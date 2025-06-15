@@ -31,30 +31,28 @@ public class CalculatingMatches : MonoBehaviour
             _secondCell = cell;
         }
 
-        if (_firstCell && _secondCell)
+        if (!_firstCell || !_secondCell) return;
+        if ((_firstCell.number == _secondCell.number || _firstCell.number + _secondCell.number == 10) && AreDifferencesWithinRangeAndNotDiagonal())
         {
-            if ((_firstCell.number == _secondCell.number || _firstCell.number + _secondCell.number == 10) && AreDifferencesWithinRangeAndNotDiagonal())
-            {
-                _firstCell.disableCell();
-                _secondCell.disableCell();
-            }
-            else
-            {
-                _firstCell.OnDeselectingCell();
-                _secondCell.OnDeselectingCell();
-            }
-
-            _firstCell = null;
-            _secondCell = null;
+            _firstCell.DisableCell();
+            _secondCell.DisableCell();
         }
+        else
+        {
+            _firstCell.OnDeselectingCell();
+            _secondCell.OnDeselectingCell();
+        }
+
+        _firstCell = null;
+        _secondCell = null;
     }
 
     private bool AreDifferencesWithinRangeAndNotDiagonal()
     {
         var widthDifference = _firstCell.line - _secondCell.line;
         var heightDifference = _firstCell.column - _secondCell.column;
-        var isWidthDifferenceValid = (widthDifference >= -1 && widthDifference <= 1);
-        var isHeightDifferenceValid = (heightDifference >= -1 && heightDifference <= 1);
+        var isWidthDifferenceValid = widthDifference is >= -1 and <= 1;
+        var isHeightDifferenceValid = heightDifference is >= -1 and <= 1;
         if (!isWidthDifferenceValid || !isHeightDifferenceValid)
         {
             return false;

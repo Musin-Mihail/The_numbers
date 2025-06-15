@@ -10,7 +10,6 @@ public class Cell : MonoBehaviour
     public GameObject indicator;
     private bool _selected;
 
-
     public void OnSelectingCell()
     {
         _selected = true;
@@ -24,7 +23,7 @@ public class Cell : MonoBehaviour
         indicator.SetActive(_selected);
     }
 
-    public void disableCell()
+    public void DisableCell()
     {
         gameObject.SetActive(false);
     }
