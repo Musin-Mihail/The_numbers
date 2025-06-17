@@ -36,14 +36,7 @@ public class CalculatingMatches : MonoBehaviour
         {
             _firstCell.DisableCell();
             _secondCell.DisableCell();
-            if (_firstCell.line > _secondCell.line)
-            {
-                ActionBus.CheckLines(_firstCell.line, _secondCell.line);
-            }
-            else
-            {
-                ActionBus.CheckLines(_secondCell.line, _firstCell.line);
-            }
+            ActionBus.CheckLines(_firstCell.line, _secondCell.line);
         }
         else
         {
