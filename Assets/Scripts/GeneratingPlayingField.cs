@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -8,6 +9,7 @@ public class GeneratingPlayingField : MonoBehaviour
 {
     public GameObject cellPrefab;
     public GameObject canvas;
+    public CanvasSwiper canvasSwiper;
     public List<List<Cell>> Cells { get; } = new();
     public static GeneratingPlayingField Instance { get; private set; }
     private const int QuantityByWidth = 10;
@@ -47,22 +49,54 @@ public class GeneratingPlayingField : MonoBehaviour
         _cellSize = _screenWidth / QuantityByWidth;
         _targetRectTransform = cellPrefab.GetComponent<RectTransform>();
         _targetRectTransform.sizeDelta = new Vector2(_cellSize, _cellSize);
-        CreateInitialField(InitialQuantityByHeight);
     }
 
-    private void OnCheckLines(int line1, int line2)
+    /// <summary>
+    /// Запускает новую игру: очищает поле, создает его заново и переключает экран.
+    /// Этот метод нужно вызывать из вашей кнопки "Новая игра".
+    /// </summary>
+    public void StartNewGame()
     {
-        CheckAndRemoveEmptyLines(line1, line2);
-    }
+        if (_isAnimating)
+        {
+            _isAnimating = false;
+            StopAllCoroutines();
+        }
 
-    private void CreateInitialField(int numberLines)
-    {
-        for (var i = 0; i < numberLines; i++)
+        ClearField();
+        for (var i = 0; i < InitialQuantityByHeight; i++)
         {
             CreateLine();
         }
 
         RecalculateCellsAndAnimate();
+        if (canvasSwiper)
+        {
+            canvasSwiper.SwitchToCanvas2();
+        }
+        else
+        {
+            Debug.LogWarning("CanvasSwiper не назначен в инспекторе для GeneratingPlayingField!");
+        }
+    }
+
+    /// <summary>
+    /// Полностью очищает игровое поле, удаляя все ячейки.
+    /// </summary>
+    private void ClearField()
+    {
+        foreach (var cell in Cells.SelectMany(line => line.Where(cell => cell && cell.gameObject)))
+        {
+            Destroy(cell.gameObject);
+        }
+
+        Cells.Clear();
+    }
+
+
+    private void OnCheckLines(int line1, int line2)
+    {
+        CheckAndRemoveEmptyLines(line1, line2);
     }
 
     private void CreateLine()
@@ -83,7 +117,6 @@ public class GeneratingPlayingField : MonoBehaviour
         var cell = cellOj.GetComponent<Cell>();
         cell.number = number;
         cell.text.text = cell.number.ToString();
-        cell.targetRectTransform = cellOj.GetComponent<RectTransform>();
         return cell;
     }
 
