@@ -50,16 +50,54 @@ public class CalculatingMatches : MonoBehaviour
 
     private bool AreDifferencesWithinRangeAndNotDiagonal()
     {
-        var widthDifference = _firstCell.line - _secondCell.line;
-        var heightDifference = _firstCell.column - _secondCell.column;
-        var isWidthDifferenceValid = widthDifference is >= -1 and <= 1;
-        var isHeightDifferenceValid = heightDifference is >= -1 and <= 1;
-        if (!isWidthDifferenceValid || !isHeightDifferenceValid)
+        var onSameLine = _firstCell.line == _secondCell.line;
+        var onSameColumn = _firstCell.column == _secondCell.column;
+
+        if (!onSameLine && !onSameColumn)
         {
             return false;
         }
 
-        var isNotDiagonal = (widthDifference == 0 || heightDifference == 0);
-        return isNotDiagonal;
+        var cells = GeneratingPlayingField.Instance.Cells;
+
+        if (onSameLine)
+        {
+            var line = _firstCell.line;
+            if (line >= cells.Count) return false;
+
+            var startCol = Mathf.Min(_firstCell.column, _secondCell.column);
+            var endCol = Mathf.Max(_firstCell.column, _secondCell.column);
+
+            if (endCol >= cells[line].Count) return false;
+
+            for (var c = startCol + 1; c < endCol; c++)
+            {
+                if (cells[line][c].gameObject.activeSelf)
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            var col = _firstCell.column;
+            var startLine = Mathf.Min(_firstCell.line, _secondCell.line);
+            var endLine = Mathf.Max(_firstCell.line, _secondCell.line);
+
+            for (var l = startLine + 1; l < endLine; l++)
+            {
+                if (l >= cells.Count || col >= cells[l].Count)
+                {
+                    return false;
+                }
+
+                if (cells[l][col].gameObject.activeSelf)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }
