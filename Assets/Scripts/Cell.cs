@@ -8,6 +8,7 @@ public class Cell : MonoBehaviour
     public int column;
     public TextMeshProUGUI text;
     public GameObject indicator;
+    public RectTransform targetRectTransform;
     private bool _selected;
 
     public void OnSelectingCell()
