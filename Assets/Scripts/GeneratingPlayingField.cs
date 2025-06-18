@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+[RequireComponent(typeof(CellPool))]
 public class GeneratingPlayingField : MonoBehaviour
 {
     public GameObject cellPrefab;
@@ -20,12 +21,19 @@ public class GeneratingPlayingField : MonoBehaviour
     private int _cellSize;
     private RectTransform _targetRectTransform;
     private bool _isAnimating;
+    private CellPool _cellPool;
 
     private void Awake()
     {
         if (!Instance)
         {
             Instance = this;
+            _cellPool = GetComponent<CellPool>();
+            if (_cellPool)
+            {
+                _cellPool.cellPrefab = cellPrefab;
+                _cellPool.canvasTransform = canvas.transform;
+            }
         }
         else if (Instance != this)
         {
@@ -51,10 +59,6 @@ public class GeneratingPlayingField : MonoBehaviour
         _targetRectTransform.sizeDelta = new Vector2(_cellSize, _cellSize);
     }
 
-    /// <summary>
-    /// Запускает новую игру: очищает поле, создает его заново и переключает экран.
-    /// Этот метод нужно вызывать из вашей кнопки "Новая игра".
-    /// </summary>
     public void StartNewGame()
     {
         if (_isAnimating)
@@ -80,19 +84,15 @@ public class GeneratingPlayingField : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Полностью очищает игровое поле, удаляя все ячейки.
-    /// </summary>
     private void ClearField()
     {
-        foreach (var cell in Cells.SelectMany(line => line.Where(cell => cell && cell.gameObject)))
+        foreach (var cell in Cells.SelectMany(line => line).Where(cell => cell))
         {
-            Destroy(cell.gameObject);
+            _cellPool.ReturnCell(cell);
         }
 
         Cells.Clear();
     }
-
 
     private void OnCheckLines(int line1, int line2)
     {
@@ -112,21 +112,21 @@ public class GeneratingPlayingField : MonoBehaviour
 
     private Cell CreateCell()
     {
-        var cellOj = Instantiate(cellPrefab, canvas.transform, false);
+        var cell = _cellPool.GetCell();
         var number = Random.Range(1, 10);
 
-        var cell = cellOj.GetComponent<Cell>();
         cell.number = number;
         cell.text.text = cell.number.ToString();
+        cell.OnDeselectingCell();
         return cell;
     }
 
     private Cell CreateCellWithNumber(int number)
     {
-        var cellOj = Instantiate(cellPrefab, canvas.transform, false);
-        var cell = cellOj.GetComponent<Cell>();
+        var cell = _cellPool.GetCell();
         cell.number = number;
         cell.text.text = cell.number.ToString();
+        cell.OnDeselectingCell();
         return cell;
     }
 
@@ -134,11 +134,7 @@ public class GeneratingPlayingField : MonoBehaviour
     {
         try
         {
-            if (_isAnimating)
-            {
-                return;
-            }
-
+            if (_isAnimating) return;
             _isAnimating = true;
             await RecalculateCellsAsync(MoveDuration);
             _isAnimating = false;
@@ -174,18 +170,12 @@ public class GeneratingPlayingField : MonoBehaviour
         if (!rectTransform) return;
         var startPosition = rectTransform.anchoredPosition;
         var elapsedTime = 0f;
-        if (Vector2.Distance(startPosition, targetPosition) < 0.01f)
-        {
-            return;
-        }
-
+        if (Vector2.Distance(startPosition, targetPosition) < 0.01f) return;
         while (elapsedTime < duration)
         {
             var t = elapsedTime / duration;
             t = t * t * (3f - 2f * t);
-
             rectTransform.anchoredPosition = Vector2.Lerp(startPosition, targetPosition, t);
-
             elapsedTime += Time.deltaTime;
             await Task.Yield();
         }
@@ -216,24 +206,15 @@ public class GeneratingPlayingField : MonoBehaviour
     private bool IsLineEmpty(int lineIndex)
     {
         if (lineIndex < 0 || lineIndex >= Cells.Count) return false;
-
-        for (var i = 0; i < Cells[lineIndex].Count; i++)
-        {
-            if (Cells[lineIndex][i] && Cells[lineIndex][i].gameObject.activeSelf)
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return Cells[lineIndex].All(cell => !cell || !cell.gameObject.activeSelf);
     }
 
     private void RemoveLine(int numberLine)
     {
         if (numberLine < 0 || numberLine >= Cells.Count) return;
-        foreach (var cell in Cells[numberLine].Where(cell => cell && cell.gameObject))
+        foreach (var cell in Cells[numberLine].Where(cell => cell))
         {
-            Destroy(cell.gameObject);
+            _cellPool.ReturnCell(cell);
         }
 
         Cells.RemoveAt(numberLine);
@@ -246,28 +227,16 @@ public class GeneratingPlayingField : MonoBehaviour
             .Where(cell => cell && cell.gameObject.activeSelf)
             .Select(cell => cell.number)
             .ToList();
-        if (numbersToAdd.Count == 0)
-        {
-            return;
-        }
-
+        if (numbersToAdd.Count == 0) return;
         var currentLine = Cells.LastOrDefault();
-        if (currentLine == null)
-        {
-            return;
-        }
-
+        if (currentLine == null) return;
         for (var i = currentLine.Count - 1; i >= 0; i--)
         {
             var cell = currentLine[i];
-            if (cell && cell.gameObject.activeSelf)
-            {
-                break;
-            }
-
+            if (cell && cell.gameObject.activeSelf) break;
             if (cell)
             {
-                Destroy(cell.gameObject);
+                _cellPool.ReturnCell(cell);
             }
 
             currentLine.RemoveAt(i);
