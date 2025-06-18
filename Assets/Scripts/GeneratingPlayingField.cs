@@ -13,6 +13,7 @@ public class GeneratingPlayingField : MonoBehaviour
     public RectTransform contentContainer;
     public CanvasSwiper canvasSwiper;
     public ScrollRect scrollRect;
+    public TopLineController topLineController;
     public float scrollLoggingThreshold = 50f;
     public List<List<Cell>> Cells { get; } = new();
     public static GeneratingPlayingField Instance { get; private set; }
@@ -66,6 +67,7 @@ public class GeneratingPlayingField : MonoBehaviour
     {
         _screenWidth = Screen.width - Indent;
         _cellSize = _screenWidth / QuantityByWidth;
+        scrollLoggingThreshold = _cellSize / 2;
 
         if (scrollRect)
         {
@@ -73,17 +75,14 @@ public class GeneratingPlayingField : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Вызывается при изменении значения прокрутки.
-    /// </summary>
-    /// <param name="position">Новая нормализованная позиция (от 0 до 1).</param>
     private void OnScrollValueChanged(Vector2 position)
     {
         var currentScrollPosition = scrollRect.content.anchoredPosition.y;
 
-        if (Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= _cellSize/2)
+        if (Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= scrollLoggingThreshold)
         {
             _lastLoggedScrollPosition = currentScrollPosition;
+            RefreshTopLine();
         }
     }
 
@@ -102,6 +101,7 @@ public class GeneratingPlayingField : MonoBehaviour
         }
 
         RecalculateCellsAndAnimate();
+        RefreshTopLine();
         if (canvasSwiper)
         {
             canvasSwiper.SwitchToCanvas2();
@@ -127,9 +127,6 @@ public class GeneratingPlayingField : MonoBehaviour
         CheckAndRemoveEmptyLines(line1, line2);
     }
 
-    /// <summary>
-    /// Обновляет высоту контейнера, чтобы ScrollRect правильно работал.
-    /// </summary>
     private void UpdateContentSize()
     {
         if (!contentContainer) return;
@@ -186,6 +183,11 @@ public class GeneratingPlayingField : MonoBehaviour
         }
     }
 
+    public void NotifyMatchOccured()
+    {
+        RefreshTopLine();
+    }
+
     private async Task RecalculateCellsAsync(float duration)
     {
         var animationTasks = new List<Task>();
@@ -197,7 +199,7 @@ public class GeneratingPlayingField : MonoBehaviour
                 if (!currentCell) continue;
                 currentCell.line = i;
                 currentCell.column = j;
-                var targetPosition = new Vector2(_cellSize * j + Indent / 2, -_cellSize * i - Indent / 2);
+                var targetPosition = new Vector2(_cellSize * j + Indent / 2, -_cellSize * i - Indent / 2 - _cellSize * 1.1f);
                 var moveTask = AnimateMoveAsync(currentCell.targetRectTransform, targetPosition, duration);
                 animationTasks.Add(moveTask);
             }
@@ -241,6 +243,7 @@ public class GeneratingPlayingField : MonoBehaviour
             }
 
             RecalculateCellsAndAnimate();
+            RefreshTopLine();
         }
     }
 
@@ -259,6 +262,60 @@ public class GeneratingPlayingField : MonoBehaviour
         }
 
         Cells.RemoveAt(numberLine);
+    }
+
+
+    private void RefreshTopLine()
+    {
+        if (!topLineController) return;
+        var numberLine = (int)_lastLoggedScrollPosition / _cellSize;
+        if (numberLine < 0)
+        {
+            numberLine = 0;
+        }
+
+        if (numberLine > Cells.Count)
+        {
+            numberLine = Cells.Count;
+        }
+
+        var activeNumbers = new List<int>();
+        if (numberLine == 0)
+        {
+            for (var i = 0; i < QuantityByWidth; i++)
+            {
+                if (Cells[numberLine][i].IsActive)
+                {
+                    activeNumbers.Add(Cells[numberLine][i].number);
+                }
+                else
+                {
+                    activeNumbers.Add(0);
+                }
+            }
+        }
+        else
+        {
+            for (var i = 0; i < QuantityByWidth; i++)
+            {
+                for (var l = numberLine; l >= 0; l--)
+                {
+                    if (Cells[l][i].IsActive)
+                    {
+                        activeNumbers.Add(Cells[l][i].number);
+                        break;
+                    }
+
+                    if (l == 0 && !Cells[l][i].IsActive)
+                    {
+                        Debug.Log(0);
+                        activeNumbers.Add(0);
+                    }
+                }
+            }
+        }
+
+        topLineController.UpdateDisplayedNumbers(activeNumbers);
     }
 
     public void AddExistingNumbersAsNewLines()
@@ -298,6 +355,7 @@ public class GeneratingPlayingField : MonoBehaviour
         }
 
         RecalculateCellsAndAnimate();
+        RefreshTopLine();
         if (canvasSwiper)
         {
             canvasSwiper.SwitchToCanvas2();

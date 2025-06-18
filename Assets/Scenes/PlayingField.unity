@@ -528,6 +528,7 @@ GameObject:
   - component: {fileID: 382419717}
   - component: {fileID: 382419719}
   - component: {fileID: 382419720}
+  - component: {fileID: 382419721}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -551,6 +552,7 @@ MonoBehaviour:
   contentContainer: {fileID: 2124303421}
   canvasSwiper: {fileID: 614222512}
   scrollRect: {fileID: 135620098}
+  topLineController: {fileID: 382419721}
   scrollLoggingThreshold: 50
 --- !u!4 &382419718
 Transform:
@@ -593,6 +595,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellPrefab: {fileID: 0}
   canvasTransform: {fileID: 0}
+--- !u!114 &382419721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 382419716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ee449a3920c4cb5931d7e6552b046bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cellPrefab: {fileID: 4519391986074129742, guid: 6c74060d7ef2add4297f914d651f7528, type: 3}
+  container: {fileID: 1175308658}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -2120,8 +2136,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 155820460}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.000000059604645}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}

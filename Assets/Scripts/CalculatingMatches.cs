@@ -6,10 +6,12 @@ public class CalculatingMatches : MonoBehaviour
 {
     private Cell _firstCell;
     private Cell _secondCell;
+    private GeneratingPlayingField _generatingPlayingField;
 
-    private void OnEnable()
+    private void Start()
     {
         ActionBus.OnSelectingCell += HandleCellSelection;
+        _generatingPlayingField = GeneratingPlayingField.Instance;
     }
 
     private void OnDisable()
@@ -39,6 +41,7 @@ public class CalculatingMatches : MonoBehaviour
             _firstCell.DisableCell();
             _secondCell.DisableCell();
             ActionBus.CheckLines(_firstCell.line, _secondCell.line);
+            _generatingPlayingField.NotifyMatchOccured();
         }
         else
         {
@@ -100,7 +103,7 @@ public class CalculatingMatches : MonoBehaviour
             var endCol = Mathf.Max(_firstCell.column, _secondCell.column);
             for (var c = startCol + 1; c < endCol; c++)
             {
-                if (cells[line][c].IsActive)
+                if (c < cells[line].Count && cells[line][c].IsActive)
                 {
                     return false;
                 }
