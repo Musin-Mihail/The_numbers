@@ -37,9 +37,6 @@ public class CanvasSwiper : MonoBehaviour
         AnimateCanvasPositions();
     }
 
-    /// <summary>
-    /// Запускает переход к первому Canvas.
-    /// </summary>
     public void SwitchToCanvas1()
     {
         if (_currentCanvasIndex != 2) return;
@@ -48,9 +45,6 @@ public class CanvasSwiper : MonoBehaviour
         _canvas2TargetPosition = new Vector2(_lastScreenWidth, 0);
     }
 
-    /// <summary>
-    /// Запускает переход ко второму Canvas.
-    /// </summary>
     public void SwitchToCanvas2()
     {
         if (_currentCanvasIndex != 1) return;
@@ -59,9 +53,6 @@ public class CanvasSwiper : MonoBehaviour
         _canvas2TargetPosition = Vector2.zero;
     }
 
-    /// <summary>
-    /// Плавно анимирует позиции Canvas к их целевым значениям.
-    /// </summary>
     private void AnimateCanvasPositions()
     {
         canvas1.anchoredPosition = Vector2.Lerp(canvas1.anchoredPosition, _canvas1TargetPosition, Time.deltaTime * animationSpeed);
