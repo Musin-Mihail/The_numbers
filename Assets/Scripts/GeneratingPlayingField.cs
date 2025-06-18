@@ -114,6 +114,16 @@ public class GeneratingPlayingField : MonoBehaviour
     {
         var cellOj = Instantiate(cellPrefab, canvas.transform, false);
         var number = Random.Range(1, 10);
+
+        var cell = cellOj.GetComponent<Cell>();
+        cell.number = number;
+        cell.text.text = cell.number.ToString();
+        return cell;
+    }
+
+    private Cell CreateCellWithNumber(int number)
+    {
+        var cellOj = Instantiate(cellPrefab, canvas.transform, false);
         var cell = cellOj.GetComponent<Cell>();
         cell.number = number;
         cell.text.text = cell.number.ToString();
@@ -218,24 +228,71 @@ public class GeneratingPlayingField : MonoBehaviour
         return true;
     }
 
-    public void AddNewLine()
-    {
-        CreateLine();
-        RecalculateCellsAndAnimate();
-    }
-
     private void RemoveLine(int numberLine)
     {
         if (numberLine < 0 || numberLine >= Cells.Count) return;
-
-        foreach (var cell in Cells[numberLine])
+        foreach (var cell in Cells[numberLine].Where(cell => cell && cell.gameObject))
         {
-            if (cell && cell.gameObject)
-            {
-                Destroy(cell.gameObject);
-            }
+            Destroy(cell.gameObject);
         }
 
         Cells.RemoveAt(numberLine);
+    }
+
+    public void AddExistingNumbersAsNewLines()
+    {
+        var numbersToAdd = Cells
+            .SelectMany(line => line)
+            .Where(cell => cell && cell.gameObject.activeSelf)
+            .Select(cell => cell.number)
+            .ToList();
+        if (numbersToAdd.Count == 0)
+        {
+            return;
+        }
+
+        var currentLine = Cells.LastOrDefault();
+        if (currentLine == null)
+        {
+            return;
+        }
+
+        for (var i = currentLine.Count - 1; i >= 0; i--)
+        {
+            var cell = currentLine[i];
+            if (cell && cell.gameObject.activeSelf)
+            {
+                break;
+            }
+
+            if (cell)
+            {
+                Destroy(cell.gameObject);
+            }
+
+            currentLine.RemoveAt(i);
+        }
+
+        foreach (var number in numbersToAdd)
+        {
+            if (currentLine.Count >= QuantityByWidth)
+            {
+                currentLine = new List<Cell>();
+                Cells.Add(currentLine);
+            }
+
+            var newCell = CreateCellWithNumber(number);
+            currentLine.Add(newCell);
+        }
+
+        RecalculateCellsAndAnimate();
+        if (canvasSwiper)
+        {
+            canvasSwiper.SwitchToCanvas2();
+        }
+        else
+        {
+            Debug.LogWarning("CanvasSwiper не назначен в инспекторе для GeneratingPlayingField!");
+        }
     }
 }
