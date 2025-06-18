@@ -1,16 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Управляет пулом объектов для ячеек (Cell), чтобы избежать постоянного создания и удаления объектов.
-/// </summary>
 public class CellPool : MonoBehaviour
 {
     public static CellPool Instance { get; private set; }
-
     [HideInInspector] public GameObject cellPrefab;
     [HideInInspector] public Transform canvasTransform;
-
     private readonly Queue<Cell> _pooledCells = new();
 
     private void Awake()
@@ -28,19 +23,23 @@ public class CellPool : MonoBehaviour
     /// <summary>
     /// Получает ячейку из пула. Если в пуле нет доступных ячеек, создает новую.
     /// </summary>
-    /// <returns>Активный объект ячейки.</returns>
+    /// <returns>Активный объект ячейки с восстановленным видом.</returns>
     public Cell GetCell()
     {
+        Cell cell;
         if (_pooledCells.Count > 0)
         {
-            var cell = _pooledCells.Dequeue();
+            cell = _pooledCells.Dequeue();
             cell.transform.SetParent(canvasTransform, false);
-            cell.gameObject.SetActive(true);
-            return cell;
+        }
+        else
+        {
+            var cellOj = Instantiate(cellPrefab, canvasTransform, false);
+            cell = cellOj.GetComponent<Cell>();
         }
 
-        var cellOj = Instantiate(cellPrefab, canvasTransform, false);
-        return cellOj.GetComponent<Cell>();
+        cell.EnableCell();
+        return cell;
     }
 
     /// <summary>
@@ -50,7 +49,6 @@ public class CellPool : MonoBehaviour
     public void ReturnCell(Cell cell)
     {
         if (!cell) return;
-
         cell.gameObject.SetActive(false);
         _pooledCells.Enqueue(cell);
     }

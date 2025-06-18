@@ -2,10 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-/// <summary>
-/// Этот класс отвечает за основную логику игры: проверку и сопоставление выбранных ячеек
-/// на основе правил.
-/// </summary>
 public class CalculatingMatches : MonoBehaviour
 {
     private Cell _firstCell;
@@ -21,9 +17,6 @@ public class CalculatingMatches : MonoBehaviour
         ActionBus.OnSelectingCell -= HandleCellSelection;
     }
 
-    /// <summary>
-    /// Обрабатывает выбор ячейки пользователем.
-    /// </summary>
     private void HandleCellSelection(Cell cell)
     {
         if (!_firstCell)
@@ -57,10 +50,6 @@ public class CalculatingMatches : MonoBehaviour
         _secondCell = null;
     }
 
-    /// <summary>
-    /// Комплексная проверка, объединяющая все правила игры.
-    /// </summary>
-    /// <returns>True, если пара является допустимой.</returns>
     private bool IsAValidMatch()
     {
         if (_firstCell.number != _secondCell.number && _firstCell.number + _secondCell.number != 10)
@@ -92,10 +81,6 @@ public class CalculatingMatches : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// ПРАВИЛО 1 и 4: Проверяет, находятся ли ячейки на одной прямой (горизонтальной или вертикальной)
-    /// и есть ли между ними только пустые (неактивные) ячейки.
-    /// </summary>
     private bool AreOnSameLineOrColumnWithGaps()
     {
         var onSameLine = _firstCell.line == _secondCell.line;
@@ -115,7 +100,7 @@ public class CalculatingMatches : MonoBehaviour
             var endCol = Mathf.Max(_firstCell.column, _secondCell.column);
             for (var c = startCol + 1; c < endCol; c++)
             {
-                if (cells[line][c].gameObject.activeSelf)
+                if (cells[line][c].IsActive)
                 {
                     return false;
                 }
@@ -128,7 +113,7 @@ public class CalculatingMatches : MonoBehaviour
             var endLine = Mathf.Max(_firstCell.line, _secondCell.line);
             for (var l = startLine + 1; l < endLine; l++)
             {
-                if (l < cells.Count && col < cells[l].Count && cells[l][col].gameObject.activeSelf)
+                if (l < cells.Count && col < cells[l].Count && cells[l][col].IsActive)
                 {
                     return false;
                 }
@@ -138,16 +123,11 @@ public class CalculatingMatches : MonoBehaviour
         return true;
     }
 
-    /// <summary>
-    /// Вспомогательный метод для получения одномерного списка всех активных ячеек на поле,
-    /// следующих в порядке их чтения (слева направо, сверху вниз).
-    /// </summary>
-    /// <returns>Список активных ячеек.</returns>
     private List<Cell> GetAllActiveCells()
     {
         return GeneratingPlayingField.Instance.Cells
             .SelectMany(line => line)
-            .Where(cell => cell && cell.gameObject.activeSelf)
+            .Where(cell => cell && cell.IsActive)
             .ToList();
     }
 }

@@ -114,7 +114,6 @@ public class GeneratingPlayingField : MonoBehaviour
     {
         var cell = _cellPool.GetCell();
         var number = Random.Range(1, 10);
-
         cell.number = number;
         cell.text.text = cell.number.ToString();
         cell.OnDeselectingCell();
@@ -153,7 +152,7 @@ public class GeneratingPlayingField : MonoBehaviour
             for (var j = 0; j < Cells[i].Count; j++)
             {
                 var currentCell = Cells[i][j];
-                if (!currentCell || !currentCell.gameObject.activeSelf) continue;
+                if (!currentCell || !currentCell.IsActive) continue;
                 currentCell.line = i;
                 currentCell.column = j;
                 var targetPosition = new Vector2(_cellSize * j + Indent / 2, -_cellSize * i - Indent / 2);
@@ -206,7 +205,7 @@ public class GeneratingPlayingField : MonoBehaviour
     private bool IsLineEmpty(int lineIndex)
     {
         if (lineIndex < 0 || lineIndex >= Cells.Count) return false;
-        return Cells[lineIndex].All(cell => !cell || !cell.gameObject.activeSelf);
+        return Cells[lineIndex].All(cell => !cell || !cell.IsActive);
     }
 
     private void RemoveLine(int numberLine)
@@ -224,16 +223,18 @@ public class GeneratingPlayingField : MonoBehaviour
     {
         var numbersToAdd = Cells
             .SelectMany(line => line)
-            .Where(cell => cell && cell.gameObject.activeSelf)
+            .Where(cell => cell && cell.IsActive)
             .Select(cell => cell.number)
             .ToList();
+
         if (numbersToAdd.Count == 0) return;
         var currentLine = Cells.LastOrDefault();
         if (currentLine == null) return;
+
         for (var i = currentLine.Count - 1; i >= 0; i--)
         {
             var cell = currentLine[i];
-            if (cell && cell.gameObject.activeSelf) break;
+            if (cell && cell.IsActive) break;
             if (cell)
             {
                 _cellPool.ReturnCell(cell);
