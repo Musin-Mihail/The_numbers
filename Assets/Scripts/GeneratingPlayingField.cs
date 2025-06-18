@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(CellPool))]
 public class GeneratingPlayingField : MonoBehaviour
 {
     public GameObject cellPrefab;
-    public GameObject canvas;
+    public RectTransform contentContainer;
     public CanvasSwiper canvasSwiper;
+    public ScrollRect scrollRect;
+    public float scrollLoggingThreshold = 50f;
     public List<List<Cell>> Cells { get; } = new();
     public static GeneratingPlayingField Instance { get; private set; }
     private const int QuantityByWidth = 10;
@@ -19,9 +22,9 @@ public class GeneratingPlayingField : MonoBehaviour
     private const float MoveDuration = 0.3f;
     private int _screenWidth;
     private int _cellSize;
-    private RectTransform _targetRectTransform;
     private bool _isAnimating;
     private CellPool _cellPool;
+    private float _lastLoggedScrollPosition;
 
     private void Awake()
     {
@@ -32,7 +35,7 @@ public class GeneratingPlayingField : MonoBehaviour
             if (_cellPool)
             {
                 _cellPool.cellPrefab = cellPrefab;
-                _cellPool.canvasTransform = canvas.transform;
+                _cellPool.canvasTransform = contentContainer;
             }
         }
         else if (Instance != this)
@@ -44,19 +47,44 @@ public class GeneratingPlayingField : MonoBehaviour
     private void OnEnable()
     {
         ActionBus.OnCheckLines += OnCheckLines;
+        if (scrollRect)
+        {
+            scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
+        }
     }
 
     private void OnDisable()
     {
         ActionBus.OnCheckLines -= OnCheckLines;
+        if (scrollRect)
+        {
+            scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
+        }
     }
 
     private void Start()
     {
         _screenWidth = Screen.width - Indent;
         _cellSize = _screenWidth / QuantityByWidth;
-        _targetRectTransform = cellPrefab.GetComponent<RectTransform>();
-        _targetRectTransform.sizeDelta = new Vector2(_cellSize, _cellSize);
+
+        if (scrollRect)
+        {
+            _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
+        }
+    }
+
+    /// <summary>
+    /// Вызывается при изменении значения прокрутки.
+    /// </summary>
+    /// <param name="position">Новая нормализованная позиция (от 0 до 1).</param>
+    private void OnScrollValueChanged(Vector2 position)
+    {
+        var currentScrollPosition = scrollRect.content.anchoredPosition.y;
+
+        if (Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= _cellSize/2)
+        {
+            _lastLoggedScrollPosition = currentScrollPosition;
+        }
     }
 
     public void StartNewGame()
@@ -99,6 +127,17 @@ public class GeneratingPlayingField : MonoBehaviour
         CheckAndRemoveEmptyLines(line1, line2);
     }
 
+    /// <summary>
+    /// Обновляет высоту контейнера, чтобы ScrollRect правильно работал.
+    /// </summary>
+    private void UpdateContentSize()
+    {
+        if (!contentContainer) return;
+        var lineCount = Cells.Count;
+        float newHeight = lineCount * _cellSize + Indent;
+        contentContainer.sizeDelta = new Vector2(contentContainer.sizeDelta.x, newHeight);
+    }
+
     private void CreateLine()
     {
         var newLine = new List<Cell>();
@@ -108,6 +147,8 @@ public class GeneratingPlayingField : MonoBehaviour
             var newCell = CreateCell();
             newLine.Add(newCell);
         }
+
+        UpdateContentSize();
     }
 
     private Cell CreateCell()
@@ -135,6 +176,7 @@ public class GeneratingPlayingField : MonoBehaviour
         {
             if (_isAnimating) return;
             _isAnimating = true;
+            UpdateContentSize();
             await RecalculateCellsAsync(MoveDuration);
             _isAnimating = false;
         }
@@ -152,7 +194,7 @@ public class GeneratingPlayingField : MonoBehaviour
             for (var j = 0; j < Cells[i].Count; j++)
             {
                 var currentCell = Cells[i][j];
-                if (!currentCell || !currentCell.IsActive) continue;
+                if (!currentCell) continue;
                 currentCell.line = i;
                 currentCell.column = j;
                 var targetPosition = new Vector2(_cellSize * j + Indent / 2, -_cellSize * i - Indent / 2);
