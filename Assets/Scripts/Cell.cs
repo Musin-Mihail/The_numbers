@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,8 @@ public class Cell : MonoBehaviour
     private bool _selected;
     public bool IsActive { get; private set; }
 
+    public event Action<Cell> OnCellClicked;
+
     private void Awake()
     {
         if (!backgroundImage)
@@ -26,24 +29,24 @@ public class Cell : MonoBehaviour
         IsActive = true;
     }
 
-    public void OnSelectingCell()
+    public void HandleClick()
     {
         if (!IsActive) return;
-        _selected = true;
+
+        OnCellClicked?.Invoke(this);
+    }
+
+    public void SetSelected(bool isSelected)
+    {
+        _selected = isSelected;
         indicator.SetActive(_selected);
-        ActionBus.SelectingCell(this);
     }
 
     public void OnDeselectingCell()
     {
-        _selected = false;
-        indicator.SetActive(_selected);
+        SetSelected(false);
     }
 
-    /// <summary>
-    /// "Отключает" ячейку визуально, не деактивируя сам GameObject.
-    /// Вызывается при успешном совпадении пары.
-    /// </summary>
     public void DisableCell()
     {
         IsActive = false;
@@ -54,10 +57,6 @@ public class Cell : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// "Включает" ячейку, когда она достается из пула объектов.
-    /// Возвращает ей первоначальный вид.
-    /// </summary>
     public void EnableCell()
     {
         gameObject.SetActive(true);

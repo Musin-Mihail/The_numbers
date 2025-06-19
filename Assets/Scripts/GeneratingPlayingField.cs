@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(CellPool))]
-[RequireComponent(typeof(CalculatingMatches))]
 public class GeneratingPlayingField : MonoBehaviour
 {
     public GameObject cellPrefab;
@@ -27,6 +26,8 @@ public class GeneratingPlayingField : MonoBehaviour
     private CellPool _cellPool;
     private float _lastLoggedScrollPosition;
     private CalculatingMatches _calculatingMatches;
+    private Cell _firstCell;
+    private Cell _secondCell;
 
     private void Awake()
     {
@@ -37,14 +38,12 @@ public class GeneratingPlayingField : MonoBehaviour
             _cellPool.canvasTransform = contentContainer;
         }
 
-        _gridModel = new GridModel(_cellPool);
-        _calculatingMatches = GetComponent<CalculatingMatches>();
-        _calculatingMatches.Initialize(this, _gridModel);
+        _gridModel = new GridModel(_cellPool, OnCellCreated);
+        _calculatingMatches = new CalculatingMatches(_gridModel);
     }
 
     private void OnEnable()
     {
-        ActionBus.OnCheckLines += OnCheckLines;
         if (scrollRect)
         {
             scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
@@ -53,11 +52,59 @@ public class GeneratingPlayingField : MonoBehaviour
 
     private void OnDisable()
     {
-        ActionBus.OnCheckLines -= OnCheckLines;
         if (scrollRect)
         {
             scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
         }
+    }
+
+    private void OnCellCreated(Cell cell)
+    {
+        cell.OnCellClicked += HandleCellSelection;
+    }
+
+    private void HandleCellSelection(Cell cell)
+    {
+        if (_isAnimating) return;
+
+        if (!_firstCell)
+        {
+            _firstCell = cell;
+            _firstCell.SetSelected(true);
+        }
+        else if (_firstCell == cell)
+        {
+            _firstCell.SetSelected(false);
+            _firstCell = null;
+        }
+        else
+        {
+            _secondCell = cell;
+            _secondCell.SetSelected(true);
+        }
+
+        if (!_firstCell || !_secondCell) return;
+
+        if (_calculatingMatches.IsAValidMatch(_firstCell, _secondCell))
+        {
+            var line1 = _firstCell.line;
+            var line2 = _secondCell.line;
+
+            _firstCell.DisableCell();
+            _secondCell.DisableCell();
+
+            OnCheckLines(line1, line2);
+
+            NotifyMatchOccured();
+        }
+        else
+        {
+            _firstCell.SetSelected(false);
+            _secondCell.SetSelected(false);
+        }
+
+        _firstCell = null;
+        _secondCell = null;
     }
 
     private void Start()
@@ -80,6 +127,20 @@ public class GeneratingPlayingField : MonoBehaviour
             StopAllCoroutines();
         }
 
+        _firstCell = null;
+        _secondCell = null;
+
+        foreach (var line in _gridModel.Cells)
+        {
+            foreach (var cell in line)
+            {
+                if (cell)
+                {
+                    cell.OnCellClicked -= HandleCellSelection;
+                }
+            }
+        }
+
         _gridModel.ClearField();
 
         for (var i = 0; i < InitialQuantityByHeight; i++)
@@ -88,7 +149,6 @@ public class GeneratingPlayingField : MonoBehaviour
         }
 
         UpdateContentSize();
-
         RecalculateCellsAndAnimate();
         RefreshTopLine();
         if (canvasSwiper)
@@ -113,8 +173,17 @@ public class GeneratingPlayingField : MonoBehaviour
         if (linesToRemove.Count > 0)
         {
             linesToRemove.Sort((a, b) => b.CompareTo(a));
+
             foreach (var lineIndex in linesToRemove)
             {
+                foreach (var cell in _gridModel.Cells[lineIndex])
+                {
+                    if (cell != null)
+                    {
+                        cell.OnCellClicked -= HandleCellSelection;
+                    }
+                }
+
                 _gridModel.RemoveLine(lineIndex);
             }
 
