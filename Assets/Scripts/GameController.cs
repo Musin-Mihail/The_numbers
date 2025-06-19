@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GameController
 {
@@ -9,7 +10,7 @@ public class GameController
 
     private readonly GridModel _gridModel;
     private readonly CalculatingMatches _calculatingMatches;
-
+    private const int InitialQuantityByHeight = 5;
     private Cell _firstCell;
     private Cell _secondCell;
 
@@ -62,16 +63,13 @@ public class GameController
 
     private void CheckAndRemoveEmptyLines(int line1, int line2)
     {
-        var line1Empty = _gridModel.IsLineEmpty(line1);
-        var line2Empty = _gridModel.IsLineEmpty(line2);
-
         var linesToRemove = new List<int>();
-        if (line1Empty) linesToRemove.Add(line1);
-        if (line2Empty && line1 != line2) linesToRemove.Add(line2);
+        if (_gridModel.IsLineEmpty(line1)) linesToRemove.Add(line1);
+        if (line1 != line2 && _gridModel.IsLineEmpty(line2)) linesToRemove.Add(line2);
 
         if (linesToRemove.Count > 0)
         {
-            linesToRemove.Sort((a, b) => b.CompareTo(a)); // Удаляем с конца, чтобы не сбить индексы
+            linesToRemove.Sort((a, b) => b.CompareTo(a));
 
             foreach (var lineIndex in linesToRemove)
             {
@@ -82,9 +80,33 @@ public class GameController
         }
     }
 
-    public void ResetGame()
+    private void ResetSelection()
     {
         _firstCell = null;
         _secondCell = null;
+    }
+
+    public void StartNewGame()
+    {
+        ResetSelection();
+        _gridModel.ClearField();
+        for (var i = 0; i < InitialQuantityByHeight; i++)
+        {
+            _gridModel.CreateLine();
+        }
+
+        OnGridChanged?.Invoke();
+    }
+
+    public void AddExistingNumbersAsNewLines()
+    {
+        var numbersToAdd = _gridModel.GetAllActiveCells()
+            .Select(cell => cell.number)
+            .ToList();
+
+        if (numbersToAdd.Count == 0) return;
+
+        _gridModel.AddNumbersAsNewLines(numbersToAdd);
+        OnGridChanged?.Invoke();
     }
 }

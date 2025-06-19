@@ -10,11 +10,13 @@ public class GridModel
     private const int QuantityByWidth = 10;
     private readonly CellPool _cellPool;
     private readonly Action<Cell> _onCellCreatedCallback;
+    private readonly Action<Cell> _onCellCleanupCallback;
 
-    public GridModel(CellPool cellPool, Action<Cell> onCellCreatedCallback = null)
+    public GridModel(CellPool cellPool, Action<Cell> onCellCreatedCallback = null, Action<Cell> onCellCleanupCallback = null)
     {
         _cellPool = cellPool;
         _onCellCreatedCallback = onCellCreatedCallback;
+        _onCellCleanupCallback = onCellCleanupCallback;
     }
 
     public List<Cell> GetAllActiveCells()
@@ -30,10 +32,7 @@ public class GridModel
         var onSameLine = firstCell.line == secondCell.line;
         var onSameColumn = firstCell.column == secondCell.column;
 
-        if (!onSameLine && !onSameColumn)
-        {
-            return false;
-        }
+        if (!onSameLine && !onSameColumn) return false;
 
         if (onSameLine)
         {
@@ -42,10 +41,7 @@ public class GridModel
             var endCol = Mathf.Max(firstCell.column, secondCell.column);
             for (var c = startCol + 1; c < endCol; c++)
             {
-                if (c < Cells[line].Count && Cells[line][c].IsActive)
-                {
-                    return false;
-                }
+                if (c < Cells[line].Count && Cells[line][c].IsActive) return false;
             }
         }
         else // onSameColumn
@@ -55,10 +51,7 @@ public class GridModel
             var endLine = Mathf.Max(firstCell.line, secondCell.line);
             for (var l = startLine + 1; l < endLine; l++)
             {
-                if (l < Cells.Count && col < Cells[l].Count && Cells[l][col].IsActive)
-                {
-                    return false;
-                }
+                if (l < Cells.Count && col < Cells[l].Count && Cells[l][col].IsActive) return false;
             }
         }
 
@@ -69,6 +62,7 @@ public class GridModel
     {
         foreach (var cell in Cells.SelectMany(line => line).Where(cell => cell))
         {
+            _onCellCleanupCallback?.Invoke(cell);
             _cellPool.ReturnCell(cell);
         }
 
@@ -78,12 +72,12 @@ public class GridModel
     public void CreateLine()
     {
         var newLine = new List<Cell>();
-        Cells.Add(newLine);
         for (var i = 0; i < QuantityByWidth; i++)
         {
-            var newCell = CreateCell();
-            newLine.Add(newCell);
+            newLine.Add(CreateCell());
         }
+
+        Cells.Add(newLine);
     }
 
     private Cell CreateCell()
@@ -118,6 +112,7 @@ public class GridModel
         if (numberLine < 0 || numberLine >= Cells.Count) return;
         foreach (var cell in Cells[numberLine].Where(cell => cell))
         {
+            _onCellCleanupCallback?.Invoke(cell);
             _cellPool.ReturnCell(cell);
         }
 
@@ -127,7 +122,11 @@ public class GridModel
     public void AddNumbersAsNewLines(List<int> numbers)
     {
         var currentLine = Cells.LastOrDefault();
-        if (currentLine == null) return;
+        if (currentLine == null)
+        {
+            currentLine = new List<Cell>();
+            Cells.Add(currentLine);
+        }
 
         for (var i = currentLine.Count - 1; i >= 0; i--)
         {
@@ -135,6 +134,7 @@ public class GridModel
             if (cell && cell.IsActive) break;
             if (cell)
             {
+                _onCellCleanupCallback?.Invoke(cell);
                 _cellPool.ReturnCell(cell);
             }
 
@@ -152,5 +152,41 @@ public class GridModel
             var newCell = CreateCellWithNumber(number);
             currentLine.Add(newCell);
         }
+    }
+
+    public List<int> GetNumbersForTopLine(int numberLine, int quantityByWidth)
+    {
+        var activeNumbers = new List<int>();
+        if (numberLine <= 0)
+        {
+            activeNumbers.AddRange(Enumerable.Repeat(0, quantityByWidth));
+            return activeNumbers;
+        }
+
+        if (numberLine > Cells.Count)
+        {
+            numberLine = Cells.Count;
+        }
+
+        for (var i = 0; i < quantityByWidth; i++)
+        {
+            bool found = false;
+            for (var l = numberLine - 1; l >= 0; l--)
+            {
+                if (l < Cells.Count && i < Cells[l].Count && Cells[l][i].IsActive)
+                {
+                    activeNumbers.Add(Cells[l][i].number);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                activeNumbers.Add(0);
+            }
+        }
+
+        return activeNumbers;
     }
 }

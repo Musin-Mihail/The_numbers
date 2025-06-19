@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,18 +9,16 @@ public class GeneratingPlayingField : MonoBehaviour
 {
     public GameObject cellPrefab;
     public RectTransform contentContainer;
-    public CanvasSwiper canvasSwiper;
     public ScrollRect scrollRect;
-    public TopLineController topLineController;
-    public float scrollLoggingThreshold = 20f;
 
+    private float _scrollLoggingThreshold = 20f;
+    private TopLineController _topLineController;
+    private CanvasSwiper _canvasSwiper;
     private GridModel _gridModel;
     private GameController _gameController;
-    private CalculatingMatches _calculatingMatches;
     private CellPool _cellPool;
 
     private const int QuantityByWidth = 10;
-    private const int InitialQuantityByHeight = 5;
     private const int Indent = 10;
     private const float MoveDuration = 0.3f;
     private int _screenWidth;
@@ -29,21 +26,19 @@ public class GeneratingPlayingField : MonoBehaviour
     private bool _isAnimating;
     private float _lastLoggedScrollPosition;
 
-    private Cell _firstSelectedCell;
-    private Cell _secondSelectedCell;
-
     private void Awake()
     {
         _cellPool = GetComponent<CellPool>();
-        if (_cellPool)
-        {
-            _cellPool.cellPrefab = cellPrefab;
-            _cellPool.canvasTransform = contentContainer;
-        }
+        _cellPool.cellPrefab = cellPrefab;
+        _cellPool.canvasTransform = contentContainer;
+    }
 
-        _gridModel = new GridModel(_cellPool, OnCellCreated);
-        _calculatingMatches = new CalculatingMatches(_gridModel);
-        _gameController = new GameController(_gridModel, _calculatingMatches);
+    public void Initialize(GameController gameController, GridModel gridModel, TopLineController topLineController, CanvasSwiper canvasSwiper)
+    {
+        _gameController = gameController;
+        _gridModel = gridModel;
+        _topLineController = topLineController;
+        _canvasSwiper = canvasSwiper;
     }
 
     private void OnEnable()
@@ -52,10 +47,6 @@ public class GeneratingPlayingField : MonoBehaviour
         {
             scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
         }
-
-        _gameController.OnMatchFound += HandleMatchFound;
-        _gameController.OnInvalidMatch += HandleInvalidMatch;
-        _gameController.OnGridChanged += HandleGridChanged;
     }
 
     private void OnDisable()
@@ -64,17 +55,13 @@ public class GeneratingPlayingField : MonoBehaviour
         {
             scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
         }
-
-        _gameController.OnMatchFound -= HandleMatchFound;
-        _gameController.OnInvalidMatch -= HandleInvalidMatch;
-        _gameController.OnGridChanged -= HandleGridChanged;
     }
 
     private void Start()
     {
         _screenWidth = Screen.width - Indent;
         _cellSize = _screenWidth / QuantityByWidth;
-        scrollLoggingThreshold = _cellSize / 2;
+        _scrollLoggingThreshold = _cellSize / 2;
 
         if (scrollRect)
         {
@@ -82,9 +69,14 @@ public class GeneratingPlayingField : MonoBehaviour
         }
     }
 
-    private void OnCellCreated(Cell cell)
+    public void SubscribeToCell(Cell cell)
     {
         cell.OnCellClicked += OnCellClicked;
+    }
+
+    public void UnsubscribeFromCell(Cell cell)
+    {
+        cell.OnCellClicked -= OnCellClicked;
     }
 
     private void OnCellClicked(Cell cell)
@@ -93,12 +85,12 @@ public class GeneratingPlayingField : MonoBehaviour
         _gameController.HandleCellSelection(cell);
     }
 
-    private void HandleMatchFound(Cell firstCell, Cell secondCell)
+    public void HandleMatchFound(Cell firstCell, Cell secondCell)
     {
         RefreshTopLine();
     }
 
-    private void HandleInvalidMatch()
+    public void HandleInvalidMatch()
     {
         foreach (var cell in _gridModel.GetAllActiveCells())
         {
@@ -106,41 +98,13 @@ public class GeneratingPlayingField : MonoBehaviour
         }
     }
 
-    private void HandleGridChanged()
+    public void HandleGridChanged()
     {
         RecalculateCellsAndAnimate();
         RefreshTopLine();
-    }
-
-    public void StartNewGame()
-    {
-        if (_isAnimating)
+        if (_canvasSwiper)
         {
-            _isAnimating = false;
-            StopAllCoroutines();
-        }
-
-        _gameController.ResetGame();
-        foreach (var cell in _gridModel.GetAllActiveCells())
-        {
-            if (cell)
-            {
-                cell.OnCellClicked -= OnCellClicked;
-            }
-        }
-
-        _gridModel.ClearField();
-        for (var i = 0; i < InitialQuantityByHeight; i++)
-        {
-            _gridModel.CreateLine();
-        }
-
-        UpdateContentSize();
-        RecalculateCellsAndAnimate();
-        RefreshTopLine();
-        if (canvasSwiper)
-        {
-            canvasSwiper.SwitchToCanvas2();
+            _canvasSwiper.SwitchToCanvas2();
         }
     }
 
@@ -208,84 +172,19 @@ public class GeneratingPlayingField : MonoBehaviour
 
     private void RefreshTopLine()
     {
-        if (!topLineController) return;
+        if (!_topLineController) return;
         var numberLine = (int)Math.Floor(_lastLoggedScrollPosition / _cellSize);
-        var activeNumbers = new List<int>();
-        if (numberLine <= 0)
-        {
-            activeNumbers.AddRange(new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-            topLineController.UpdateDisplayedNumbers(activeNumbers);
-            return;
-        }
-
-        if (numberLine > _gridModel.Cells.Count)
-        {
-            numberLine = _gridModel.Cells.Count;
-        }
-
-        if (numberLine == 0)
-        {
-            for (var i = 0; i < QuantityByWidth; i++)
-            {
-                if (_gridModel.Cells[numberLine][i].IsActive)
-                {
-                    activeNumbers.Add(_gridModel.Cells[numberLine][i].number);
-                }
-                else
-                {
-                    activeNumbers.Add(0);
-                }
-            }
-        }
-        else
-        {
-            for (var i = 0; i < QuantityByWidth; i++)
-            {
-                for (var l = numberLine - 1; l >= 0; l--)
-                {
-                    if (l < _gridModel.Cells.Count && i < _gridModel.Cells[l].Count && _gridModel.Cells[l][i].IsActive)
-                    {
-                        activeNumbers.Add(_gridModel.Cells[l][i].number);
-                        break;
-                    }
-
-                    if (l == 0)
-                    {
-                        activeNumbers.Add(0);
-                    }
-                }
-            }
-        }
-
-        topLineController.UpdateDisplayedNumbers(activeNumbers);
+        var activeNumbers = _gridModel.GetNumbersForTopLine(numberLine, QuantityByWidth);
+        _topLineController.UpdateDisplayedNumbers(activeNumbers);
     }
 
     private void OnScrollValueChanged(Vector2 position)
     {
         var currentScrollPosition = scrollRect.content.anchoredPosition.y;
-
-        if (Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= scrollLoggingThreshold)
+        if (Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= _scrollLoggingThreshold)
         {
             _lastLoggedScrollPosition = currentScrollPosition;
             RefreshTopLine();
-        }
-    }
-
-    public void AddExistingNumbersAsNewLines()
-    {
-        var numbersToAdd = _gridModel.GetAllActiveCells()
-            .Select(cell => cell.number)
-            .ToList();
-
-        if (numbersToAdd.Count == 0) return;
-
-        _gridModel.AddNumbersAsNewLines(numbersToAdd);
-
-        RecalculateCellsAndAnimate();
-        RefreshTopLine();
-        if (canvasSwiper)
-        {
-            canvasSwiper.SwitchToCanvas2();
         }
     }
 }

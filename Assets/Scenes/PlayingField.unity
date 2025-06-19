@@ -525,9 +525,9 @@ GameObject:
   m_Component:
   - component: {fileID: 382419718}
   - component: {fileID: 382419717}
-  - component: {fileID: 382419719}
   - component: {fileID: 382419720}
   - component: {fileID: 382419721}
+  - component: {fileID: 382419722}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -549,10 +549,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellPrefab: {fileID: 4519391986074129742, guid: 6c74060d7ef2add4297f914d651f7528, type: 3}
   contentContainer: {fileID: 2124303421}
-  canvasSwiper: {fileID: 614222512}
   scrollRect: {fileID: 135620098}
-  topLineController: {fileID: 382419721}
-  scrollLoggingThreshold: 50
 --- !u!4 &382419718
 Transform:
   m_ObjectHideFlags: 0
@@ -568,18 +565,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &382419719
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 382419716}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bb2fad99db4750f49b395fec18d7b5e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &382419720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -608,6 +593,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellPrefab: {fileID: 4519391986074129742, guid: 6c74060d7ef2add4297f914d651f7528, type: 3}
   container: {fileID: 1175308658}
+--- !u!114 &382419722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 382419716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c043e05fa1b4edc97f85335c6c69700, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  view: {fileID: 382419717}
+  cellPool: {fileID: 382419720}
+  topLineController: {fileID: 382419721}
+  canvasSwiper: {fileID: 614222512}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -918,8 +919,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 382419717}
-        m_TargetAssemblyTypeName: GeneratingPlayingField, Assembly-CSharp
+      - m_Target: {fileID: 382419722}
+        m_TargetAssemblyTypeName: GameBootstrap, Assembly-CSharp
         m_MethodName: AddExistingNumbersAsNewLines
         m_Mode: 1
         m_Arguments:
@@ -1398,8 +1399,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 382419717}
-        m_TargetAssemblyTypeName: GeneratingPlayingField, Assembly-CSharp
+      - m_Target: {fileID: 382419722}
+        m_TargetAssemblyTypeName: GameBootstrap, Assembly-CSharp
         m_MethodName: StartNewGame
         m_Mode: 1
         m_Arguments:
