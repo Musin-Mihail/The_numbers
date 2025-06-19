@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(CellPool))]
 [RequireComponent(typeof(CalculatingMatches))]
@@ -16,7 +15,8 @@ public class GeneratingPlayingField : MonoBehaviour
     public ScrollRect scrollRect;
     public TopLineController topLineController;
     public float scrollLoggingThreshold = 20f;
-    public List<List<Cell>> Cells { get; } = new();
+    private GridModel _gridModel;
+
     private const int QuantityByWidth = 10;
     private const int InitialQuantityByHeight = 5;
     private const int Indent = 10;
@@ -37,8 +37,9 @@ public class GeneratingPlayingField : MonoBehaviour
             _cellPool.canvasTransform = contentContainer;
         }
 
+        _gridModel = new GridModel(_cellPool);
         _calculatingMatches = GetComponent<CalculatingMatches>();
-        _calculatingMatches.Initialize(this);
+        _calculatingMatches.Initialize(this, _gridModel);
     }
 
     private void OnEnable()
@@ -71,54 +72,6 @@ public class GeneratingPlayingField : MonoBehaviour
         }
     }
 
-    public List<Cell> GetAllActiveCells()
-    {
-        return Cells
-            .SelectMany(line => line)
-            .Where(cell => cell && cell.IsActive)
-            .ToList();
-    }
-
-    public bool AreCellsOnSameLineOrColumnWithoutGaps(Cell firstCell, Cell secondCell)
-    {
-        var onSameLine = firstCell.line == secondCell.line;
-        var onSameColumn = firstCell.column == secondCell.column;
-
-        if (!onSameLine && !onSameColumn)
-        {
-            return false;
-        }
-
-        if (onSameLine)
-        {
-            var line = firstCell.line;
-            var startCol = Mathf.Min(firstCell.column, secondCell.column);
-            var endCol = Mathf.Max(firstCell.column, secondCell.column);
-            for (var c = startCol + 1; c < endCol; c++)
-            {
-                if (c < Cells[line].Count && Cells[line][c].IsActive)
-                {
-                    return false;
-                }
-            }
-        }
-        else
-        {
-            var col = firstCell.column;
-            var startLine = Mathf.Min(firstCell.line, secondCell.line);
-            var endLine = Mathf.Max(firstCell.line, secondCell.line);
-            for (var l = startLine + 1; l < endLine; l++)
-            {
-                if (l < Cells.Count && col < Cells[l].Count && Cells[l][col].IsActive)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
     public void StartNewGame()
     {
         if (_isAnimating)
@@ -127,11 +80,14 @@ public class GeneratingPlayingField : MonoBehaviour
             StopAllCoroutines();
         }
 
-        ClearField();
+        _gridModel.ClearField();
+
         for (var i = 0; i < InitialQuantityByHeight; i++)
         {
-            CreateLine();
+            _gridModel.CreateLine();
         }
+
+        UpdateContentSize();
 
         RecalculateCellsAndAnimate();
         RefreshTopLine();
@@ -145,59 +101,34 @@ public class GeneratingPlayingField : MonoBehaviour
         }
     }
 
-    private void ClearField()
-    {
-        foreach (var cell in Cells.SelectMany(line => line).Where(cell => cell))
-        {
-            _cellPool.ReturnCell(cell);
-        }
-
-        Cells.Clear();
-    }
-
     private void OnCheckLines(int line1, int line2)
     {
-        CheckAndRemoveEmptyLines(line1, line2);
+        var line1Empty = _gridModel.IsLineEmpty(line1);
+        var line2Empty = _gridModel.IsLineEmpty(line2);
+
+        var linesToRemove = new List<int>();
+        if (line1Empty) linesToRemove.Add(line1);
+        if (line2Empty && line1 != line2) linesToRemove.Add(line2);
+
+        if (linesToRemove.Count > 0)
+        {
+            linesToRemove.Sort((a, b) => b.CompareTo(a));
+            foreach (var lineIndex in linesToRemove)
+            {
+                _gridModel.RemoveLine(lineIndex);
+            }
+
+            RecalculateCellsAndAnimate();
+            RefreshTopLine();
+        }
     }
 
     private void UpdateContentSize()
     {
         if (!contentContainer) return;
-        var lineCount = Cells.Count;
+        var lineCount = _gridModel.Cells.Count;
         float newHeight = lineCount * _cellSize + Indent;
         contentContainer.sizeDelta = new Vector2(contentContainer.sizeDelta.x, newHeight);
-    }
-
-    private void CreateLine()
-    {
-        var newLine = new List<Cell>();
-        Cells.Add(newLine);
-        for (var i = 0; i < QuantityByWidth; i++)
-        {
-            var newCell = CreateCell();
-            newLine.Add(newCell);
-        }
-
-        UpdateContentSize();
-    }
-
-    private Cell CreateCell()
-    {
-        var cell = _cellPool.GetCell();
-        var number = Random.Range(1, 10);
-        cell.number = number;
-        cell.text.text = cell.number.ToString();
-        cell.OnDeselectingCell();
-        return cell;
-    }
-
-    private Cell CreateCellWithNumber(int number)
-    {
-        var cell = _cellPool.GetCell();
-        cell.number = number;
-        cell.text.text = cell.number.ToString();
-        cell.OnDeselectingCell();
-        return cell;
     }
 
     private async void RecalculateCellsAndAnimate()
@@ -224,11 +155,11 @@ public class GeneratingPlayingField : MonoBehaviour
     private async Task RecalculateCellsAsync(float duration)
     {
         var animationTasks = new List<Task>();
-        for (var i = 0; i < Cells.Count; i++)
+        for (var i = 0; i < _gridModel.Cells.Count; i++)
         {
-            for (var j = 0; j < Cells[i].Count; j++)
+            for (var j = 0; j < _gridModel.Cells[i].Count; j++)
             {
-                var currentCell = Cells[i][j];
+                var currentCell = _gridModel.Cells[i][j];
                 if (!currentCell) continue;
                 currentCell.line = i;
                 currentCell.column = j;
@@ -259,45 +190,6 @@ public class GeneratingPlayingField : MonoBehaviour
         rectTransform.anchoredPosition = targetPosition;
     }
 
-    private void CheckAndRemoveEmptyLines(int line1, int line2)
-    {
-        var line1Empty = IsLineEmpty(line1);
-        var line2Empty = IsLineEmpty(line2);
-        var linesToRemove = new List<int>();
-        if (line1Empty) linesToRemove.Add(line1);
-        if (line2Empty && line1 != line2) linesToRemove.Add(line2);
-
-        if (linesToRemove.Count > 0)
-        {
-            linesToRemove.Sort((a, b) => b.CompareTo(a));
-            foreach (var lineIndex in linesToRemove)
-            {
-                RemoveLine(lineIndex);
-            }
-
-            RecalculateCellsAndAnimate();
-            RefreshTopLine();
-        }
-    }
-
-    private bool IsLineEmpty(int lineIndex)
-    {
-        if (lineIndex < 0 || lineIndex >= Cells.Count) return false;
-        return Cells[lineIndex].All(cell => !cell || !cell.IsActive);
-    }
-
-    private void RemoveLine(int numberLine)
-    {
-        if (numberLine < 0 || numberLine >= Cells.Count) return;
-        foreach (var cell in Cells[numberLine].Where(cell => cell))
-        {
-            _cellPool.ReturnCell(cell);
-        }
-
-        Cells.RemoveAt(numberLine);
-    }
-
-
     private void RefreshTopLine()
     {
         if (!topLineController) return;
@@ -310,18 +202,18 @@ public class GeneratingPlayingField : MonoBehaviour
             return;
         }
 
-        if (numberLine > Cells.Count)
+        if (numberLine > _gridModel.Cells.Count)
         {
-            numberLine = Cells.Count;
+            numberLine = _gridModel.Cells.Count;
         }
 
         if (numberLine == 0)
         {
             for (var i = 0; i < QuantityByWidth; i++)
             {
-                if (Cells[numberLine][i].IsActive)
+                if (_gridModel.Cells[numberLine][i].IsActive)
                 {
-                    activeNumbers.Add(Cells[numberLine][i].number);
+                    activeNumbers.Add(_gridModel.Cells[numberLine][i].number);
                 }
                 else
                 {
@@ -335,13 +227,13 @@ public class GeneratingPlayingField : MonoBehaviour
             {
                 for (var l = numberLine - 1; l >= 0; l--)
                 {
-                    if (Cells[l][i].IsActive)
+                    if (_gridModel.Cells[l][i].IsActive)
                     {
-                        activeNumbers.Add(Cells[l][i].number);
+                        activeNumbers.Add(_gridModel.Cells[l][i].number);
                         break;
                     }
 
-                    if (l == 0 && !Cells[l][i].IsActive)
+                    if (l == 0 && !_gridModel.Cells[l][i].IsActive)
                     {
                         activeNumbers.Add(0);
                     }
@@ -365,14 +257,12 @@ public class GeneratingPlayingField : MonoBehaviour
 
     public void AddExistingNumbersAsNewLines()
     {
-        var numbersToAdd = Cells
-            .SelectMany(line => line)
-            .Where(cell => cell && cell.IsActive)
+        var numbersToAdd = _gridModel.GetAllActiveCells()
             .Select(cell => cell.number)
             .ToList();
 
         if (numbersToAdd.Count == 0) return;
-        var currentLine = Cells.LastOrDefault();
+        var currentLine = _gridModel.Cells.LastOrDefault();
         if (currentLine == null) return;
 
         for (var i = currentLine.Count - 1; i >= 0; i--)
@@ -392,10 +282,10 @@ public class GeneratingPlayingField : MonoBehaviour
             if (currentLine.Count >= QuantityByWidth)
             {
                 currentLine = new List<Cell>();
-                Cells.Add(currentLine);
+                _gridModel.Cells.Add(currentLine);
             }
 
-            var newCell = CreateCellWithNumber(number);
+            var newCell = _gridModel.CreateCellWithNumber(number);
             currentLine.Add(newCell);
         }
 

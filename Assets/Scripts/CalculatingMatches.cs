@@ -5,7 +5,8 @@ public class CalculatingMatches : MonoBehaviour
 {
     private Cell _firstCell;
     private Cell _secondCell;
-    private GeneratingPlayingField _generatingPlayingField;
+    private GridModel _gridModel;
+    private GeneratingPlayingField _fieldView;
 
     private void OnEnable()
     {
@@ -17,14 +18,15 @@ public class CalculatingMatches : MonoBehaviour
         ActionBus.OnSelectingCell -= HandleCellSelection;
     }
 
-    public void Initialize(GeneratingPlayingField generatingPlayingField)
+    public void Initialize(GeneratingPlayingField fieldView, GridModel gridModel)
     {
-        _generatingPlayingField = generatingPlayingField;
+        _fieldView = fieldView;
+        _gridModel = gridModel;
     }
 
     private void HandleCellSelection(Cell cell)
     {
-        if (!_generatingPlayingField) return;
+        if (_gridModel == null) return;
 
         if (!_firstCell)
         {
@@ -41,12 +43,14 @@ public class CalculatingMatches : MonoBehaviour
         }
 
         if (!_firstCell || !_secondCell) return;
+
         if (IsAValidMatch())
         {
             _firstCell.DisableCell();
             _secondCell.DisableCell();
             ActionBus.CheckLines(_firstCell.line, _secondCell.line);
-            _generatingPlayingField.NotifyMatchOccured();
+
+            if (_fieldView) _fieldView.NotifyMatchOccured();
         }
         else
         {
@@ -65,12 +69,12 @@ public class CalculatingMatches : MonoBehaviour
             return false;
         }
 
-        if (_generatingPlayingField.AreCellsOnSameLineOrColumnWithoutGaps(_firstCell, _secondCell))
+        if (_gridModel.AreCellsOnSameLineOrColumnWithoutGaps(_firstCell, _secondCell))
         {
             return true;
         }
 
-        var activeCells = _generatingPlayingField.GetAllActiveCells();
+        var activeCells = _gridModel.GetAllActiveCells();
         var firstIndex = activeCells.IndexOf(_firstCell);
         var secondIndex = activeCells.IndexOf(_secondCell);
 
