@@ -84,7 +84,7 @@ public class GridModel : IGridDataProvider
     {
         var cell = _cellPool.GetCell();
         var number = Random.Range(1, 10);
-        cell.number = 1;
+        cell.number = number;
         cell.text.text = cell.number.ToString();
         cell.OnDeselectingCell();
         _onCellCreatedCallback?.Invoke(cell);

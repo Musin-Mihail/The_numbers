@@ -14,9 +14,9 @@ public class Cell : MonoBehaviour
     public Image backgroundImage;
     public Sprite activeSprite;
     public Sprite disabledSprite;
+    public CellAnimator Animator { get; private set; }
     private bool _selected;
     public bool IsActive { get; private set; }
-
     public event Action<Cell> OnCellClicked;
 
     private void Awake()
@@ -26,13 +26,18 @@ public class Cell : MonoBehaviour
             backgroundImage = GetComponent<Image>();
         }
 
+        Animator = GetComponent<CellAnimator>();
+        if (Animator == null)
+        {
+            Debug.LogError("Компонент CellAnimator не найден на ячейке! Пожалуйста, добавьте его на префаб.", this);
+        }
+
         IsActive = true;
     }
 
     public void HandleClick()
     {
         if (!IsActive) return;
-
         OnCellClicked?.Invoke(this);
     }
 
@@ -62,7 +67,6 @@ public class Cell : MonoBehaviour
         gameObject.SetActive(true);
         IsActive = true;
         SetActiveSprite();
-
         OnDeselectingCell();
     }
 

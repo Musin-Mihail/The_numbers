@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,7 +20,6 @@ public class GeneratingPlayingField : MonoBehaviour
     private const float MoveDuration = 0.3f;
     private int _screenWidth;
     private int _cellSize;
-    private bool _isAnimating;
     private float _lastLoggedScrollPosition;
 
     private void Awake()
@@ -82,8 +79,10 @@ public class GeneratingPlayingField : MonoBehaviour
 
     public void HandleGridChanged()
     {
-        RecalculateCellsAndAnimate();
+        UpdateContentSize();
+        UpdateCellsPositions();
         RefreshTopLine();
+
         if (_canvasSwiper)
         {
             _canvasSwiper.SwitchToCanvas2();
@@ -98,25 +97,8 @@ public class GeneratingPlayingField : MonoBehaviour
         contentContainer.sizeDelta = new Vector2(contentContainer.sizeDelta.x, newHeight);
     }
 
-    private async void RecalculateCellsAndAnimate()
+    private void UpdateCellsPositions()
     {
-        try
-        {
-            if (_isAnimating) return;
-            _isAnimating = true;
-            UpdateContentSize();
-            await RecalculateCellsAsync(MoveDuration);
-            _isAnimating = false;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Ошибка пересчета позиций." + e);
-        }
-    }
-
-    private async Task RecalculateCellsAsync(float duration)
-    {
-        var animationTasks = new List<Task>();
         for (var i = 0; i < _gridModel.Cells.Count; i++)
         {
             for (var j = 0; j < _gridModel.Cells[i].Count; j++)
@@ -126,30 +108,13 @@ public class GeneratingPlayingField : MonoBehaviour
                 currentCell.line = i;
                 currentCell.column = j;
                 var targetPosition = new Vector2(_cellSize * j + Indent / 2, -_cellSize * i - Indent / 2 - _cellSize * 1.1f);
-                var moveTask = AnimateMoveAsync(currentCell.targetRectTransform, targetPosition, duration);
-                animationTasks.Add(moveTask);
+
+                if (currentCell.Animator)
+                {
+                    currentCell.Animator.MoveTo(currentCell.targetRectTransform, targetPosition, MoveDuration);
+                }
             }
         }
-
-        await Task.WhenAll(animationTasks);
-    }
-
-    private async Task AnimateMoveAsync(RectTransform rectTransform, Vector2 targetPosition, float duration)
-    {
-        if (!rectTransform) return;
-        var startPosition = rectTransform.anchoredPosition;
-        var elapsedTime = 0f;
-        if (Vector2.Distance(startPosition, targetPosition) < 0.01f) return;
-        while (elapsedTime < duration)
-        {
-            var t = elapsedTime / duration;
-            t = t * t * (3f - 2f * t);
-            rectTransform.anchoredPosition = Vector2.Lerp(startPosition, targetPosition, t);
-            elapsedTime += Time.deltaTime;
-            await Task.Yield();
-        }
-
-        rectTransform.anchoredPosition = targetPosition;
     }
 
     private void RefreshTopLine()
