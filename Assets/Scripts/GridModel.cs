@@ -8,18 +8,12 @@ public class GridModel : IGridDataProvider
 {
     public List<List<CellData>> Cells { get; } = new();
     private readonly Dictionary<Guid, CellData> _cellDataMap = new();
-    private List<Cell> _activeCellsCache = new();
+    private List<CellData> _activeCellsCache = new();
     private bool _isCacheDirty = true;
-    private readonly GeneratingPlayingField _view;
-
-    public GridModel(GeneratingPlayingField view)
-    {
-        _view = view;
-    }
 
     public List<CellData> GetAllCellData() => _cellDataMap.Values.ToList();
 
-    public List<Cell> GetAllActiveCells()
+    public List<CellData> GetAllActiveCellData()
     {
         if (_isCacheDirty)
         {
@@ -27,8 +21,6 @@ public class GridModel : IGridDataProvider
                 .Where(data => data.IsActive)
                 .OrderBy(data => data.Line)
                 .ThenBy(data => data.Column)
-                .Select(data => _view.GetCellView(data.Id))
-                .Where(cell => cell)
                 .ToList();
             _isCacheDirty = false;
         }
@@ -36,18 +28,16 @@ public class GridModel : IGridDataProvider
         return _activeCellsCache;
     }
 
-    public bool AreCellsOnSameLineOrColumnWithoutGaps(Cell firstCell, Cell secondCell)
+    public bool AreCellsOnSameLineOrColumnWithoutGaps(CellData firstCell, CellData secondCell)
     {
-        var onSameLine = firstCell.line == secondCell.line;
-        var onSameColumn = firstCell.column == secondCell.column;
-
+        var onSameLine = firstCell.Line == secondCell.Line;
+        var onSameColumn = firstCell.Column == secondCell.Column;
         if (!onSameLine && !onSameColumn) return false;
-
         if (onSameLine)
         {
-            var line = firstCell.line;
-            var startCol = Mathf.Min(firstCell.column, secondCell.column);
-            var endCol = Mathf.Max(firstCell.column, secondCell.column);
+            var line = firstCell.Line;
+            var startCol = Mathf.Min(firstCell.Column, secondCell.Column);
+            var endCol = Mathf.Max(firstCell.Column, secondCell.Column);
 
             var lineData = Cells[line];
             for (var c = startCol + 1; c < endCol; c++)
@@ -58,15 +48,15 @@ public class GridModel : IGridDataProvider
         }
         else // onSameColumn
         {
-            var col = firstCell.column;
-            var startLine = Mathf.Min(firstCell.line, secondCell.line);
-            var endLine = Mathf.Max(firstCell.line, secondCell.line);
+            var col = firstCell.Column;
+            var startLine = Mathf.Min(firstCell.Line, secondCell.Line);
+            var endLine = Mathf.Max(firstCell.Line, secondCell.Line);
             for (var l = startLine + 1; l < endLine; l++)
             {
                 if (l < Cells.Count)
                 {
                     var data = Cells[l].FirstOrDefault(d => d.Column == col);
-                    if (data is { IsActive: true }) return false; // Найдена преграда
+                    if (data is { IsActive: true }) return false;
                 }
             }
         }
@@ -135,10 +125,7 @@ public class GridModel : IGridDataProvider
 
     public void AppendActiveNumbersToGrid()
     {
-        var numbersToAdd = _cellDataMap.Values
-            .Where(d => d.IsActive)
-            .OrderBy(d => d.Line)
-            .ThenBy(d => d.Column)
+        var numbersToAdd = GetAllActiveCellData() // Используем обновленный метод
             .Select(cell => cell.Number)
             .ToList();
         if (numbersToAdd.Count == 0) return;
@@ -173,7 +160,7 @@ public class GridModel : IGridDataProvider
 
     public List<int> GetNumbersForTopLine(int numberLine)
     {
-        var topNumbers = new List<int>(new int[GameConstants.QuantityByWidth]); // Инициализируем нулями
+        var topNumbers = new List<int>(new int[GameConstants.QuantityByWidth]);
         if (numberLine < 0) return topNumbers;
         numberLine = Mathf.Min(numberLine, Cells.Count);
         for (var col = 0; col < GameConstants.QuantityByWidth; col++)

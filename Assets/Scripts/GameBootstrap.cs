@@ -12,7 +12,7 @@ public class GameBootstrap : MonoBehaviour
 
     private void Awake()
     {
-        _gridModel = new GridModel(view);
+        _gridModel = new GridModel();
         var calculatingMatches = new CalculatingMatches(_gridModel);
         _gameController = new GameController(_gridModel, calculatingMatches);
         view.Initialize(_gridModel, topLineController, canvasSwiper, inputHandler);

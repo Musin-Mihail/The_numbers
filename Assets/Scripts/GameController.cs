@@ -35,12 +35,12 @@ public class GameController
         }
         else
         {
-            var secondCell = cell;
             _firstCell.SetSelected(false);
-
-            if (_calculatingMatches.IsAValidMatch(_firstCell, secondCell))
+            var firstData = _gridModel.GetCellDataById(_firstCell.DataId);
+            var secondData = _gridModel.GetCellDataById(cell.DataId);
+            if (firstData != null && secondData != null && _calculatingMatches.IsAValidMatch(firstData, secondData))
             {
-                ProcessValidMatch(_firstCell, secondCell);
+                ProcessValidMatch(_firstCell, cell);
             }
             else
             {

@@ -2,6 +2,6 @@
 
 public interface IGridDataProvider
 {
-    bool AreCellsOnSameLineOrColumnWithoutGaps(Cell firstCell, Cell secondCell);
-    List<Cell> GetAllActiveCells();
+    bool AreCellsOnSameLineOrColumnWithoutGaps(CellData firstCell, CellData secondCell);
+    List<CellData> GetAllActiveCellData();
 }

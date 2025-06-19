@@ -9,7 +9,7 @@ public class CalculatingMatches
         _gridDataProvider = gridDataProvider;
     }
 
-    public bool IsAValidMatch(Cell firstCell, Cell secondCell)
+    public bool IsAValidMatch(CellData firstCell, CellData secondCell)
     {
         if (firstCell.Number != secondCell.Number && firstCell.Number + secondCell.Number != 10)
         {
@@ -21,7 +21,7 @@ public class CalculatingMatches
             return true;
         }
 
-        var activeCells = _gridDataProvider.GetAllActiveCells();
+        var activeCells = _gridDataProvider.GetAllActiveCellData();
         var firstIndex = activeCells.IndexOf(firstCell);
         var secondIndex = activeCells.IndexOf(secondCell);
 
@@ -32,7 +32,7 @@ public class CalculatingMatches
             return true;
         }
 
-        if ((firstIndex == 0 && secondIndex == activeCells.Count - 1) || (secondIndex == 0 && firstIndex == activeCells.Count - 1))
+        if (activeCells.Count > 1 && ((firstIndex == 0 && secondIndex == activeCells.Count - 1) || (secondIndex == 0 && firstIndex == activeCells.Count - 1)))
         {
             return true;
         }
