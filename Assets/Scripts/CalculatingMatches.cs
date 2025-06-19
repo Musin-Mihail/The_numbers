@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class CalculatingMatches
 {
-    private GridModel _gridModel;
+    private readonly IGridDataProvider _gridDataProvider;
 
-    public CalculatingMatches(GridModel gridModel)
+    public CalculatingMatches(IGridDataProvider gridDataProvider)
     {
-        _gridModel = gridModel;
+        _gridDataProvider = gridDataProvider;
     }
 
     public bool IsAValidMatch(Cell firstCell, Cell secondCell)
@@ -16,12 +16,12 @@ public class CalculatingMatches
             return false;
         }
 
-        if (_gridModel.AreCellsOnSameLineOrColumnWithoutGaps(firstCell, secondCell))
+        if (_gridDataProvider.AreCellsOnSameLineOrColumnWithoutGaps(firstCell, secondCell))
         {
             return true;
         }
 
-        var activeCells = _gridModel.GetAllActiveCells();
+        var activeCells = _gridDataProvider.GetAllActiveCells();
         var firstIndex = activeCells.IndexOf(firstCell);
         var secondIndex = activeCells.IndexOf(secondCell);
 

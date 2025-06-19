@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class GridModel
+public class GridModel : IGridDataProvider
 {
     public List<List<Cell>> Cells { get; } = new();
     private const int QuantityByWidth = 10;
@@ -84,7 +84,7 @@ public class GridModel
     {
         var cell = _cellPool.GetCell();
         var number = Random.Range(1, 10);
-        cell.number = number;
+        cell.number = 1;
         cell.text.text = cell.number.ToString();
         cell.OnDeselectingCell();
         _onCellCreatedCallback?.Invoke(cell);
