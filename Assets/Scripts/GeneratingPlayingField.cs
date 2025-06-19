@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(CellPool))]
+[RequireComponent(typeof(CalculatingMatches))]
 public class GeneratingPlayingField : MonoBehaviour
 {
     public GameObject cellPrefab;
@@ -16,7 +17,6 @@ public class GeneratingPlayingField : MonoBehaviour
     public TopLineController topLineController;
     public float scrollLoggingThreshold = 20f;
     public List<List<Cell>> Cells { get; } = new();
-    public static GeneratingPlayingField Instance { get; private set; }
     private const int QuantityByWidth = 10;
     private const int InitialQuantityByHeight = 5;
     private const int Indent = 10;
@@ -26,23 +26,19 @@ public class GeneratingPlayingField : MonoBehaviour
     private bool _isAnimating;
     private CellPool _cellPool;
     private float _lastLoggedScrollPosition;
+    private CalculatingMatches _calculatingMatches;
 
     private void Awake()
     {
-        if (!Instance)
+        _cellPool = GetComponent<CellPool>();
+        if (_cellPool)
         {
-            Instance = this;
-            _cellPool = GetComponent<CellPool>();
-            if (_cellPool)
-            {
-                _cellPool.cellPrefab = cellPrefab;
-                _cellPool.canvasTransform = contentContainer;
-            }
+            _cellPool.cellPrefab = cellPrefab;
+            _cellPool.canvasTransform = contentContainer;
         }
-        else if (Instance != this)
-        {
-            Destroy(gameObject);
-        }
+
+        _calculatingMatches = GetComponent<CalculatingMatches>();
+        _calculatingMatches.Initialize(this);
     }
 
     private void OnEnable()
@@ -75,15 +71,52 @@ public class GeneratingPlayingField : MonoBehaviour
         }
     }
 
-    private void OnScrollValueChanged(Vector2 position)
+    public List<Cell> GetAllActiveCells()
     {
-        var currentScrollPosition = scrollRect.content.anchoredPosition.y;
+        return Cells
+            .SelectMany(line => line)
+            .Where(cell => cell && cell.IsActive)
+            .ToList();
+    }
 
-        if (Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= scrollLoggingThreshold)
+    public bool AreCellsOnSameLineOrColumnWithoutGaps(Cell firstCell, Cell secondCell)
+    {
+        var onSameLine = firstCell.line == secondCell.line;
+        var onSameColumn = firstCell.column == secondCell.column;
+
+        if (!onSameLine && !onSameColumn)
         {
-            _lastLoggedScrollPosition = currentScrollPosition;
-            RefreshTopLine();
+            return false;
         }
+
+        if (onSameLine)
+        {
+            var line = firstCell.line;
+            var startCol = Mathf.Min(firstCell.column, secondCell.column);
+            var endCol = Mathf.Max(firstCell.column, secondCell.column);
+            for (var c = startCol + 1; c < endCol; c++)
+            {
+                if (c < Cells[line].Count && Cells[line][c].IsActive)
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            var col = firstCell.column;
+            var startLine = Mathf.Min(firstCell.line, secondCell.line);
+            var endLine = Mathf.Max(firstCell.line, secondCell.line);
+            for (var l = startLine + 1; l < endLine; l++)
+            {
+                if (l < Cells.Count && col < Cells[l].Count && Cells[l][col].IsActive)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public void StartNewGame()
@@ -317,6 +350,17 @@ public class GeneratingPlayingField : MonoBehaviour
         }
 
         topLineController.UpdateDisplayedNumbers(activeNumbers);
+    }
+
+    private void OnScrollValueChanged(Vector2 position)
+    {
+        var currentScrollPosition = scrollRect.content.anchoredPosition.y;
+
+        if (Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= scrollLoggingThreshold)
+        {
+            _lastLoggedScrollPosition = currentScrollPosition;
+            RefreshTopLine();
+        }
     }
 
     public void AddExistingNumbersAsNewLines()
