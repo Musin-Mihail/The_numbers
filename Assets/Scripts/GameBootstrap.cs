@@ -6,6 +6,7 @@ public class GameBootstrap : MonoBehaviour
     [SerializeField] private CellPool cellPool;
     [SerializeField] private TopLineController topLineController;
     [SerializeField] private CanvasSwiper canvasSwiper;
+    [SerializeField] private GameInputHandler inputHandler;
 
     private GameController _gameController;
     private GridModel _gridModel;
@@ -14,12 +15,13 @@ public class GameBootstrap : MonoBehaviour
     {
         _gridModel = new GridModel(
             cellPool,
-            cell => view.SubscribeToCell(cell),
-            cell => view.UnsubscribeFromCell(cell)
+            cell => inputHandler.SubscribeToCell(cell),
+            cell => inputHandler.UnsubscribeFromCell(cell)
         );
         var calculatingMatches = new CalculatingMatches(_gridModel);
         _gameController = new GameController(_gridModel, calculatingMatches);
-        view.Initialize(_gameController, _gridModel, topLineController, canvasSwiper);
+        view.Initialize(_gridModel, topLineController, canvasSwiper);
+        inputHandler.Initialize(_gameController);
     }
 
     private void OnEnable()

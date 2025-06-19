@@ -15,7 +15,6 @@ public class GeneratingPlayingField : MonoBehaviour
     private TopLineController _topLineController;
     private CanvasSwiper _canvasSwiper;
     private GridModel _gridModel;
-    private GameController _gameController;
     private CellPool _cellPool;
 
     private const int QuantityByWidth = 10;
@@ -33,9 +32,8 @@ public class GeneratingPlayingField : MonoBehaviour
         _cellPool.canvasTransform = contentContainer;
     }
 
-    public void Initialize(GameController gameController, GridModel gridModel, TopLineController topLineController, CanvasSwiper canvasSwiper)
+    public void Initialize(GridModel gridModel, TopLineController topLineController, CanvasSwiper canvasSwiper)
     {
-        _gameController = gameController;
         _gridModel = gridModel;
         _topLineController = topLineController;
         _canvasSwiper = canvasSwiper;
@@ -67,22 +65,6 @@ public class GeneratingPlayingField : MonoBehaviour
         {
             _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
         }
-    }
-
-    public void SubscribeToCell(Cell cell)
-    {
-        cell.OnCellClicked += OnCellClicked;
-    }
-
-    public void UnsubscribeFromCell(Cell cell)
-    {
-        cell.OnCellClicked -= OnCellClicked;
-    }
-
-    private void OnCellClicked(Cell cell)
-    {
-        if (_isAnimating) return;
-        _gameController.HandleCellSelection(cell);
     }
 
     public void HandleMatchFound(Cell firstCell, Cell secondCell)
