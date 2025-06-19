@@ -10,49 +10,12 @@ public class GridModel : IGridDataProvider
     public event Action<CellData> OnCellUpdated;
     public event Action<Guid> OnCellRemoved;
     public event Action OnGridCleared;
-
     public List<List<CellData>> Cells { get; } = new();
     private readonly Dictionary<Guid, CellData> _cellDataMap = new();
-    private List<CellData> _activeCellsCache = new();
-    private readonly Dictionary<Guid, int> _activeCellIndexMap = new();
-    private bool _isCacheDirty = true;
-
-    private void RebuildCache()
-    {
-        if (!_isCacheDirty) return;
-        _activeCellsCache.Clear();
-        _activeCellIndexMap.Clear();
-        foreach (var line in Cells)
-        {
-            foreach (var cellData in line)
-            {
-                if (cellData.IsActive)
-                {
-                    _activeCellsCache.Add(cellData);
-                }
-            }
-        }
-
-        for (var i = 0; i < _activeCellsCache.Count; i++)
-        {
-            _activeCellIndexMap[_activeCellsCache[i].Id] = i;
-        }
-
-        _isCacheDirty = false;
-    }
-
-    public int GetIndexOfActiveCell(CellData cell)
-    {
-        if (cell == null) return -1;
-
-        RebuildCache();
-
-        return _activeCellIndexMap.GetValueOrDefault(cell.Id, -1);
-    }
+    private readonly List<CellData> _activeCellsCache = new();
 
     public List<CellData> GetAllActiveCellData()
     {
-        RebuildCache();
         return _activeCellsCache;
     }
 
@@ -61,7 +24,6 @@ public class GridModel : IGridDataProvider
         var onSameLine = firstCell.Line == secondCell.Line;
         var onSameColumn = firstCell.Column == secondCell.Column;
         if (!onSameLine && !onSameColumn) return false;
-        RebuildCache();
         if (onSameLine)
         {
             var line = firstCell.Line;
@@ -76,7 +38,7 @@ public class GridModel : IGridDataProvider
                 }
             }
         }
-        else
+        else // onSameColumn
         {
             var col = firstCell.Column;
             var startLine = Mathf.Min(firstCell.Line, secondCell.Line);
@@ -102,8 +64,22 @@ public class GridModel : IGridDataProvider
 
     public void SetCellActiveState(CellData data, bool isActive)
     {
+        if (data.IsActive == isActive) return;
+
         data.SetActive(isActive);
-        _isCacheDirty = true;
+
+        if (isActive)
+        {
+            if (!_activeCellsCache.Contains(data))
+            {
+                _activeCellsCache.Add(data);
+            }
+        }
+        else
+        {
+            _activeCellsCache.Remove(data);
+        }
+
         OnCellUpdated?.Invoke(data);
     }
 
@@ -111,7 +87,7 @@ public class GridModel : IGridDataProvider
     {
         Cells.Clear();
         _cellDataMap.Clear();
-        _isCacheDirty = true;
+        _activeCellsCache.Clear();
         OnGridCleared?.Invoke();
     }
 
@@ -123,11 +99,11 @@ public class GridModel : IGridDataProvider
             var cellData = new CellData(Random.Range(1, 10), lineIndex, i);
             newLine.Add(cellData);
             _cellDataMap[cellData.Id] = cellData;
+            _activeCellsCache.Add(cellData);
             OnCellAdded?.Invoke(cellData);
         }
 
         Cells.Add(newLine);
-        _isCacheDirty = true;
     }
 
     public bool IsLineEmpty(int lineIndex)
@@ -142,6 +118,7 @@ public class GridModel : IGridDataProvider
         foreach (var cellData in Cells[lineIndex])
         {
             _cellDataMap.Remove(cellData.Id);
+            _activeCellsCache.Remove(cellData);
             OnCellRemoved?.Invoke(cellData.Id);
         }
 
@@ -154,8 +131,6 @@ public class GridModel : IGridDataProvider
                 OnCellUpdated?.Invoke(cell);
             }
         }
-
-        _isCacheDirty = true;
     }
 
     public void AppendActiveNumbersToGrid()
@@ -182,7 +157,7 @@ public class GridModel : IGridDataProvider
         }
 
         var lineIndex = Cells.Count > 0 ? Cells.Count - 1 : 0;
-        var columnIndex = Cells.Count > 0 ? Cells[lineIndex].Count : 0;
+        var columnIndex = Cells.Count > 0 && Cells[lineIndex] != null ? Cells[lineIndex].Count : 0;
         if (Cells.Count == 0)
         {
             Cells.Add(new List<CellData>());
@@ -200,15 +175,13 @@ public class GridModel : IGridDataProvider
                 }
             }
 
-            var currentLineList = Cells[lineIndex];
             var newCellData = new CellData(number, lineIndex, columnIndex);
-            currentLineList.Add(newCellData);
+            Cells[lineIndex].Add(newCellData);
             _cellDataMap[newCellData.Id] = newCellData;
+            _activeCellsCache.Add(newCellData);
             OnCellAdded?.Invoke(newCellData);
             columnIndex++;
         }
-
-        _isCacheDirty = true;
     }
 
     public List<int> GetNumbersForTopLine(int numberLine)
@@ -220,8 +193,8 @@ public class GridModel : IGridDataProvider
         {
             for (var line = numberLine - 1; line >= 0; line--)
             {
-                var cellData = Cells[line].FirstOrDefault(d => d.Column == col);
-                if (cellData is { IsActive: true })
+                var cellData = _activeCellsCache.LastOrDefault(d => d.Column == col && d.Line == line);
+                if (cellData != null)
                 {
                     topNumbers[col] = cellData.Number;
                     break;
