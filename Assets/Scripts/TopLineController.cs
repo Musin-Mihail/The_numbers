@@ -12,7 +12,7 @@ public class TopLineController : MonoBehaviour
     private const int Indent = 10;
     private int _cellSize;
 
-    void Start()
+    private void Start()
     {
         if (!container)
         {
@@ -23,9 +23,6 @@ public class TopLineController : MonoBehaviour
         CreateLineDisplay();
     }
 
-    /// <summary>
-    /// Создает ячейки для верхней линии при старте.
-    /// </summary>
     private void CreateLineDisplay()
     {
         for (int i = 0; i < QuantityByWidth; i++)
@@ -33,17 +30,17 @@ public class TopLineController : MonoBehaviour
             var cellGo = Instantiate(cellPrefab, container);
             var cell = cellGo.GetComponent<Cell>();
             cell.targetRectTransform = cellGo.GetComponent<RectTransform>();
-            cell.GetComponent<Button>().enabled = false;
+            if (cell.TryGetComponent<Button>(out var button))
+            {
+                button.enabled = false;
+            }
+
             cell.indicator.SetActive(false);
             _topLineCells.Add(cell);
             cellGo.SetActive(true);
         }
     }
 
-    /// <summary>
-    /// Обновляет числа, отображаемые в верхней линии.
-    /// </summary>
-    /// <param name="numbers">Список активных чисел с игрового поля.</param>
     public void UpdateDisplayedNumbers(List<int> numbers)
     {
         for (int i = 0; i < _topLineCells.Count; i++)
@@ -51,13 +48,14 @@ public class TopLineController : MonoBehaviour
             var cell = _topLineCells[i];
             cell.text.text = numbers[i].ToString();
             cell.targetRectTransform.anchoredPosition = new Vector2(_cellSize * i + Indent / 2, 0 - Indent / 2);
+
             if (numbers[i] == 0)
             {
-                cell.SetDisabledSprite();
+                cell.SetVisualState(false);
             }
             else
             {
-                cell.SetActiveSprite();
+                cell.SetVisualState(true);
             }
         }
     }

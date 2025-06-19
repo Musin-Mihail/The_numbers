@@ -6,24 +6,22 @@ using Random = UnityEngine.Random;
 
 public class GridModel : IGridDataProvider
 {
-    public List<List<Cell>> Cells { get; } = new();
+    public List<List<CellData>> Cells { get; } = new();
     private const int QuantityByWidth = 10;
-    private readonly CellPool _cellPool;
-    private readonly Action<Cell> _onCellCreatedCallback;
-    private readonly Action<Cell> _onCellCleanupCallback;
+    private readonly GeneratingPlayingField _view;
 
-    public GridModel(CellPool cellPool, Action<Cell> onCellCreatedCallback = null, Action<Cell> onCellCleanupCallback = null)
+    public GridModel(GeneratingPlayingField view)
     {
-        _cellPool = cellPool;
-        _onCellCreatedCallback = onCellCreatedCallback;
-        _onCellCleanupCallback = onCellCleanupCallback;
+        _view = view;
     }
 
     public List<Cell> GetAllActiveCells()
     {
         return Cells
             .SelectMany(line => line)
-            .Where(cell => cell && cell.IsActive)
+            .Where(data => data != null && data.IsActive)
+            .Select(data => _view.GetCellView(data.Id))
+            .Where(cell => cell != null)
             .ToList();
     }
 
@@ -34,6 +32,8 @@ public class GridModel : IGridDataProvider
 
         if (!onSameLine && !onSameColumn) return false;
 
+        var allCellsData = Cells.SelectMany(list => list).ToList();
+
         if (onSameLine)
         {
             var line = firstCell.line;
@@ -41,7 +41,8 @@ public class GridModel : IGridDataProvider
             var endCol = Mathf.Max(firstCell.column, secondCell.column);
             for (var c = startCol + 1; c < endCol; c++)
             {
-                if (c < Cells[line].Count && Cells[line][c].IsActive) return false;
+                var data = allCellsData.FirstOrDefault(d => d.Line == line && d.Column == c);
+                if (data != null && data.IsActive) return false;
             }
         }
         else // onSameColumn
@@ -51,106 +52,99 @@ public class GridModel : IGridDataProvider
             var endLine = Mathf.Max(firstCell.line, secondCell.line);
             for (var l = startLine + 1; l < endLine; l++)
             {
-                if (l < Cells.Count && col < Cells[l].Count && Cells[l][col].IsActive) return false;
+                var data = allCellsData.FirstOrDefault(d => d.Line == l && d.Column == col);
+                if (data != null && data.IsActive) return false;
             }
         }
 
         return true;
     }
 
+    public CellData GetCellDataById(Guid id)
+    {
+        return Cells.SelectMany(line => line).FirstOrDefault(d => d.Id == id);
+    }
+
     public void ClearField()
     {
-        foreach (var cell in Cells.SelectMany(line => line).Where(cell => cell))
-        {
-            _onCellCleanupCallback?.Invoke(cell);
-            _cellPool.ReturnCell(cell);
-        }
-
         Cells.Clear();
     }
 
-    public void CreateLine()
+    public void CreateLine(int lineIndex)
     {
-        var newLine = new List<Cell>();
+        var newLine = new List<CellData>();
         for (var i = 0; i < QuantityByWidth; i++)
         {
-            newLine.Add(CreateCell());
+            newLine.Add(new CellData(Random.Range(1, 10), lineIndex, i));
         }
 
         Cells.Add(newLine);
     }
 
-    private Cell CreateCell()
-    {
-        var cell = _cellPool.GetCell();
-        var number = Random.Range(1, 10);
-        cell.number = number;
-        cell.text.text = cell.number.ToString();
-        cell.OnDeselectingCell();
-        _onCellCreatedCallback?.Invoke(cell);
-        return cell;
-    }
-
-    private Cell CreateCellWithNumber(int number)
-    {
-        var cell = _cellPool.GetCell();
-        cell.number = number;
-        cell.text.text = cell.number.ToString();
-        cell.OnDeselectingCell();
-        _onCellCreatedCallback?.Invoke(cell);
-        return cell;
-    }
-
     public bool IsLineEmpty(int lineIndex)
     {
         if (lineIndex < 0 || lineIndex >= Cells.Count) return false;
-        return Cells[lineIndex].All(cell => !cell || !cell.IsActive);
+        return Cells[lineIndex].All(cellData => !cellData.IsActive);
     }
 
     public void RemoveLine(int numberLine)
     {
         if (numberLine < 0 || numberLine >= Cells.Count) return;
-        foreach (var cell in Cells[numberLine].Where(cell => cell))
-        {
-            _onCellCleanupCallback?.Invoke(cell);
-            _cellPool.ReturnCell(cell);
-        }
-
         Cells.RemoveAt(numberLine);
+        for (int i = 0; i < Cells.Count; i++)
+        {
+            foreach (var cell in Cells[i])
+            {
+                cell.Line = i;
+            }
+        }
     }
 
-    public void AddNumbersAsNewLines(List<int> numbers)
+    // ИСПРАВЛЕНО: Возвращена логика очистки неактивных ячеек в конце последней строки.
+    // Метод переименован для ясности.
+    public void AppendActiveNumbersToGrid()
     {
-        var currentLine = Cells.LastOrDefault();
+        var activeCellsData = Cells.SelectMany(line => line).Where(d => d.IsActive).ToList();
+        var numbersToAdd = activeCellsData.Select(cell => cell.Number).ToList();
+
+        if (numbersToAdd.Count == 0) return;
+
+        int lastLineIndex = Cells.Count > 0 ? Cells.Max(l => l.First().Line) : -1;
+
+        List<CellData> currentLine = Cells.LastOrDefault();
+
         if (currentLine == null)
         {
-            currentLine = new List<Cell>();
+            lastLineIndex = 0;
+            currentLine = new List<CellData>();
             Cells.Add(currentLine);
         }
-
-        for (var i = currentLine.Count - 1; i >= 0; i--)
+        else
         {
-            var cell = currentLine[i];
-            if (cell && cell.IsActive) break;
-            if (cell)
+            // Восстановленная логика: ищем с конца последней строки
+            // и удаляем неактивные ячейки, пока не встретим активную.
+            for (int i = currentLine.Count - 1; i >= 0; i--)
             {
-                _onCellCleanupCallback?.Invoke(cell);
-                _cellPool.ReturnCell(cell);
-            }
+                if (currentLine[i].IsActive)
+                {
+                    break; // Нашли последнюю активную, останавливаемся.
+                }
 
-            currentLine.RemoveAt(i);
+                currentLine.RemoveAt(i); // Удаляем неактивную ячейку с конца.
+            }
         }
 
-        foreach (var number in numbers)
+        foreach (var number in numbersToAdd)
         {
             if (currentLine.Count >= QuantityByWidth)
             {
-                currentLine = new List<Cell>();
+                lastLineIndex++;
+                currentLine = new List<CellData>();
                 Cells.Add(currentLine);
             }
 
-            var newCell = CreateCellWithNumber(number);
-            currentLine.Add(newCell);
+            var newCellData = new CellData(number, lastLineIndex, currentLine.Count);
+            currentLine.Add(newCellData);
         }
     }
 
@@ -173,11 +167,15 @@ public class GridModel : IGridDataProvider
             bool found = false;
             for (var l = numberLine - 1; l >= 0; l--)
             {
-                if (l < Cells.Count && i < Cells[l].Count && Cells[l][i].IsActive)
+                if (l < Cells.Count && i < Cells[l].Count)
                 {
-                    activeNumbers.Add(Cells[l][i].number);
-                    found = true;
-                    break;
+                    var cellData = Cells[l][i];
+                    if (cellData != null && cellData.IsActive)
+                    {
+                        activeNumbers.Add(cellData.Number);
+                        found = true;
+                        break;
+                    }
                 }
             }
 

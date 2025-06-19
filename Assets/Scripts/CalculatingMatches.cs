@@ -11,7 +11,7 @@ public class CalculatingMatches
 
     public bool IsAValidMatch(Cell firstCell, Cell secondCell)
     {
-        if (firstCell.number != secondCell.number && firstCell.number + secondCell.number != 10)
+        if (firstCell.Number != secondCell.Number && firstCell.Number + secondCell.Number != 10)
         {
             return false;
         }

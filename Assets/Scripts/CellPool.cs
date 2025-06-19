@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CellPool : MonoBehaviour
 {
-    public static CellPool Instance { get; private set; }
+    private static CellPool Instance { get; set; }
     [HideInInspector] public GameObject cellPrefab;
     [HideInInspector] public Transform canvasTransform;
     private readonly Queue<Cell> _pooledCells = new();
@@ -20,10 +20,6 @@ public class CellPool : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Получает ячейку из пула. Если в пуле нет доступных ячеек, создает новую.
-    /// </summary>
-    /// <returns>Активный объект ячейки с восстановленным видом.</returns>
     public Cell GetCell()
     {
         Cell cell;
@@ -38,14 +34,10 @@ public class CellPool : MonoBehaviour
             cell = cellOj.GetComponent<Cell>();
         }
 
-        cell.EnableCell();
+        cell.gameObject.SetActive(true);
         return cell;
     }
 
-    /// <summary>
-    /// Возвращает ячейку в пул для повторного использования.
-    /// </summary>
-    /// <param name="cell">Ячейка для возврата в пул.</param>
     public void ReturnCell(Cell cell)
     {
         if (!cell) return;
