@@ -513,8 +513,8 @@ GameObject:
   - component: {fileID: 382419718}
   - component: {fileID: 382419717}
   - component: {fileID: 382419720}
-  - component: {fileID: 382419721}
   - component: {fileID: 382419722}
+  - component: {fileID: 382419723}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -567,7 +567,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellPrefab: {fileID: 4519391986074129742, guid: 6c74060d7ef2add4297f914d651f7528, type: 3}
   canvasTransform: {fileID: 2124303421}
---- !u!114 &382419721
+--- !u!114 &382419722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 382419716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c043e05fa1b4edc97f85335c6c69700, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  view: {fileID: 382419717}
+  topLineController: {fileID: 382419723}
+  windowSwiper: {fileID: 614222512}
+--- !u!114 &382419723
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -582,21 +597,6 @@ MonoBehaviour:
   canvasScaler: {fileID: 111448985}
   cellPrefab: {fileID: 4519391986074129742, guid: 6c74060d7ef2add4297f914d651f7528, type: 3}
   container: {fileID: 1175308658}
---- !u!114 &382419722
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 382419716}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c043e05fa1b4edc97f85335c6c69700, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  view: {fileID: 382419717}
-  topLineController: {fileID: 382419721}
-  windowSwiper: {fileID: 614222512}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

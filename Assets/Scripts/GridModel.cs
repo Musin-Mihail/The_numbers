@@ -13,19 +13,26 @@ public class GridModel : IGridDataProvider
 
     public List<List<CellData>> Cells { get; } = new();
     private readonly Dictionary<Guid, CellData> _cellDataMap = new();
-    private List<CellData> _activeCellsCache = new();
+    private readonly List<CellData> _activeCellsCache = new();
     private readonly Dictionary<Guid, int> _activeCellIndexMap = new();
     private bool _isCacheDirty = true;
 
     private void RebuildCache()
     {
         if (!_isCacheDirty) return;
-        _activeCellsCache = _cellDataMap.Values
-            .Where(data => data.IsActive)
-            .OrderBy(data => data.Line)
-            .ThenBy(data => data.Column)
-            .ToList();
+        _activeCellsCache.Clear();
         _activeCellIndexMap.Clear();
+        foreach (var line in Cells)
+        {
+            foreach (var cellData in line)
+            {
+                if (cellData.IsActive)
+                {
+                    _activeCellsCache.Add(cellData);
+                }
+            }
+        }
+
         for (var i = 0; i < _activeCellsCache.Count; i++)
         {
             _activeCellIndexMap[_activeCellsCache[i].Id] = i;
