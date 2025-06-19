@@ -21,18 +21,18 @@ public class CalculatingMatches
             return true;
         }
 
-        var activeCells = _gridDataProvider.GetAllActiveCellData();
-        var firstIndex = activeCells.IndexOf(firstCell);
-        var secondIndex = activeCells.IndexOf(secondCell);
-
+        var firstIndex = _gridDataProvider.GetIndexOfActiveCell(firstCell);
+        var secondIndex = _gridDataProvider.GetIndexOfActiveCell(secondCell);
         if (firstIndex == -1 || secondIndex == -1) return false;
-
         if (Mathf.Abs(firstIndex - secondIndex) == 1)
         {
             return true;
         }
 
-        if (activeCells.Count > 1 && ((firstIndex == 0 && secondIndex == activeCells.Count - 1) || (secondIndex == 0 && firstIndex == activeCells.Count - 1)))
+        var activeCellCount = _gridDataProvider.GetAllActiveCellData().Count;
+        if (activeCellCount > 1 &&
+            ((firstIndex == 0 && secondIndex == activeCellCount - 1) ||
+             (secondIndex == 0 && firstIndex == activeCellCount - 1)))
         {
             return true;
         }

@@ -4,4 +4,5 @@ public interface IGridDataProvider
 {
     bool AreCellsOnSameLineOrColumnWithoutGaps(CellData firstCell, CellData secondCell);
     List<CellData> GetAllActiveCellData();
+    int GetIndexOfActiveCell(CellData cell);
 }
