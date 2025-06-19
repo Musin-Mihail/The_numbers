@@ -6,12 +6,15 @@ using Random = UnityEngine.Random;
 
 public class GridModel : IGridDataProvider
 {
+    public event Action<CellData> OnCellAdded;
+    public event Action<CellData> OnCellUpdated;
+    public event Action<Guid> OnCellRemoved;
+    public event Action OnGridCleared;
+
     public List<List<CellData>> Cells { get; } = new();
     private readonly Dictionary<Guid, CellData> _cellDataMap = new();
     private List<CellData> _activeCellsCache = new();
     private bool _isCacheDirty = true;
-
-    public List<CellData> GetAllCellData() => _cellDataMap.Values.ToList();
 
     public List<CellData> GetAllActiveCellData()
     {
@@ -74,6 +77,7 @@ public class GridModel : IGridDataProvider
     {
         data.SetActive(isActive);
         _isCacheDirty = true;
+        OnCellUpdated?.Invoke(data);
     }
 
     public void ClearField()
@@ -81,6 +85,7 @@ public class GridModel : IGridDataProvider
         Cells.Clear();
         _cellDataMap.Clear();
         _isCacheDirty = true;
+        OnGridCleared?.Invoke();
     }
 
     public void CreateLine(int lineIndex)
@@ -91,6 +96,7 @@ public class GridModel : IGridDataProvider
             var cellData = new CellData(Random.Range(1, 10), lineIndex, i);
             newLine.Add(cellData);
             _cellDataMap[cellData.Id] = cellData;
+            OnCellAdded?.Invoke(cellData);
         }
 
         Cells.Add(newLine);
@@ -109,6 +115,7 @@ public class GridModel : IGridDataProvider
         foreach (var cellData in Cells[lineIndex])
         {
             _cellDataMap.Remove(cellData.Id);
+            OnCellRemoved?.Invoke(cellData.Id);
         }
 
         Cells.RemoveAt(lineIndex);
@@ -117,6 +124,7 @@ public class GridModel : IGridDataProvider
             foreach (var cell in Cells[i])
             {
                 cell.Line = i;
+                OnCellUpdated?.Invoke(cell);
             }
         }
 
@@ -125,25 +133,31 @@ public class GridModel : IGridDataProvider
 
     public void AppendActiveNumbersToGrid()
     {
-        var numbersToAdd = GetAllActiveCellData() // Используем обновленный метод
+        var numbersToAdd = GetAllActiveCellData()
             .Select(cell => cell.Number)
             .ToList();
         if (numbersToAdd.Count == 0) return;
-        var lastLineIndex = Cells.Count > 0 ? Cells.Max(l => l.First().Line) : -1;
-        var currentLine = Cells.LastOrDefault();
-        if (currentLine != null)
+
+        var lastLine = Cells.LastOrDefault();
+        if (lastLine != null)
         {
-            for (var i = currentLine.Count - 1; i >= 0; i--)
+            for (var i = lastLine.Count - 1; i >= 0; i--)
             {
-                if (currentLine[i].IsActive) break;
-                _cellDataMap.Remove(currentLine[i].Id);
-                currentLine.RemoveAt(i);
+                if (lastLine[i].IsActive) break;
+
+                var cellToRemove = lastLine[i];
+                _cellDataMap.Remove(cellToRemove.Id);
+                OnCellRemoved?.Invoke(cellToRemove.Id);
+                lastLine.RemoveAt(i);
             }
         }
 
+        var lastLineIndex = Cells.Count > 0 ? Cells.Max(l => l.First().Line) : -1;
+        var currentLine = Cells.LastOrDefault();
+
         foreach (var number in numbersToAdd)
         {
-            if (currentLine is not { Count: < GameConstants.QuantityByWidth })
+            if (currentLine == null || currentLine.Count >= GameConstants.QuantityByWidth)
             {
                 lastLineIndex++;
                 currentLine = new List<CellData>();
@@ -153,6 +167,7 @@ public class GridModel : IGridDataProvider
             var newCellData = new CellData(number, lastLineIndex, currentLine.Count);
             currentLine.Add(newCellData);
             _cellDataMap[newCellData.Id] = newCellData;
+            OnCellAdded?.Invoke(newCellData);
         }
 
         _isCacheDirty = true;

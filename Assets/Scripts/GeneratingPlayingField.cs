@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,8 +16,6 @@ public class GeneratingPlayingField : MonoBehaviour
     private GridModel _gridModel;
     private CellPool _cellPool;
     private GameInputHandler _inputHandler;
-    private int _screenWidth;
-
     private int _cellSize;
     private float _scrollLoggingThreshold;
     private float _lastLoggedScrollPosition;
@@ -34,6 +31,11 @@ public class GeneratingPlayingField : MonoBehaviour
         _topLineController = topLineController;
         _canvasSwiper = canvasSwiper;
         _inputHandler = inputHandler;
+
+        _gridModel.OnCellAdded += HandleCellAdded;
+        _gridModel.OnCellUpdated += HandleCellUpdated;
+        _gridModel.OnCellRemoved += HandleCellRemoved;
+        _gridModel.OnGridCleared += HandleGridCleared;
     }
 
     private void Start()
@@ -41,7 +43,6 @@ public class GeneratingPlayingField : MonoBehaviour
         var screenWidth = Screen.width - GameConstants.Indent;
         _cellSize = screenWidth / GameConstants.QuantityByWidth;
         cellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(_cellSize, _cellSize);
-
         _scrollLoggingThreshold = _cellSize / 2f;
 
         if (scrollRect)
@@ -54,16 +55,19 @@ public class GeneratingPlayingField : MonoBehaviour
     private void OnDestroy()
     {
         if (scrollRect) scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
-    }
 
-    public Cell GetCellView(Guid dataId)
-    {
-        _cellViewInstances.TryGetValue(dataId, out var cell);
-        return cell;
+        if (_gridModel != null)
+        {
+            _gridModel.OnCellAdded -= HandleCellAdded;
+            _gridModel.OnCellUpdated -= HandleCellUpdated;
+            _gridModel.OnCellRemoved -= HandleCellRemoved;
+            _gridModel.OnGridCleared -= HandleGridCleared;
+        }
     }
 
     public void HandleMatchFound(Cell firstCell, Cell secondCell)
     {
+        UpdateContentSize();
         RefreshTopLine();
     }
 
@@ -72,71 +76,68 @@ public class GeneratingPlayingField : MonoBehaviour
         // Здесь можно добавить визуальный/звуковой отклик на неверный выбор
     }
 
-    public void HandleGridChanged()
+    private void HandleCellAdded(CellData data)
     {
-        SynchronizeViewWithModel();
+        var newCellView = _cellPool.GetCell();
+        newCellView.UpdateFromData(data);
+        _inputHandler.SubscribeToCell(newCellView);
+        _cellViewInstances[data.Id] = newCellView;
+
+        UpdateCellPosition(data, newCellView);
         UpdateContentSize();
-        UpdateCellsPositions();
         RefreshTopLine();
         _canvasSwiper?.SwitchToCanvas2();
     }
 
-    private void SynchronizeViewWithModel()
+    private void HandleCellUpdated(CellData data)
     {
-        var allDataIds = _gridModel.GetAllCellData().Select(d => d.Id).ToHashSet();
-        var viewIds = _cellViewInstances.Keys.ToList();
-
-        foreach (var id in viewIds)
+        if (_cellViewInstances.TryGetValue(data.Id, out var cellView))
         {
-            if (!allDataIds.Contains(id))
-            {
-                var cellToReturn = _cellViewInstances[id];
-                _inputHandler.UnsubscribeFromCell(cellToReturn);
-                _cellPool.ReturnCell(cellToReturn);
-                _cellViewInstances.Remove(id);
-            }
+            cellView.UpdateFromData(data);
+            UpdateCellPosition(data, cellView);
+        }
+    }
+
+    private void HandleCellRemoved(Guid dataId)
+    {
+        if (_cellViewInstances.TryGetValue(dataId, out var cellToReturn))
+        {
+            _inputHandler.UnsubscribeFromCell(cellToReturn);
+            _cellPool.ReturnCell(cellToReturn);
+            _cellViewInstances.Remove(dataId);
+        }
+    }
+
+    private void HandleGridCleared()
+    {
+        foreach (var cell in _cellViewInstances.Values)
+        {
+            _inputHandler.UnsubscribeFromCell(cell);
+            _cellPool.ReturnCell(cell);
         }
 
-        foreach (var data in _gridModel.GetAllCellData())
-        {
-            if (_cellViewInstances.TryGetValue(data.Id, out var cellView))
-            {
-                cellView.UpdateFromData(data);
-            }
-            else
-            {
-                var newCellView = _cellPool.GetCell();
-                newCellView.UpdateFromData(data);
-                _inputHandler.SubscribeToCell(newCellView);
-                _cellViewInstances[data.Id] = newCellView;
-            }
-        }
+        _cellViewInstances.Clear();
+        UpdateContentSize();
     }
 
     private void UpdateContentSize()
     {
         if (!contentContainer) return;
         var lineCount = _gridModel.Cells.Count;
-        float newHeight = lineCount * _cellSize + GameConstants.Indent;
+        var newHeight = lineCount * _cellSize + _cellSize * 1.1f + GameConstants.Indent;
         contentContainer.sizeDelta = new Vector2(contentContainer.sizeDelta.x, newHeight);
     }
 
-    private void UpdateCellsPositions()
+    private void UpdateCellPosition(CellData data, Cell cellView)
     {
-        foreach (var data in _gridModel.GetAllCellData())
-        {
-            if (_cellViewInstances.TryGetValue(data.Id, out var currentCell))
-            {
-                var targetPosition = new Vector2(
-                    _cellSize * data.Column + GameConstants.Indent / 2f,
-                    -_cellSize * data.Line - GameConstants.Indent / 2f - _cellSize * 1.1f
-                );
+        var targetPosition = new Vector2(
+            _cellSize * data.Column + GameConstants.Indent / 2f,
+            -_cellSize * data.Line - GameConstants.Indent / 2f - _cellSize * 1.1f
+        );
 
-                if (currentCell.Animator != null)
-                {
-                    currentCell.Animator.MoveTo(currentCell.targetRectTransform, targetPosition, GameConstants.CellMoveDuration);
-                }
-            }
+        if (cellView.Animator)
+        {
+            cellView.Animator.MoveTo(cellView.targetRectTransform, targetPosition, GameConstants.CellMoveDuration);
         }
     }
 

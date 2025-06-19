@@ -40,14 +40,12 @@ public class GameBootstrap : MonoBehaviour
     {
         _gameController.OnMatchFound += view.HandleMatchFound;
         _gameController.OnInvalidMatch += view.HandleInvalidMatch;
-        _gameController.OnGridChanged += view.HandleGridChanged;
     }
 
     private void UnsubscribeFromEvents()
     {
         _gameController.OnMatchFound -= view.HandleMatchFound;
         _gameController.OnInvalidMatch -= view.HandleInvalidMatch;
-        _gameController.OnGridChanged -= view.HandleGridChanged;
     }
 
     public void StartNewGame() => _gameController.StartNewGame();

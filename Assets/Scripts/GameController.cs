@@ -6,8 +6,6 @@ public class GameController
 {
     public event Action<Cell, Cell> OnMatchFound;
     public event Action OnInvalidMatch;
-    public event Action OnGridChanged;
-
     private readonly GridModel _gridModel;
     private readonly CalculatingMatches _calculatingMatches;
     private const int InitialQuantityByHeight = 5;
@@ -59,7 +57,6 @@ public class GameController
         if (data1 != null) _gridModel.SetCellActiveState(data1, false);
         if (data2 != null) _gridModel.SetCellActiveState(data2, false);
         CheckAndRemoveEmptyLines(data1.Line, data2.Line);
-        OnGridChanged?.Invoke();
     }
 
     private void CheckAndRemoveEmptyLines(int line1, int line2)
@@ -84,13 +81,10 @@ public class GameController
         {
             _gridModel.CreateLine(i);
         }
-
-        OnGridChanged?.Invoke();
     }
 
     public void AddExistingNumbersAsNewLines()
     {
         _gridModel.AppendActiveNumbersToGrid();
-        OnGridChanged?.Invoke();
     }
 }
