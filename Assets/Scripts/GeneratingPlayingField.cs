@@ -14,7 +14,11 @@ public class GeneratingPlayingField : MonoBehaviour
     public ScrollRect scrollRect;
     public TopLineController topLineController;
     public float scrollLoggingThreshold = 20f;
+
     private GridModel _gridModel;
+    private GameController _gameController;
+    private CalculatingMatches _calculatingMatches;
+    private CellPool _cellPool;
 
     private const int QuantityByWidth = 10;
     private const int InitialQuantityByHeight = 5;
@@ -23,11 +27,10 @@ public class GeneratingPlayingField : MonoBehaviour
     private int _screenWidth;
     private int _cellSize;
     private bool _isAnimating;
-    private CellPool _cellPool;
     private float _lastLoggedScrollPosition;
-    private CalculatingMatches _calculatingMatches;
-    private Cell _firstCell;
-    private Cell _secondCell;
+
+    private Cell _firstSelectedCell;
+    private Cell _secondSelectedCell;
 
     private void Awake()
     {
@@ -40,6 +43,7 @@ public class GeneratingPlayingField : MonoBehaviour
 
         _gridModel = new GridModel(_cellPool, OnCellCreated);
         _calculatingMatches = new CalculatingMatches(_gridModel);
+        _gameController = new GameController(_gridModel, _calculatingMatches);
     }
 
     private void OnEnable()
@@ -48,6 +52,10 @@ public class GeneratingPlayingField : MonoBehaviour
         {
             scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
         }
+
+        _gameController.OnMatchFound += HandleMatchFound;
+        _gameController.OnInvalidMatch += HandleInvalidMatch;
+        _gameController.OnGridChanged += HandleGridChanged;
     }
 
     private void OnDisable()
@@ -56,55 +64,10 @@ public class GeneratingPlayingField : MonoBehaviour
         {
             scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
         }
-    }
 
-    private void OnCellCreated(Cell cell)
-    {
-        cell.OnCellClicked += HandleCellSelection;
-    }
-
-    private void HandleCellSelection(Cell cell)
-    {
-        if (_isAnimating) return;
-
-        if (!_firstCell)
-        {
-            _firstCell = cell;
-            _firstCell.SetSelected(true);
-        }
-        else if (_firstCell == cell)
-        {
-            _firstCell.SetSelected(false);
-            _firstCell = null;
-        }
-        else
-        {
-            _secondCell = cell;
-            _secondCell.SetSelected(true);
-        }
-
-        if (!_firstCell || !_secondCell) return;
-
-        if (_calculatingMatches.IsAValidMatch(_firstCell, _secondCell))
-        {
-            var line1 = _firstCell.line;
-            var line2 = _secondCell.line;
-
-            _firstCell.DisableCell();
-            _secondCell.DisableCell();
-
-            OnCheckLines(line1, line2);
-
-            NotifyMatchOccured();
-        }
-        else
-        {
-            _firstCell.SetSelected(false);
-            _secondCell.SetSelected(false);
-        }
-
-        _firstCell = null;
-        _secondCell = null;
+        _gameController.OnMatchFound -= HandleMatchFound;
+        _gameController.OnInvalidMatch -= HandleInvalidMatch;
+        _gameController.OnGridChanged -= HandleGridChanged;
     }
 
     private void Start()
@@ -119,6 +82,36 @@ public class GeneratingPlayingField : MonoBehaviour
         }
     }
 
+    private void OnCellCreated(Cell cell)
+    {
+        cell.OnCellClicked += OnCellClicked;
+    }
+
+    private void OnCellClicked(Cell cell)
+    {
+        if (_isAnimating) return;
+        _gameController.HandleCellSelection(cell);
+    }
+
+    private void HandleMatchFound(Cell firstCell, Cell secondCell)
+    {
+        RefreshTopLine();
+    }
+
+    private void HandleInvalidMatch()
+    {
+        foreach (var cell in _gridModel.GetAllActiveCells())
+        {
+            cell.SetSelected(false);
+        }
+    }
+
+    private void HandleGridChanged()
+    {
+        RecalculateCellsAndAnimate();
+        RefreshTopLine();
+    }
+
     public void StartNewGame()
     {
         if (_isAnimating)
@@ -127,22 +120,16 @@ public class GeneratingPlayingField : MonoBehaviour
             StopAllCoroutines();
         }
 
-        _firstCell = null;
-        _secondCell = null;
-
-        foreach (var line in _gridModel.Cells)
+        _gameController.ResetGame();
+        foreach (var cell in _gridModel.GetAllActiveCells())
         {
-            foreach (var cell in line)
+            if (cell)
             {
-                if (cell)
-                {
-                    cell.OnCellClicked -= HandleCellSelection;
-                }
+                cell.OnCellClicked -= OnCellClicked;
             }
         }
 
         _gridModel.ClearField();
-
         for (var i = 0; i < InitialQuantityByHeight; i++)
         {
             _gridModel.CreateLine();
@@ -154,41 +141,6 @@ public class GeneratingPlayingField : MonoBehaviour
         if (canvasSwiper)
         {
             canvasSwiper.SwitchToCanvas2();
-        }
-        else
-        {
-            Debug.LogWarning("CanvasSwiper не назначен в инспекторе для GeneratingPlayingField!");
-        }
-    }
-
-    private void OnCheckLines(int line1, int line2)
-    {
-        var line1Empty = _gridModel.IsLineEmpty(line1);
-        var line2Empty = _gridModel.IsLineEmpty(line2);
-
-        var linesToRemove = new List<int>();
-        if (line1Empty) linesToRemove.Add(line1);
-        if (line2Empty && line1 != line2) linesToRemove.Add(line2);
-
-        if (linesToRemove.Count > 0)
-        {
-            linesToRemove.Sort((a, b) => b.CompareTo(a));
-
-            foreach (var lineIndex in linesToRemove)
-            {
-                foreach (var cell in _gridModel.Cells[lineIndex])
-                {
-                    if (cell != null)
-                    {
-                        cell.OnCellClicked -= HandleCellSelection;
-                    }
-                }
-
-                _gridModel.RemoveLine(lineIndex);
-            }
-
-            RecalculateCellsAndAnimate();
-            RefreshTopLine();
         }
     }
 
@@ -214,11 +166,6 @@ public class GeneratingPlayingField : MonoBehaviour
         {
             Debug.LogError("Ошибка пересчета позиций." + e);
         }
-    }
-
-    public void NotifyMatchOccured()
-    {
-        RefreshTopLine();
     }
 
     private async Task RecalculateCellsAsync(float duration)
@@ -296,13 +243,13 @@ public class GeneratingPlayingField : MonoBehaviour
             {
                 for (var l = numberLine - 1; l >= 0; l--)
                 {
-                    if (_gridModel.Cells[l][i].IsActive)
+                    if (l < _gridModel.Cells.Count && i < _gridModel.Cells[l].Count && _gridModel.Cells[l][i].IsActive)
                     {
                         activeNumbers.Add(_gridModel.Cells[l][i].number);
                         break;
                     }
 
-                    if (l == 0 && !_gridModel.Cells[l][i].IsActive)
+                    if (l == 0)
                     {
                         activeNumbers.Add(0);
                     }
@@ -331,42 +278,14 @@ public class GeneratingPlayingField : MonoBehaviour
             .ToList();
 
         if (numbersToAdd.Count == 0) return;
-        var currentLine = _gridModel.Cells.LastOrDefault();
-        if (currentLine == null) return;
 
-        for (var i = currentLine.Count - 1; i >= 0; i--)
-        {
-            var cell = currentLine[i];
-            if (cell && cell.IsActive) break;
-            if (cell)
-            {
-                _cellPool.ReturnCell(cell);
-            }
-
-            currentLine.RemoveAt(i);
-        }
-
-        foreach (var number in numbersToAdd)
-        {
-            if (currentLine.Count >= QuantityByWidth)
-            {
-                currentLine = new List<Cell>();
-                _gridModel.Cells.Add(currentLine);
-            }
-
-            var newCell = _gridModel.CreateCellWithNumber(number);
-            currentLine.Add(newCell);
-        }
+        _gridModel.AddNumbersAsNewLines(numbersToAdd);
 
         RecalculateCellsAndAnimate();
         RefreshTopLine();
         if (canvasSwiper)
         {
             canvasSwiper.SwitchToCanvas2();
-        }
-        else
-        {
-            Debug.LogWarning("CanvasSwiper не назначен в инспекторе для GeneratingPlayingField!");
         }
     }
 }

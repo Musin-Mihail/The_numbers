@@ -97,7 +97,7 @@ public class GridModel
         return cell;
     }
 
-    public Cell CreateCellWithNumber(int number)
+    private Cell CreateCellWithNumber(int number)
     {
         var cell = _cellPool.GetCell();
         cell.number = number;
@@ -122,5 +122,35 @@ public class GridModel
         }
 
         Cells.RemoveAt(numberLine);
+    }
+
+    public void AddNumbersAsNewLines(List<int> numbers)
+    {
+        var currentLine = Cells.LastOrDefault();
+        if (currentLine == null) return;
+
+        for (var i = currentLine.Count - 1; i >= 0; i--)
+        {
+            var cell = currentLine[i];
+            if (cell && cell.IsActive) break;
+            if (cell)
+            {
+                _cellPool.ReturnCell(cell);
+            }
+
+            currentLine.RemoveAt(i);
+        }
+
+        foreach (var number in numbers)
+        {
+            if (currentLine.Count >= QuantityByWidth)
+            {
+                currentLine = new List<Cell>();
+                Cells.Add(currentLine);
+            }
+
+            var newCell = CreateCellWithNumber(number);
+            currentLine.Add(newCell);
+        }
     }
 }
