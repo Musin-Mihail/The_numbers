@@ -21,15 +21,19 @@ public class CalculatingMatches
             return true;
         }
 
-        var firstIndex = _gridDataProvider.GetIndexOfActiveCell(firstCell);
-        var secondIndex = _gridDataProvider.GetIndexOfActiveCell(secondCell);
+        var activeCells = _gridDataProvider.GetAllActiveCellData();
+        var activeCellCount = activeCells.Count;
+
+        var firstIndex = activeCells.IndexOf(firstCell);
+        var secondIndex = activeCells.IndexOf(secondCell);
+
         if (firstIndex == -1 || secondIndex == -1) return false;
+
         if (Mathf.Abs(firstIndex - secondIndex) == 1)
         {
             return true;
         }
 
-        var activeCellCount = _gridDataProvider.GetAllActiveCellData().Count;
         if (activeCellCount > 1 &&
             ((firstIndex == 0 && secondIndex == activeCellCount - 1) ||
              (secondIndex == 0 && firstIndex == activeCellCount - 1)))
