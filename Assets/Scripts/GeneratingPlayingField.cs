@@ -6,16 +6,19 @@ using UnityEngine.UI;
 [RequireComponent(typeof(CellPool))]
 public class GeneratingPlayingField : MonoBehaviour
 {
+    [Header("Ссылки на компоненты")] [SerializeField]
+    private CanvasScaler canvasScaler;
+
     [SerializeField] private GameObject cellPrefab;
     [SerializeField] private RectTransform contentContainer;
     [SerializeField] private ScrollRect scrollRect;
 
     private readonly Dictionary<Guid, Cell> _cellViewInstances = new();
     private TopLineController _topLineController;
-    private CanvasSwiper _canvasSwiper;
+    private WindowSwiper _windowSwiper;
     private GridModel _gridModel;
     private CellPool _cellPool;
-    private int _cellSize;
+    private float _cellSize;
     private float _scrollLoggingThreshold;
     private float _lastLoggedScrollPosition;
     private GameController _gameController;
@@ -25,11 +28,11 @@ public class GeneratingPlayingField : MonoBehaviour
         _cellPool = GetComponent<CellPool>();
     }
 
-    public void Initialize(GridModel gridModel, TopLineController topLineController, CanvasSwiper canvasSwiper, GameController gameController)
+    public void Initialize(GridModel gridModel, TopLineController topLineController, WindowSwiper windowSwiper, GameController gameController)
     {
         _gridModel = gridModel;
         _topLineController = topLineController;
-        _canvasSwiper = canvasSwiper;
+        _windowSwiper = windowSwiper;
         _gameController = gameController;
 
         _gridModel.OnCellAdded += HandleCellAdded;
@@ -43,15 +46,21 @@ public class GeneratingPlayingField : MonoBehaviour
 
     private void Start()
     {
-        var screenWidth = Screen.width - GameConstants.Indent;
-        _cellSize = screenWidth / GameConstants.QuantityByWidth;
+        if (!canvasScaler)
+        {
+            Debug.LogError("Ошибка: CanvasScaler не назначен в инспекторе!", this);
+            enabled = false;
+            return;
+        }
+
+        var referenceWidth = canvasScaler.referenceResolution.x;
+        _cellSize = (referenceWidth - GameConstants.Indent) / GameConstants.QuantityByWidth;
         if (cellPrefab)
         {
             cellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(_cellSize, _cellSize);
         }
 
         _scrollLoggingThreshold = _cellSize / 2f;
-
         if (scrollRect)
         {
             _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
@@ -115,7 +124,7 @@ public class GeneratingPlayingField : MonoBehaviour
         UpdateCellPosition(data, newCellView);
         UpdateContentSize();
         RefreshTopLine();
-        _canvasSwiper?.SwitchToCanvas2();
+        _windowSwiper?.SwitchToWindowGame();
     }
 
     private void HandleCellUpdated(CellData data)

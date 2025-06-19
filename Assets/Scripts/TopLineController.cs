@@ -1,17 +1,28 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TopLineController : MonoBehaviour
 {
+    [SerializeField] private CanvasScaler canvasScaler;
     [SerializeField] private GameObject cellPrefab;
     [SerializeField] private RectTransform container;
 
     private readonly List<Cell> _topLineCells = new();
-    private int _cellSize;
+    private float _cellSize;
 
     private void Start()
     {
-        _cellSize = (Screen.width - GameConstants.Indent) / GameConstants.QuantityByWidth;
+        if (!canvasScaler)
+        {
+            Debug.LogError("Ошибка: CanvasScaler не назначен в инспекторе!", this);
+            enabled = false;
+            return;
+        }
+
+        var referenceWidth = canvasScaler.referenceResolution.x;
+        _cellSize = (referenceWidth - GameConstants.Indent) / GameConstants.QuantityByWidth;
+
         CreateLineDisplay();
     }
 
@@ -26,7 +37,9 @@ public class TopLineController : MonoBehaviour
             cell.SetVisualState(false);
             _topLineCells.Add(cell);
             cellGo.SetActive(true);
-            cell.targetRectTransform.anchoredPosition = new Vector2(_cellSize * i + GameConstants.Indent / 2f, -GameConstants.Indent / 2f);
+            var rectTransform = cell.targetRectTransform;
+            rectTransform.sizeDelta = new Vector2(_cellSize, _cellSize);
+            rectTransform.anchoredPosition = new Vector2(_cellSize * i + GameConstants.Indent / 2f, -GameConstants.Indent / 2f);
         }
     }
 

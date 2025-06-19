@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class SwipeDetector : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [SerializeField] private CanvasSwiper canvasSwiper;
+    [SerializeField] private WindowSwiper windowSwiper;
     [SerializeField] private ScrollRect scrollRect;
     private Vector2 _dragStartPosition;
 
@@ -21,7 +21,7 @@ public class SwipeDetector : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (!canvasSwiper)
+        if (!windowSwiper)
         {
             scrollRect?.OnEndDrag(eventData);
             return;
@@ -29,15 +29,15 @@ public class SwipeDetector : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         var dragVector = eventData.position - _dragStartPosition;
 
-        if (Mathf.Abs(dragVector.x) > Mathf.Abs(dragVector.y) && Mathf.Abs(dragVector.x) > canvasSwiper.swipeThreshold)
+        if (Mathf.Abs(dragVector.x) > Mathf.Abs(dragVector.y) && Mathf.Abs(dragVector.x) > windowSwiper.swipeThreshold)
         {
             if (dragVector.x < 0)
             {
-                canvasSwiper.SwitchToCanvas2();
+                windowSwiper.SwitchToWindowGame();
             }
             else
             {
-                canvasSwiper.SwitchToCanvas1();
+                windowSwiper.SwitchToWindowMenu();
             }
         }
         else

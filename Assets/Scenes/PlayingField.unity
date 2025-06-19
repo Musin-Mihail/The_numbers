@@ -131,7 +131,6 @@ GameObject:
   - component: {fileID: 111448986}
   - component: {fileID: 111448985}
   - component: {fileID: 111448984}
-  - component: {fileID: 111448989}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -223,18 +222,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &111448989
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 111448982}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d70ba7bfe5161548943438152b9096b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &135620096
 GameObject:
   m_ObjectHideFlags: 0
@@ -355,7 +342,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a51d020a62c42484982698c9ae705cd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasSwiper: {fileID: 614222512}
+  windowSwiper: {fileID: 614222512}
   scrollRect: {fileID: 135620098}
 --- !u!1 &155820459
 GameObject:
@@ -513,7 +500,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a51d020a62c42484982698c9ae705cd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasSwiper: {fileID: 614222512}
+  windowSwiper: {fileID: 614222512}
   scrollRect: {fileID: 211573952}
 --- !u!1 &382419716
 GameObject:
@@ -547,6 +534,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63ac8623b1d6aaf4491670379f6ea468, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvasScaler: {fileID: 111448985}
   cellPrefab: {fileID: 4519391986074129742, guid: 6c74060d7ef2add4297f914d651f7528, type: 3}
   contentContainer: {fileID: 2124303421}
   scrollRect: {fileID: 135620098}
@@ -591,6 +579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ee449a3920c4cb5931d7e6552b046bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvasScaler: {fileID: 111448985}
   cellPrefab: {fileID: 4519391986074129742, guid: 6c74060d7ef2add4297f914d651f7528, type: 3}
   container: {fileID: 1175308658}
 --- !u!114 &382419722
@@ -607,7 +596,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   view: {fileID: 382419717}
   topLineController: {fileID: 382419721}
-  canvasSwiper: {fileID: 614222512}
+  windowSwiper: {fileID: 614222512}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -997,8 +986,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8848260148f469aa3be34b2983d9ed1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvas1: {fileID: 1578535002}
-  canvas2: {fileID: 1175308658}
+  canvasScaler: {fileID: 111448985}
+  windowMenu: {fileID: 1578535002}
+  windowGame: {fileID: 1175308658}
   animationSpeed: 10
   swipeThreshold: 100
 --- !u!4 &614222513

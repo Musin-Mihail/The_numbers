@@ -4,7 +4,7 @@ public class GameBootstrap : MonoBehaviour
 {
     [SerializeField] private GeneratingPlayingField view;
     [SerializeField] private TopLineController topLineController;
-    [SerializeField] private CanvasSwiper canvasSwiper;
+    [SerializeField] private WindowSwiper windowSwiper;
 
     private GameController _gameController;
     private GridModel _gridModel;
@@ -14,7 +14,7 @@ public class GameBootstrap : MonoBehaviour
         _gridModel = new GridModel();
         var calculatingMatches = new CalculatingMatches(_gridModel);
         _gameController = new GameController(_gridModel, calculatingMatches);
-        view.Initialize(_gridModel, topLineController, canvasSwiper, _gameController);
+        view.Initialize(_gridModel, topLineController, windowSwiper, _gameController);
         SubscribeToEvents();
     }
 
