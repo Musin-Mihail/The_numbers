@@ -133,41 +133,52 @@ public class GridModel : IGridDataProvider
 
     public void AppendActiveNumbersToGrid()
     {
-        var numbersToAdd = GetAllActiveCellData()
-            .Select(cell => cell.Number)
-            .ToList();
+        var numbersToAdd = GetAllActiveCellData().Select(cell => cell.Number).ToList();
         if (numbersToAdd.Count == 0) return;
-
         var lastLine = Cells.LastOrDefault();
         if (lastLine != null)
         {
             for (var i = lastLine.Count - 1; i >= 0; i--)
             {
-                if (lastLine[i].IsActive) break;
-
-                var cellToRemove = lastLine[i];
-                _cellDataMap.Remove(cellToRemove.Id);
-                OnCellRemoved?.Invoke(cellToRemove.Id);
-                lastLine.RemoveAt(i);
+                var cell = lastLine[i];
+                if (!cell.IsActive)
+                {
+                    _cellDataMap.Remove(cell.Id);
+                    OnCellRemoved?.Invoke(cell.Id);
+                    lastLine.RemoveAt(i);
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 
-        var lastLineIndex = Cells.Count > 0 ? Cells.Max(l => l.First().Line) : -1;
-        var currentLine = Cells.LastOrDefault();
+        var lineIndex = Cells.Count > 0 ? Cells.Count - 1 : 0;
+        var columnIndex = Cells.Count > 0 ? Cells[lineIndex].Count : 0;
+        if (Cells.Count == 0)
+        {
+            Cells.Add(new List<CellData>());
+        }
 
         foreach (var number in numbersToAdd)
         {
-            if (currentLine == null || currentLine.Count >= GameConstants.QuantityByWidth)
+            if (columnIndex >= GameConstants.QuantityByWidth)
             {
-                lastLineIndex++;
-                currentLine = new List<CellData>();
-                Cells.Add(currentLine);
+                columnIndex = 0;
+                lineIndex++;
+                if (Cells.Count <= lineIndex)
+                {
+                    Cells.Add(new List<CellData>());
+                }
             }
 
-            var newCellData = new CellData(number, lastLineIndex, currentLine.Count);
-            currentLine.Add(newCellData);
+            var currentLineList = Cells[lineIndex];
+            var newCellData = new CellData(number, lineIndex, columnIndex);
+            currentLineList.Add(newCellData);
             _cellDataMap[newCellData.Id] = newCellData;
             OnCellAdded?.Invoke(newCellData);
+            columnIndex++;
         }
 
         _isCacheDirty = true;
