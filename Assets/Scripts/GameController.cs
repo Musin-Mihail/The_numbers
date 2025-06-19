@@ -11,9 +11,7 @@ public class GameController
     private readonly GridModel _gridModel;
     private readonly CalculatingMatches _calculatingMatches;
     private const int InitialQuantityByHeight = 5;
-
     private Cell _firstCell;
-    private Cell _secondCell;
 
     public GameController(GridModel gridModel, CalculatingMatches calculatingMatches)
     {
@@ -25,7 +23,7 @@ public class GameController
     {
         if (!cell.IsActive) return;
 
-        if (_firstCell == null)
+        if (!_firstCell)
         {
             _firstCell = cell;
             _firstCell.SetSelected(true);
@@ -35,24 +33,14 @@ public class GameController
             _firstCell.SetSelected(false);
             _firstCell = null;
         }
-        else // Выбрана вторая ячейка
+        else
         {
-            _secondCell = cell;
-
+            var secondCell = cell;
             _firstCell.SetSelected(false);
 
-            if (_calculatingMatches.IsAValidMatch(_firstCell, _secondCell))
+            if (_calculatingMatches.IsAValidMatch(_firstCell, secondCell))
             {
-                OnMatchFound?.Invoke(_firstCell, _secondCell);
-
-                var data1 = _gridModel.GetCellDataById(_firstCell.DataId);
-                var data2 = _gridModel.GetCellDataById(_secondCell.DataId);
-
-                if (data1 != null) data1.SetActive(false);
-                if (data2 != null) data2.SetActive(false);
-
-                CheckAndRemoveEmptyLines(data1.Line, data2.Line);
-                OnGridChanged?.Invoke();
+                ProcessValidMatch(_firstCell, secondCell);
             }
             else
             {
@@ -60,16 +48,25 @@ public class GameController
             }
 
             _firstCell = null;
-            _secondCell = null;
         }
+    }
+
+    private void ProcessValidMatch(Cell cell1, Cell cell2)
+    {
+        OnMatchFound?.Invoke(cell1, cell2);
+        var data1 = _gridModel.GetCellDataById(cell1.DataId);
+        var data2 = _gridModel.GetCellDataById(cell2.DataId);
+        if (data1 != null) _gridModel.SetCellActiveState(data1, false);
+        if (data2 != null) _gridModel.SetCellActiveState(data2, false);
+        CheckAndRemoveEmptyLines(data1.Line, data2.Line);
+        OnGridChanged?.Invoke();
     }
 
     private void CheckAndRemoveEmptyLines(int line1, int line2)
     {
         var linesToRemove = new HashSet<int>();
         if (_gridModel.IsLineEmpty(line1)) linesToRemove.Add(line1);
-        if (line1 != line2 && _gridModel.IsLineEmpty(line2)) linesToRemove.Add(line2);
-
+        if (_gridModel.IsLineEmpty(line2)) linesToRemove.Add(line2);
         if (linesToRemove.Count > 0)
         {
             foreach (var lineIndex in linesToRemove.OrderByDescending(i => i))
@@ -79,15 +76,9 @@ public class GameController
         }
     }
 
-    private void ResetSelection()
-    {
-        _firstCell = null;
-        _secondCell = null;
-    }
-
     public void StartNewGame()
     {
-        ResetSelection();
+        _firstCell = null;
         _gridModel.ClearField();
         for (var i = 0; i < InitialQuantityByHeight; i++)
         {

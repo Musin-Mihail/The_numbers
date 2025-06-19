@@ -3,22 +3,9 @@ using UnityEngine;
 
 public class CellPool : MonoBehaviour
 {
-    private static CellPool Instance { get; set; }
-    [HideInInspector] public GameObject cellPrefab;
-    [HideInInspector] public Transform canvasTransform;
+    [SerializeField] private GameObject cellPrefab;
+    [SerializeField] private Transform canvasTransform;
     private readonly Queue<Cell> _pooledCells = new();
-
-    private void Awake()
-    {
-        if (!Instance)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
     public Cell GetCell()
     {
@@ -26,14 +13,14 @@ public class CellPool : MonoBehaviour
         if (_pooledCells.Count > 0)
         {
             cell = _pooledCells.Dequeue();
-            cell.transform.SetParent(canvasTransform, false);
         }
         else
         {
-            var cellOj = Instantiate(cellPrefab, canvasTransform, false);
-            cell = cellOj.GetComponent<Cell>();
+            var cellObj = Instantiate(cellPrefab, canvasTransform);
+            cell = cellObj.GetComponent<Cell>();
         }
 
+        cell.transform.SetParent(canvasTransform, false);
         cell.gameObject.SetActive(true);
         return cell;
     }

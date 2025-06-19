@@ -578,8 +578,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fef732ad4234d4d8c63bd15aac98efe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellPrefab: {fileID: 0}
-  canvasTransform: {fileID: 0}
+  cellPrefab: {fileID: 4519391986074129742, guid: 6c74060d7ef2add4297f914d651f7528, type: 3}
+  canvasTransform: {fileID: 2124303421}
 --- !u!114 &382419721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -607,7 +607,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   view: {fileID: 382419717}
-  cellPool: {fileID: 382419720}
   topLineController: {fileID: 382419721}
   canvasSwiper: {fileID: 614222512}
   inputHandler: {fileID: 382419723}

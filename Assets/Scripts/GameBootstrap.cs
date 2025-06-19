@@ -17,29 +17,39 @@ public class GameBootstrap : MonoBehaviour
         _gameController = new GameController(_gridModel, calculatingMatches);
         view.Initialize(_gridModel, topLineController, canvasSwiper, inputHandler);
         inputHandler.Initialize(_gameController);
+        SubscribeToEvents();
     }
 
     private void OnEnable()
+    {
+        if (_gameController != null)
+        {
+            SubscribeToEvents();
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_gameController != null)
+        {
+            UnsubscribeFromEvents();
+        }
+    }
+
+    private void SubscribeToEvents()
     {
         _gameController.OnMatchFound += view.HandleMatchFound;
         _gameController.OnInvalidMatch += view.HandleInvalidMatch;
         _gameController.OnGridChanged += view.HandleGridChanged;
     }
 
-    private void OnDisable()
+    private void UnsubscribeFromEvents()
     {
         _gameController.OnMatchFound -= view.HandleMatchFound;
         _gameController.OnInvalidMatch -= view.HandleInvalidMatch;
         _gameController.OnGridChanged -= view.HandleGridChanged;
     }
 
-    public void StartNewGame()
-    {
-        _gameController.StartNewGame();
-    }
-
-    public void AddExistingNumbersAsNewLines()
-    {
-        _gameController.AddExistingNumbersAsNewLines();
-    }
+    public void StartNewGame() => _gameController.StartNewGame();
+    public void AddExistingNumbersAsNewLines() => _gameController.AddExistingNumbersAsNewLines();
 }

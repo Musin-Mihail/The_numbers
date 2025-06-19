@@ -3,51 +3,49 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(CellAnimator), typeof(Image))]
 public class Cell : MonoBehaviour
 {
-    public Guid DataId { get; private set; }
     public TextMeshProUGUI text;
-    public GameObject indicator;
-    public RectTransform targetRectTransform;
-    public Image backgroundImage;
-    public Sprite activeSprite;
-    public Sprite disabledSprite;
+    [SerializeField] private GameObject indicator;
+    [SerializeField] private Sprite activeSprite;
+    [SerializeField] private Sprite disabledSprite;
+    public RectTransform targetRectTransform { get; private set; }
     public CellAnimator Animator { get; private set; }
+    private Image _backgroundImage;
     public event Action<Cell> OnCellClicked;
+    public Guid DataId { get; private set; }
+    public int line { get; private set; }
+    public int column { get; private set; }
+    public bool IsActive { get; private set; }
+    public int Number { get; private set; }
     private bool _selected;
 
     private void Awake()
     {
-        if (!backgroundImage) backgroundImage = GetComponent<Image>();
+        _backgroundImage = GetComponent<Image>();
         Animator = GetComponent<CellAnimator>();
-        if (!Animator) Debug.LogError("Компонент CellAnimator не найден!", this);
+        targetRectTransform = GetComponent<RectTransform>();
     }
 
     public void UpdateFromData(CellData data)
     {
         DataId = data.Id;
-        text.text = data.Number.ToString();
         line = data.Line;
         column = data.Column;
+
+        if (Number != data.Number)
+        {
+            Number = data.Number;
+            text.text = Number.ToString();
+        }
 
         if (IsActive != data.IsActive)
         {
             IsActive = data.IsActive;
-            if (IsActive)
-            {
-                SetActiveSprite();
-            }
-            else
-            {
-                SetDisabledSprite();
-            }
+            SetVisualState(IsActive);
         }
     }
-
-    public int line;
-    public int column;
-    public int Number => int.Parse(text.text);
-    public bool IsActive { get; private set; }
 
     public void HandleClick()
     {
@@ -64,31 +62,10 @@ public class Cell : MonoBehaviour
 
     public void SetVisualState(bool isActive)
     {
-        if (isActive)
+        text.enabled = isActive;
+        if (_backgroundImage)
         {
-            SetActiveSprite();
-        }
-        else
-        {
-            SetDisabledSprite();
-        }
-    }
-
-    private void SetActiveSprite()
-    {
-        text.enabled = true;
-        if (backgroundImage && activeSprite)
-        {
-            backgroundImage.sprite = activeSprite;
-        }
-    }
-
-    private void SetDisabledSprite()
-    {
-        text.enabled = false;
-        if (backgroundImage && disabledSprite)
-        {
-            backgroundImage.sprite = disabledSprite;
+            _backgroundImage.sprite = isActive ? activeSprite : disabledSprite;
         }
     }
 }

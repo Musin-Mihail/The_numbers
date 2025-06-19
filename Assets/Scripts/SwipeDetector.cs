@@ -2,56 +2,47 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-/// <summary>
-/// Этот компонент отслеживает свайпы и передает события прокрутки компоненту ScrollRect.
-/// Он должен быть размещен на UI-элементе (например, невидимой панели),
-/// который находится на Canvas и покрывает область, где возможен свайп.
-/// </summary>
 public class SwipeDetector : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    public CanvasSwiper canvasSwiper;
-    public ScrollRect scrollRect;
+    [SerializeField] private CanvasSwiper canvasSwiper;
+    [SerializeField] private ScrollRect scrollRect;
     private Vector2 _dragStartPosition;
 
     public void OnBeginDrag(PointerEventData eventData)
     {
         _dragStartPosition = eventData.position;
-        if (scrollRect)
-        {
-            scrollRect.OnBeginDrag(eventData);
-        }
+        scrollRect?.OnBeginDrag(eventData);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (scrollRect)
-        {
-            scrollRect.OnDrag(eventData);
-        }
+        scrollRect?.OnDrag(eventData);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        var dragEndPosition = eventData.position;
-        var dragVector = dragEndPosition - _dragStartPosition;
-        if (Mathf.Abs(dragVector.x) > Mathf.Abs(dragVector.y))
+        if (!canvasSwiper)
         {
-            if (Mathf.Abs(dragVector.x) > canvasSwiper.swipeThreshold)
-            {
-                if (dragVector.x < 0)
-                {
-                    canvasSwiper.SwitchToCanvas2();
-                }
-                else
-                {
-                    canvasSwiper.SwitchToCanvas1();
-                }
-            }
+            scrollRect?.OnEndDrag(eventData);
+            return;
         }
 
-        if (scrollRect)
+        var dragVector = eventData.position - _dragStartPosition;
+
+        if (Mathf.Abs(dragVector.x) > Mathf.Abs(dragVector.y) && Mathf.Abs(dragVector.x) > canvasSwiper.swipeThreshold)
         {
-            scrollRect.OnEndDrag(eventData);
+            if (dragVector.x < 0)
+            {
+                canvasSwiper.SwitchToCanvas2();
+            }
+            else
+            {
+                canvasSwiper.SwitchToCanvas1();
+            }
+        }
+        else
+        {
+            scrollRect?.OnEndDrag(eventData);
         }
     }
 }

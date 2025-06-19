@@ -7,9 +7,9 @@ using UnityEngine.UI;
 [RequireComponent(typeof(CellPool))]
 public class GeneratingPlayingField : MonoBehaviour
 {
-    public GameObject cellPrefab;
-    public RectTransform contentContainer;
-    public ScrollRect scrollRect;
+    [SerializeField] private GameObject cellPrefab;
+    [SerializeField] private RectTransform contentContainer;
+    [SerializeField] private ScrollRect scrollRect;
 
     private readonly Dictionary<Guid, Cell> _cellViewInstances = new();
     private TopLineController _topLineController;
@@ -17,19 +17,15 @@ public class GeneratingPlayingField : MonoBehaviour
     private GridModel _gridModel;
     private CellPool _cellPool;
     private GameInputHandler _inputHandler;
-    private const int QuantityByWidth = 10;
-    private const int Indent = 10;
-    private const float MoveDuration = 0.3f;
     private int _screenWidth;
+
     private int _cellSize;
-    private float _scrollLoggingThreshold = 20f;
+    private float _scrollLoggingThreshold;
     private float _lastLoggedScrollPosition;
 
     private void Awake()
     {
         _cellPool = GetComponent<CellPool>();
-        _cellPool.cellPrefab = cellPrefab;
-        _cellPool.canvasTransform = contentContainer;
     }
 
     public void Initialize(GridModel gridModel, TopLineController topLineController, CanvasSwiper canvasSwiper, GameInputHandler inputHandler)
@@ -38,6 +34,26 @@ public class GeneratingPlayingField : MonoBehaviour
         _topLineController = topLineController;
         _canvasSwiper = canvasSwiper;
         _inputHandler = inputHandler;
+    }
+
+    private void Start()
+    {
+        var screenWidth = Screen.width - GameConstants.Indent;
+        _cellSize = screenWidth / GameConstants.QuantityByWidth;
+        cellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(_cellSize, _cellSize);
+
+        _scrollLoggingThreshold = _cellSize / 2f;
+
+        if (scrollRect)
+        {
+            _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
+            scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (scrollRect) scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
     }
 
     public Cell GetCellView(Guid dataId)
@@ -53,7 +69,7 @@ public class GeneratingPlayingField : MonoBehaviour
 
     public void HandleInvalidMatch()
     {
-        // Этот метод может быть использован для проигрывания звука или визуальных эффектов при неверном выборе.
+        // Здесь можно добавить визуальный/звуковой отклик на неверный выбор
     }
 
     public void HandleGridChanged()
@@ -62,81 +78,63 @@ public class GeneratingPlayingField : MonoBehaviour
         UpdateContentSize();
         UpdateCellsPositions();
         RefreshTopLine();
-
-        if (_canvasSwiper)
-        {
-            _canvasSwiper.SwitchToCanvas2();
-        }
+        _canvasSwiper?.SwitchToCanvas2();
     }
 
     private void SynchronizeViewWithModel()
     {
-        var allDataIds = _gridModel.Cells.SelectMany(line => line).Select(d => d.Id).ToHashSet();
+        var allDataIds = _gridModel.GetAllCellData().Select(d => d.Id).ToHashSet();
+        var viewIds = _cellViewInstances.Keys.ToList();
 
-        var idsToRemove = _cellViewInstances.Keys.Where(id => !allDataIds.Contains(id)).ToList();
-        foreach (var id in idsToRemove)
+        foreach (var id in viewIds)
         {
-            var cellToReturn = _cellViewInstances[id];
-            _inputHandler.UnsubscribeFromCell(cellToReturn);
-            _cellPool.ReturnCell(cellToReturn);
-            _cellViewInstances.Remove(id);
-        }
-
-        foreach (var line in _gridModel.Cells)
-        {
-            foreach (var data in line)
+            if (!allDataIds.Contains(id))
             {
-                if (_cellViewInstances.TryGetValue(data.Id, out var cellView))
-                {
-                    cellView.UpdateFromData(data);
-                }
-                else
-                {
-                    var newCellView = _cellPool.GetCell();
-                    newCellView.UpdateFromData(data);
-                    _inputHandler.SubscribeToCell(newCellView);
-                    _cellViewInstances[data.Id] = newCellView;
-                }
+                var cellToReturn = _cellViewInstances[id];
+                _inputHandler.UnsubscribeFromCell(cellToReturn);
+                _cellPool.ReturnCell(cellToReturn);
+                _cellViewInstances.Remove(id);
             }
         }
-    }
 
-    private void OnEnable()
-    {
-        if (scrollRect) scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
-    }
-
-    private void OnDisable()
-    {
-        if (scrollRect) scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
-    }
-
-    private void Start()
-    {
-        _screenWidth = Screen.width - Indent;
-        _cellSize = _screenWidth / QuantityByWidth;
-        _scrollLoggingThreshold = _cellSize / 2;
-        if (scrollRect) _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
+        foreach (var data in _gridModel.GetAllCellData())
+        {
+            if (_cellViewInstances.TryGetValue(data.Id, out var cellView))
+            {
+                cellView.UpdateFromData(data);
+            }
+            else
+            {
+                var newCellView = _cellPool.GetCell();
+                newCellView.UpdateFromData(data);
+                _inputHandler.SubscribeToCell(newCellView);
+                _cellViewInstances[data.Id] = newCellView;
+            }
+        }
     }
 
     private void UpdateContentSize()
     {
         if (!contentContainer) return;
         var lineCount = _gridModel.Cells.Count;
-        float newHeight = lineCount * _cellSize + Indent;
+        float newHeight = lineCount * _cellSize + GameConstants.Indent;
         contentContainer.sizeDelta = new Vector2(contentContainer.sizeDelta.x, newHeight);
     }
 
     private void UpdateCellsPositions()
     {
-        foreach (var data in _gridModel.Cells.SelectMany(line => line))
+        foreach (var data in _gridModel.GetAllCellData())
         {
             if (_cellViewInstances.TryGetValue(data.Id, out var currentCell))
             {
-                var targetPosition = new Vector2(_cellSize * data.Column + Indent / 2, -_cellSize * data.Line - Indent / 2 - _cellSize * 1.1f);
-                if (currentCell.Animator)
+                var targetPosition = new Vector2(
+                    _cellSize * data.Column + GameConstants.Indent / 2f,
+                    -_cellSize * data.Line - GameConstants.Indent / 2f - _cellSize * 1.1f
+                );
+
+                if (currentCell.Animator != null)
                 {
-                    currentCell.Animator.MoveTo(currentCell.targetRectTransform, targetPosition, MoveDuration);
+                    currentCell.Animator.MoveTo(currentCell.targetRectTransform, targetPosition, GameConstants.CellMoveDuration);
                 }
             }
         }
@@ -145,8 +143,8 @@ public class GeneratingPlayingField : MonoBehaviour
     private void RefreshTopLine()
     {
         if (!_topLineController) return;
-        var numberLine = (int)Math.Floor(_lastLoggedScrollPosition / _cellSize);
-        var activeNumbers = _gridModel.GetNumbersForTopLine(numberLine, QuantityByWidth);
+        var numberLine = Mathf.RoundToInt(_lastLoggedScrollPosition / _cellSize);
+        var activeNumbers = _gridModel.GetNumbersForTopLine(numberLine);
         _topLineController.UpdateDisplayedNumbers(activeNumbers);
     }
 

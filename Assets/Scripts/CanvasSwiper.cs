@@ -1,34 +1,31 @@
 ﻿using UnityEngine;
 
-/// <summary>
-/// Этот скрипт управляет переключением между двумя Canvas с помощью свайпа (прокрутки) в сторону.
-/// Он плавно анимирует перемещение Canvas.
-/// </summary>
 public class CanvasSwiper : MonoBehaviour
 {
     public RectTransform canvas1;
     public RectTransform canvas2;
     public float animationSpeed = 10f;
     public float swipeThreshold = 100f;
+
     private int _currentCanvasIndex = 1;
     private Vector2 _canvas1TargetPosition;
     private Vector2 _canvas2TargetPosition;
-    private float _lastScreenWidth = 0;
+    private float _screenWidth = 0;
 
     private void Start()
     {
         if (!canvas1 || !canvas2)
         {
-            Debug.LogError("Ошибка: Один или оба Canvas не назначены в инспекторе! Пожалуйста, перетащите ваши Canvas в соответствующие поля компонента CanvasSwiper.");
+            Debug.LogError("Ошибка: Один или оба Canvas не назначены в инспекторе!", this);
             enabled = false;
             return;
         }
 
+        _screenWidth = Screen.width;
         canvas1.anchoredPosition = Vector2.zero;
-        canvas2.anchoredPosition = new Vector2(Screen.width, 0);
+        canvas2.anchoredPosition = new Vector2(_screenWidth, 0);
         _canvas1TargetPosition = canvas1.anchoredPosition;
         _canvas2TargetPosition = canvas2.anchoredPosition;
-        _lastScreenWidth = Screen.width;
     }
 
     private void Update()
@@ -39,17 +36,17 @@ public class CanvasSwiper : MonoBehaviour
 
     public void SwitchToCanvas1()
     {
-        if (_currentCanvasIndex != 2) return;
+        if (_currentCanvasIndex == 1) return;
         _currentCanvasIndex = 1;
         _canvas1TargetPosition = Vector2.zero;
-        _canvas2TargetPosition = new Vector2(_lastScreenWidth, 0);
+        _canvas2TargetPosition = new Vector2(_screenWidth, 0);
     }
 
     public void SwitchToCanvas2()
     {
-        if (_currentCanvasIndex != 1) return;
+        if (_currentCanvasIndex == 2) return;
         _currentCanvasIndex = 2;
-        _canvas1TargetPosition = new Vector2(-_lastScreenWidth, 0);
+        _canvas1TargetPosition = new Vector2(-_screenWidth, 0);
         _canvas2TargetPosition = Vector2.zero;
     }
 
