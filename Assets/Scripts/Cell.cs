@@ -13,11 +13,11 @@ public class Cell : MonoBehaviour
     public RectTransform targetRectTransform { get; private set; }
     public CellAnimator Animator { get; private set; }
     private Image _backgroundImage;
-    public event Action<Cell> OnCellClicked;
-    public Guid DataId { get; private set; }
+    public Action<Guid> OnClickedCallback { get; set; }
+    private Guid DataId { get; set; }
     public int line { get; private set; }
     public int column { get; private set; }
-    public bool IsActive { get; private set; }
+    private bool IsActive { get; set; }
     public int Number { get; private set; }
     private bool _selected;
 
@@ -50,7 +50,13 @@ public class Cell : MonoBehaviour
     public void HandleClick()
     {
         if (!IsActive) return;
-        OnCellClicked?.Invoke(this);
+        OnClickedCallback?.Invoke(DataId);
+    }
+
+    public void ResetForPooling()
+    {
+        OnClickedCallback = null;
+        SetSelected(false);
     }
 
     public void SetSelected(bool isSelected)

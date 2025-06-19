@@ -15,7 +15,6 @@ public class GeneratingPlayingField : MonoBehaviour
     private CanvasSwiper _canvasSwiper;
     private GridModel _gridModel;
     private CellPool _cellPool;
-    private GameInputHandler _inputHandler;
     private int _cellSize;
     private float _scrollLoggingThreshold;
     private float _lastLoggedScrollPosition;
@@ -26,12 +25,11 @@ public class GeneratingPlayingField : MonoBehaviour
         _cellPool = GetComponent<CellPool>();
     }
 
-    public void Initialize(GridModel gridModel, TopLineController topLineController, CanvasSwiper canvasSwiper, GameInputHandler inputHandler, GameController gameController)
+    public void Initialize(GridModel gridModel, TopLineController topLineController, CanvasSwiper canvasSwiper, GameController gameController)
     {
         _gridModel = gridModel;
         _topLineController = topLineController;
         _canvasSwiper = canvasSwiper;
-        _inputHandler = inputHandler;
         _gameController = gameController;
 
         _gridModel.OnCellAdded += HandleCellAdded;
@@ -111,7 +109,7 @@ public class GeneratingPlayingField : MonoBehaviour
     {
         var newCellView = _cellPool.GetCell();
         newCellView.UpdateFromData(data);
-        _inputHandler.SubscribeToCell(newCellView);
+        newCellView.OnClickedCallback = _gameController.HandleCellSelection;
         _cellViewInstances[data.Id] = newCellView;
 
         UpdateCellPosition(data, newCellView);
@@ -133,7 +131,6 @@ public class GeneratingPlayingField : MonoBehaviour
     {
         if (_cellViewInstances.TryGetValue(dataId, out var cellToReturn))
         {
-            _inputHandler.UnsubscribeFromCell(cellToReturn);
             _cellPool.ReturnCell(cellToReturn);
             _cellViewInstances.Remove(dataId);
         }
@@ -143,7 +140,6 @@ public class GeneratingPlayingField : MonoBehaviour
     {
         foreach (var cell in _cellViewInstances.Values)
         {
-            _inputHandler.UnsubscribeFromCell(cell);
             _cellPool.ReturnCell(cell);
         }
 

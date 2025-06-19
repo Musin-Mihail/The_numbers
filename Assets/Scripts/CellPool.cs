@@ -29,6 +29,7 @@ public class CellPool : MonoBehaviour
     {
         if (!cell) return;
         cell.gameObject.SetActive(false);
+        cell.ResetForPooling();
         _pooledCells.Enqueue(cell);
     }
 }
