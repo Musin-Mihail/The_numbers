@@ -13,7 +13,7 @@ public class GridModel : IGridDataProvider
 
     public List<List<CellData>> Cells { get; } = new();
     private readonly Dictionary<Guid, CellData> _cellDataMap = new();
-    private readonly List<CellData> _activeCellsCache = new();
+    private List<CellData> _activeCellsCache = new();
     private readonly Dictionary<Guid, int> _activeCellIndexMap = new();
     private bool _isCacheDirty = true;
 
@@ -61,30 +61,32 @@ public class GridModel : IGridDataProvider
         var onSameLine = firstCell.Line == secondCell.Line;
         var onSameColumn = firstCell.Column == secondCell.Column;
         if (!onSameLine && !onSameColumn) return false;
+        RebuildCache();
         if (onSameLine)
         {
             var line = firstCell.Line;
             var startCol = Mathf.Min(firstCell.Column, secondCell.Column);
             var endCol = Mathf.Max(firstCell.Column, secondCell.Column);
 
-            var lineData = Cells[line];
-            for (var c = startCol + 1; c < endCol; c++)
+            foreach (var activeCell in _activeCellsCache)
             {
-                var data = lineData.FirstOrDefault(d => d.Column == c);
-                if (data is { IsActive: true }) return false;
+                if (activeCell.Line == line && activeCell.Column > startCol && activeCell.Column < endCol)
+                {
+                    return false;
+                }
             }
         }
-        else // onSameColumn
+        else
         {
             var col = firstCell.Column;
             var startLine = Mathf.Min(firstCell.Line, secondCell.Line);
             var endLine = Mathf.Max(firstCell.Line, secondCell.Line);
-            for (var l = startLine + 1; l < endLine; l++)
+
+            foreach (var activeCell in _activeCellsCache)
             {
-                if (l < Cells.Count)
+                if (activeCell.Column == col && activeCell.Line > startLine && activeCell.Line < endLine)
                 {
-                    var data = Cells[l].FirstOrDefault(d => d.Column == col);
-                    if (data is { IsActive: true }) return false;
+                    return false;
                 }
             }
         }
