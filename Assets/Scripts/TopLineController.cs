@@ -50,10 +50,15 @@ public class TopLineController : MonoBehaviour
         {
             var cell = _topLineCells[i];
             cell.text.text = numbers[i].ToString();
-
-            var rectTransform = cell.GetComponent<RectTransform>();
-
-            rectTransform.anchoredPosition = new Vector2(_cellSize * i + Indent / 2, 0 - Indent / 2);
+            cell.targetRectTransform.anchoredPosition = new Vector2(_cellSize * i + Indent / 2, 0 - Indent / 2);
+            if (numbers[i] == 0)
+            {
+                cell.SetDisabledSprite();
+            }
+            else
+            {
+                cell.SetActiveSprite();
+            }
         }
     }
 }

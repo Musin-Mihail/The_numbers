@@ -47,12 +47,7 @@ public class Cell : MonoBehaviour
     public void DisableCell()
     {
         IsActive = false;
-        text.enabled = false;
-        if (backgroundImage && disabledSprite)
-        {
-            backgroundImage.sprite = disabledSprite;
-        }
-
+        SetDisabledSprite();
         if (_selected)
         {
             OnDeselectingCell();
@@ -67,12 +62,26 @@ public class Cell : MonoBehaviour
     {
         gameObject.SetActive(true);
         IsActive = true;
+        SetActiveSprite();
+
+        OnDeselectingCell();
+    }
+
+    public void SetActiveSprite()
+    {
         text.enabled = true;
         if (backgroundImage && activeSprite)
         {
             backgroundImage.sprite = activeSprite;
         }
+    }
 
-        OnDeselectingCell();
+    public void SetDisabledSprite()
+    {
+        text.enabled = false;
+        if (backgroundImage && disabledSprite)
+        {
+            backgroundImage.sprite = disabledSprite;
+        }
     }
 }

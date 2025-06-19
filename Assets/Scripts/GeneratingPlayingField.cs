@@ -14,7 +14,7 @@ public class GeneratingPlayingField : MonoBehaviour
     public CanvasSwiper canvasSwiper;
     public ScrollRect scrollRect;
     public TopLineController topLineController;
-    public float scrollLoggingThreshold = 50f;
+    public float scrollLoggingThreshold = 20f;
     public List<List<Cell>> Cells { get; } = new();
     public static GeneratingPlayingField Instance { get; private set; }
     private const int QuantityByWidth = 10;
@@ -268,10 +268,13 @@ public class GeneratingPlayingField : MonoBehaviour
     private void RefreshTopLine()
     {
         if (!topLineController) return;
-        var numberLine = (int)_lastLoggedScrollPosition / _cellSize;
-        if (numberLine < 0)
+        var numberLine = (int)Math.Floor(_lastLoggedScrollPosition / _cellSize);
+        var activeNumbers = new List<int>();
+        if (numberLine <= 0)
         {
-            numberLine = 0;
+            activeNumbers.AddRange(new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+            topLineController.UpdateDisplayedNumbers(activeNumbers);
+            return;
         }
 
         if (numberLine > Cells.Count)
@@ -279,7 +282,6 @@ public class GeneratingPlayingField : MonoBehaviour
             numberLine = Cells.Count;
         }
 
-        var activeNumbers = new List<int>();
         if (numberLine == 0)
         {
             for (var i = 0; i < QuantityByWidth; i++)
@@ -298,7 +300,7 @@ public class GeneratingPlayingField : MonoBehaviour
         {
             for (var i = 0; i < QuantityByWidth; i++)
             {
-                for (var l = numberLine; l >= 0; l--)
+                for (var l = numberLine - 1; l >= 0; l--)
                 {
                     if (Cells[l][i].IsActive)
                     {
@@ -308,7 +310,6 @@ public class GeneratingPlayingField : MonoBehaviour
 
                     if (l == 0 && !Cells[l][i].IsActive)
                     {
-                        Debug.Log(0);
                         activeNumbers.Add(0);
                     }
                 }
