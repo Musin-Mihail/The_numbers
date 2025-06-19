@@ -15,7 +15,7 @@ public class GameBootstrap : MonoBehaviour
         _gridModel = new GridModel();
         var calculatingMatches = new CalculatingMatches(_gridModel);
         _gameController = new GameController(_gridModel, calculatingMatches);
-        view.Initialize(_gridModel, topLineController, canvasSwiper, inputHandler);
+        view.Initialize(_gridModel, topLineController, canvasSwiper, inputHandler, _gameController);
         inputHandler.Initialize(_gameController);
         SubscribeToEvents();
     }

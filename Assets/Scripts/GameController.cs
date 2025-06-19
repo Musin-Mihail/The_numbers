@@ -4,12 +4,14 @@ using System.Linq;
 
 public class GameController
 {
-    public event Action<Cell, Cell> OnMatchFound;
+    public event Action<Guid, Guid> OnMatchFound;
     public event Action OnInvalidMatch;
+    public event Action<Guid> OnCellSelected;
+    public event Action<Guid> OnCellDeselected;
     private readonly GridModel _gridModel;
     private readonly CalculatingMatches _calculatingMatches;
     private const int InitialQuantityByHeight = 5;
-    private Cell _firstCell;
+    private Guid? _firstSelectedCellId;
 
     public GameController(GridModel gridModel, CalculatingMatches calculatingMatches)
     {
@@ -17,45 +19,42 @@ public class GameController
         _calculatingMatches = calculatingMatches;
     }
 
-    public void HandleCellSelection(Cell cell)
+    public void HandleCellSelection(Guid cellId)
     {
-        if (!cell.IsActive) return;
-
-        if (!_firstCell)
+        var data = _gridModel.GetCellDataById(cellId);
+        if (data is not { IsActive: true }) return;
+        if (_firstSelectedCellId == null)
         {
-            _firstCell = cell;
-            _firstCell.SetSelected(true);
+            _firstSelectedCellId = cellId;
+            OnCellSelected?.Invoke(cellId);
         }
-        else if (_firstCell == cell)
+        else if (_firstSelectedCellId == cellId)
         {
-            _firstCell.SetSelected(false);
-            _firstCell = null;
+            OnCellDeselected?.Invoke(cellId);
+            _firstSelectedCellId = null;
         }
         else
         {
-            _firstCell.SetSelected(false);
-            var firstData = _gridModel.GetCellDataById(_firstCell.DataId);
-            var secondData = _gridModel.GetCellDataById(cell.DataId);
-            if (firstData != null && secondData != null && _calculatingMatches.IsAValidMatch(firstData, secondData))
+            var firstData = _gridModel.GetCellDataById(_firstSelectedCellId.Value);
+            OnCellDeselected?.Invoke(_firstSelectedCellId.Value);
+            if (firstData != null && _calculatingMatches.IsAValidMatch(firstData, data))
             {
-                ProcessValidMatch(_firstCell, cell);
+                ProcessValidMatch(firstData, data);
             }
             else
             {
                 OnInvalidMatch?.Invoke();
             }
 
-            _firstCell = null;
+            _firstSelectedCellId = null;
         }
     }
 
-    private void ProcessValidMatch(Cell cell1, Cell cell2)
+    private void ProcessValidMatch(CellData data1, CellData data2)
     {
-        OnMatchFound?.Invoke(cell1, cell2);
-        var data1 = _gridModel.GetCellDataById(cell1.DataId);
-        var data2 = _gridModel.GetCellDataById(cell2.DataId);
-        if (data1 != null) _gridModel.SetCellActiveState(data1, false);
-        if (data2 != null) _gridModel.SetCellActiveState(data2, false);
+        OnMatchFound?.Invoke(data1.Id, data2.Id);
+        _gridModel.SetCellActiveState(data1, false);
+        _gridModel.SetCellActiveState(data2, false);
         CheckAndRemoveEmptyLines(data1.Line, data2.Line);
     }
 
@@ -75,7 +74,12 @@ public class GameController
 
     public void StartNewGame()
     {
-        _firstCell = null;
+        if (_firstSelectedCellId.HasValue)
+        {
+            OnCellDeselected?.Invoke(_firstSelectedCellId.Value);
+            _firstSelectedCellId = null;
+        }
+
         _gridModel.ClearField();
         for (var i = 0; i < InitialQuantityByHeight; i++)
         {

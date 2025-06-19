@@ -27,6 +27,6 @@ public class GameInputHandler : MonoBehaviour
 
     private void HandleCellClick(Cell cell)
     {
-        _gameController?.HandleCellSelection(cell);
+        _gameController?.HandleCellSelection(cell.DataId);
     }
 }

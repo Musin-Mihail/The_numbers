@@ -19,30 +19,39 @@ public class GeneratingPlayingField : MonoBehaviour
     private int _cellSize;
     private float _scrollLoggingThreshold;
     private float _lastLoggedScrollPosition;
+    private GameController _gameController;
 
     private void Awake()
     {
         _cellPool = GetComponent<CellPool>();
     }
 
-    public void Initialize(GridModel gridModel, TopLineController topLineController, CanvasSwiper canvasSwiper, GameInputHandler inputHandler)
+    public void Initialize(GridModel gridModel, TopLineController topLineController, CanvasSwiper canvasSwiper, GameInputHandler inputHandler, GameController gameController)
     {
         _gridModel = gridModel;
         _topLineController = topLineController;
         _canvasSwiper = canvasSwiper;
         _inputHandler = inputHandler;
+        _gameController = gameController;
 
         _gridModel.OnCellAdded += HandleCellAdded;
         _gridModel.OnCellUpdated += HandleCellUpdated;
         _gridModel.OnCellRemoved += HandleCellRemoved;
         _gridModel.OnGridCleared += HandleGridCleared;
+
+        _gameController.OnCellSelected += HandleCellSelected;
+        _gameController.OnCellDeselected += HandleCellDeselected;
     }
 
     private void Start()
     {
         var screenWidth = Screen.width - GameConstants.Indent;
         _cellSize = screenWidth / GameConstants.QuantityByWidth;
-        cellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(_cellSize, _cellSize);
+        if (cellPrefab)
+        {
+            cellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(_cellSize, _cellSize);
+        }
+
         _scrollLoggingThreshold = _cellSize / 2f;
 
         if (scrollRect)
@@ -63,12 +72,34 @@ public class GeneratingPlayingField : MonoBehaviour
             _gridModel.OnCellRemoved -= HandleCellRemoved;
             _gridModel.OnGridCleared -= HandleGridCleared;
         }
+
+        if (_gameController != null)
+        {
+            _gameController.OnCellSelected -= HandleCellSelected;
+            _gameController.OnCellDeselected -= HandleCellDeselected;
+        }
     }
 
-    public void HandleMatchFound(Cell firstCell, Cell secondCell)
+    public void HandleMatchFound(Guid firstCellId, Guid secondCellId)
     {
         UpdateContentSize();
         RefreshTopLine();
+    }
+
+    private void HandleCellSelected(Guid cellId)
+    {
+        if (_cellViewInstances.TryGetValue(cellId, out var cellView))
+        {
+            cellView.SetSelected(true);
+        }
+    }
+
+    private void HandleCellDeselected(Guid cellId)
+    {
+        if (_cellViewInstances.TryGetValue(cellId, out var cellView))
+        {
+            cellView.SetSelected(false);
+        }
     }
 
     public void HandleInvalidMatch()
