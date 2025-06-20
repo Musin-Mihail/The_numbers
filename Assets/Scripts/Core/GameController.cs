@@ -10,19 +10,28 @@ namespace Core
     {
         public event Action<Guid, Guid> OnMatchFound;
         public event Action OnInvalidMatch;
+        public event Action OnActionUndone;
         private readonly GridModel _gridModel;
         private readonly MatchValidator _matchValidator;
+        private readonly ActionHistory _actionHistory;
         private const int InitialQuantityByHeight = 5;
 
         public GameController(GridModel gridModel, MatchValidator matchValidator)
         {
             _gridModel = gridModel;
             _matchValidator = matchValidator;
+            _actionHistory = new ActionHistory(_gridModel);
         }
 
         public void AddExistingNumbersAsNewLines()
         {
             _gridModel.AppendActiveNumbersToGrid();
+        }
+
+        public void UndoLastAction()
+        {
+            _actionHistory.Undo();
+            OnActionUndone?.Invoke();
         }
 
         public void AttemptMatch(Guid firstCellId, Guid secondCellId)
@@ -42,13 +51,16 @@ namespace Core
 
         private void ProcessValidMatch(CellData data1, CellData data2)
         {
+            var removedLinesInfo = new List<Tuple<int, List<CellData>>>();
             OnMatchFound?.Invoke(data1.Id, data2.Id);
             _gridModel.SetCellActiveState(data1, false);
             _gridModel.SetCellActiveState(data2, false);
-            CheckAndRemoveEmptyLines(data1.Line, data2.Line);
+            CheckAndRemoveEmptyLines(data1.Line, data2.Line, removedLinesInfo);
+            var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo);
+            _actionHistory.Record(action);
         }
 
-        private void CheckAndRemoveEmptyLines(int line1, int line2)
+        private void CheckAndRemoveEmptyLines(int line1, int line2, List<Tuple<int, List<CellData>>> removedLinesInfo)
         {
             var linesToRemove = new HashSet<int>();
             if (_gridModel.IsLineEmpty(line1)) linesToRemove.Add(line1);
@@ -57,6 +69,8 @@ namespace Core
             {
                 foreach (var lineIndex in linesToRemove.OrderByDescending(i => i))
                 {
+                    var lineData = new List<CellData>(_gridModel.Cells[lineIndex]);
+                    removedLinesInfo.Add(new Tuple<int, List<CellData>>(lineIndex, lineData));
                     _gridModel.RemoveLine(lineIndex);
                 }
             }
@@ -65,6 +79,7 @@ namespace Core
         public void StartNewGame()
         {
             _gridModel.ClearField();
+            _actionHistory.Clear();
             for (var i = 0; i < InitialQuantityByHeight; i++)
             {
                 _gridModel.CreateLine(i);

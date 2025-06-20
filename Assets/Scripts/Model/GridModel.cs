@@ -100,6 +100,29 @@ namespace Model
             _isCacheDirty = true;
         }
 
+        public void RestoreLine(int lineIndex, List<CellData> lineData)
+        {
+            if (lineIndex < 0 || lineIndex > Cells.Count) return;
+
+            for (var i = lineIndex; i < Cells.Count; i++)
+            {
+                foreach (var cell in Cells[i])
+                {
+                    cell.Line++;
+                    OnCellUpdated?.Invoke(cell);
+                }
+            }
+
+            Cells.Insert(lineIndex, lineData);
+            foreach (var cellData in lineData)
+            {
+                _cellDataMap[cellData.Id] = cellData;
+                OnCellAdded?.Invoke(cellData);
+            }
+
+            _isCacheDirty = true;
+        }
+
         public List<int> GetNumbersForTopLine(int numberLine)
         {
             var topNumbers = new List<int>(new int[GameConstants.QuantityByWidth]);

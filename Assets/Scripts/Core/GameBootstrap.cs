@@ -46,15 +46,26 @@ namespace Core
         {
             _gameController.OnMatchFound += view.HandleMatchFound;
             _gameController.OnInvalidMatch += view.HandleInvalidMatch;
+            _gameController.OnActionUndone += HandleActionUndone;
         }
 
         private void UnsubscribeFromEvents()
         {
             _gameController.OnMatchFound -= view.HandleMatchFound;
             _gameController.OnInvalidMatch -= view.HandleInvalidMatch;
+            _gameController.OnActionUndone -= HandleActionUndone;
+        }
+
+        private void HandleActionUndone()
+        {
+            if (windowSwiper)
+            {
+                windowSwiper.SwitchToWindowGame();
+            }
         }
 
         public void StartNewGame() => _gameController.StartNewGame();
         public void AddExistingNumbersAsNewLines() => _gameController.AddExistingNumbersAsNewLines();
+        public void UndoLastMove() => _gameController.UndoLastAction();
     }
 }
