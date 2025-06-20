@@ -1,6 +1,7 @@
 ﻿using DataProviders;
 using Gameplay;
 using Model;
+using TMPro;
 using UnityEngine;
 using View.Grid;
 using View.UI;
@@ -13,9 +14,13 @@ namespace Core
         [SerializeField] private HeaderNumberDisplay headerNumberDisplay;
         [SerializeField] private WindowSwiper windowSwiper;
         [SerializeField] private ConfirmationDialog confirmationDialog;
+        [SerializeField] private TextMeshProUGUI timerText;
 
         private GameController _gameController;
         private GridModel _gridModel;
+        private float _remainingTime;
+        private bool _isTimerRunning;
+        private const float GameDuration = 120f;
 
         private void Awake()
         {
@@ -30,6 +35,28 @@ namespace Core
             }
 
             SubscribeToEvents();
+        }
+
+        private void Start()
+        {
+            _remainingTime = GameDuration;
+            _isTimerRunning = true;
+        }
+
+        private void Update()
+        {
+            if (!_isTimerRunning) return;
+
+            _remainingTime -= Time.deltaTime;
+
+            if (_remainingTime <= 0)
+            {
+                _remainingTime = 0;
+                _isTimerRunning = false;
+                StartNewGameInternal();
+            }
+
+            UpdateTimerDisplay();
         }
 
         private void OnDisable()
@@ -70,7 +97,12 @@ namespace Core
             }
         }
 
-        private void StartNewGameInternal() => _gameController.StartNewGame();
+        private void StartNewGameInternal()
+        {
+            _gameController.StartNewGame();
+            _remainingTime = GameDuration;
+            _isTimerRunning = true;
+        }
 
         public void RequestNewGame()
         {
@@ -87,5 +119,15 @@ namespace Core
 
         public void AddExistingNumbersAsNewLines() => _gameController.AddExistingNumbersAsNewLines();
         public void UndoLastMove() => _gameController.UndoLastAction();
+
+        private void UpdateTimerDisplay()
+        {
+            if (timerText)
+            {
+                var minutes = Mathf.FloorToInt(_remainingTime / 60);
+                var seconds = Mathf.FloorToInt(_remainingTime % 60);
+                timerText.text = $"{minutes:00}:{seconds:00}";
+            }
+        }
     }
 }
