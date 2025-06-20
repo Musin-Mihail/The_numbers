@@ -12,6 +12,7 @@ namespace Core
         [SerializeField] private GridView view;
         [SerializeField] private HeaderNumberDisplay headerNumberDisplay;
         [SerializeField] private WindowSwiper windowSwiper;
+        [SerializeField] private ConfirmationDialog confirmationDialog;
 
         private GameController _gameController;
         private GridModel _gridModel;
@@ -64,7 +65,21 @@ namespace Core
             }
         }
 
-        public void StartNewGame() => _gameController.StartNewGame();
+        private void StartNewGameInternal() => _gameController.StartNewGame();
+
+        public void RequestNewGame()
+        {
+            if (confirmationDialog)
+            {
+                confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
+            }
+            else
+            {
+                Debug.LogWarning("ConfirmationDialog не назначен в GameBootstrap. Новая игра начнется немедленно.");
+                StartNewGameInternal();
+            }
+        }
+
         public void AddExistingNumbersAsNewLines() => _gameController.AddExistingNumbersAsNewLines();
         public void UndoLastMove() => _gameController.UndoLastAction();
     }
