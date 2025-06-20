@@ -4,13 +4,13 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class GridModel
+public class GridModel : IGridDataProvider
 {
     public event Action<CellData> OnCellAdded;
     public event Action<CellData> OnCellUpdated;
     public event Action<Guid> OnCellRemoved;
     public event Action OnGridCleared;
-    public event Action<CellData, bool> OnCellActiveStateChanged;
+
     public List<List<CellData>> Cells { get; } = new();
     private readonly Dictionary<Guid, CellData> _cellDataMap = new();
 
@@ -24,7 +24,6 @@ public class GridModel
     {
         if (data.IsActive == isActive) return;
         data.SetActive(isActive);
-        OnCellActiveStateChanged?.Invoke(data, isActive);
         OnCellUpdated?.Invoke(data);
     }
 
@@ -43,7 +42,6 @@ public class GridModel
             var cellData = new CellData(Random.Range(1, 10), lineIndex, i);
             newLine.Add(cellData);
             _cellDataMap[cellData.Id] = cellData;
-            OnCellActiveStateChanged?.Invoke(cellData, true);
             OnCellAdded?.Invoke(cellData);
         }
 
@@ -76,12 +74,12 @@ public class GridModel
         }
     }
 
-    public List<int> GetNumbersForTopLine(int numberLine, IGridDataProvider gridDataProvider)
+    public List<int> GetNumbersForTopLine(int numberLine)
     {
         var topNumbers = new List<int>(new int[GameConstants.QuantityByWidth]);
         if (numberLine < 0) return topNumbers;
 
-        var activeCells = gridDataProvider.GetAllActiveCellData();
+        var activeCells = GetAllActiveCellData(); // Используем свой же метод
 
         numberLine = Mathf.Min(numberLine, Cells.Count);
         for (var col = 0; col < GameConstants.QuantityByWidth; col++)
@@ -100,9 +98,9 @@ public class GridModel
         return topNumbers;
     }
 
-    public void AppendActiveNumbersToGrid(IGridDataProvider gridDataProvider)
+    public void AppendActiveNumbersToGrid()
     {
-        var numbersToAdd = gridDataProvider.GetAllActiveCellData().Select(cell => cell.Number).ToList();
+        var numbersToAdd = GetAllActiveCellData().Select(cell => cell.Number).ToList();
         if (numbersToAdd.Count == 0) return;
         var lastLine = Cells.LastOrDefault();
         if (lastLine != null)
@@ -145,9 +143,35 @@ public class GridModel
             var newCellData = new CellData(number, lineIndex, columnIndex);
             Cells[lineIndex].Add(newCellData);
             _cellDataMap[newCellData.Id] = newCellData;
-            OnCellActiveStateChanged?.Invoke(newCellData, true);
             OnCellAdded?.Invoke(newCellData);
             columnIndex++;
         }
+    }
+
+    public List<CellData> GetAllActiveCellData()
+    {
+        return _cellDataMap.Values.Where(cell => cell.IsActive).ToList();
+    }
+
+    public bool AreCellsOnSameLineOrColumnWithoutGaps(CellData firstCell, CellData secondCell)
+    {
+        var onSameLine = firstCell.Line == secondCell.Line;
+        var onSameColumn = firstCell.Column == secondCell.Column;
+
+        if (!onSameLine && !onSameColumn) return false;
+
+        if (onSameLine)
+        {
+            var line = firstCell.Line;
+            var startCol = Mathf.Min(firstCell.Column, secondCell.Column);
+            var endCol = Mathf.Max(firstCell.Column, secondCell.Column);
+            return !_cellDataMap.Values.Any(cell => cell.IsActive && cell.Line == line && cell.Column > startCol && cell.Column < endCol);
+        }
+
+        var col = firstCell.Column;
+        var startLine = Mathf.Min(firstCell.Line, secondCell.Line);
+        var endLine = Mathf.Max(firstCell.Line, secondCell.Line);
+
+        return !_cellDataMap.Values.Any(cell => cell.IsActive && cell.Column == col && cell.Line > startLine && cell.Line < endLine);
     }
 }

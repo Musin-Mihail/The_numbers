@@ -13,18 +13,16 @@ public class GameController
     private readonly CalculatingMatches _calculatingMatches;
     private const int InitialQuantityByHeight = 5;
     private Guid? _firstSelectedCellId;
-    private readonly IGridDataProvider _gridDataProvider;
 
-    public GameController(GridModel gridModel, CalculatingMatches calculatingMatches, IGridDataProvider gridDataProvider)
+    public GameController(GridModel gridModel, CalculatingMatches calculatingMatches)
     {
         _gridModel = gridModel;
         _calculatingMatches = calculatingMatches;
-        _gridDataProvider = gridDataProvider;
     }
 
     public void AddExistingNumbersAsNewLines()
     {
-        _gridModel.AppendActiveNumbersToGrid(_gridDataProvider);
+        _gridModel.AppendActiveNumbersToGrid();
     }
 
     public void HandleCellSelection(Guid cellId)
@@ -70,7 +68,7 @@ public class GameController
     {
         var linesToRemove = new HashSet<int>();
         if (_gridModel.IsLineEmpty(line1)) linesToRemove.Add(line1);
-        if (_gridModel.IsLineEmpty(line2)) linesToRemove.Add(line2);
+        if (line1 != line2 && _gridModel.IsLineEmpty(line2)) linesToRemove.Add(line2); // Проверка, чтобы не добавлять одну и ту же линию дважды
         if (linesToRemove.Count > 0)
         {
             foreach (var lineIndex in linesToRemove.OrderByDescending(i => i))

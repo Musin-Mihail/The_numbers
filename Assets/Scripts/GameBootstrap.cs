@@ -8,17 +8,13 @@ public class GameBootstrap : MonoBehaviour
 
     private GameController _gameController;
     private GridModel _gridModel;
-    private ActiveCellsManager _activeCellsManager;
 
     private void Awake()
     {
         _gridModel = new GridModel();
-        _activeCellsManager = new ActiveCellsManager(_gridModel);
-        var calculatingMatches = new CalculatingMatches(_activeCellsManager);
-
-        _gameController = new GameController(_gridModel, calculatingMatches, _activeCellsManager);
-
-        view.Initialize(_gridModel, topLineController, windowSwiper, _gameController, _activeCellsManager);
+        var calculatingMatches = new CalculatingMatches(_gridModel);
+        _gameController = new GameController(_gridModel, calculatingMatches);
+        view.Initialize(_gridModel, topLineController, windowSwiper, _gameController);
         SubscribeToEvents();
     }
 
@@ -28,8 +24,6 @@ public class GameBootstrap : MonoBehaviour
         {
             UnsubscribeFromEvents();
         }
-
-        _activeCellsManager?.UnsubscribeEvents();
     }
 
     private void OnEnable()

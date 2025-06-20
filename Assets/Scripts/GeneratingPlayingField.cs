@@ -20,20 +20,18 @@ public class GeneratingPlayingField : MonoBehaviour
     private float _scrollLoggingThreshold;
     private float _lastLoggedScrollPosition;
     private GameController _gameController;
-    private IGridDataProvider _gridDataProvider;
 
     private void Awake()
     {
         _cellPool = GetComponent<CellPool>();
     }
 
-    public void Initialize(GridModel gridModel, TopLineController topLineController, WindowSwiper windowSwiper, GameController gameController, IGridDataProvider gridDataProvider)
+    public void Initialize(GridModel gridModel, TopLineController topLineController, WindowSwiper windowSwiper, GameController gameController)
     {
         _gridModel = gridModel;
         _topLineController = topLineController;
         _windowSwiper = windowSwiper;
         _gameController = gameController;
-        _gridDataProvider = gridDataProvider;
 
         _gridModel.OnCellAdded += HandleCellAdded;
         _gridModel.OnCellUpdated += HandleCellUpdated;
@@ -48,7 +46,7 @@ public class GeneratingPlayingField : MonoBehaviour
     {
         if (!_topLineController) return;
         var numberLine = Mathf.RoundToInt(_lastLoggedScrollPosition / _cellSize);
-        var activeNumbers = _gridModel.GetNumbersForTopLine(numberLine, _gridDataProvider);
+        var activeNumbers = _gridModel.GetNumbersForTopLine(numberLine);
         _topLineController.UpdateDisplayedNumbers(activeNumbers);
     }
 
