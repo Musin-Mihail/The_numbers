@@ -4,57 +4,15 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class GridModel : IGridDataProvider
+public class GridModel
 {
     public event Action<CellData> OnCellAdded;
     public event Action<CellData> OnCellUpdated;
     public event Action<Guid> OnCellRemoved;
     public event Action OnGridCleared;
+    public event Action<CellData, bool> OnCellActiveStateChanged;
     public List<List<CellData>> Cells { get; } = new();
     private readonly Dictionary<Guid, CellData> _cellDataMap = new();
-    private readonly List<CellData> _activeCellsCache = new();
-
-    public List<CellData> GetAllActiveCellData()
-    {
-        return _activeCellsCache;
-    }
-
-    public bool AreCellsOnSameLineOrColumnWithoutGaps(CellData firstCell, CellData secondCell)
-    {
-        var onSameLine = firstCell.Line == secondCell.Line;
-        var onSameColumn = firstCell.Column == secondCell.Column;
-        if (!onSameLine && !onSameColumn) return false;
-        if (onSameLine)
-        {
-            var line = firstCell.Line;
-            var startCol = Mathf.Min(firstCell.Column, secondCell.Column);
-            var endCol = Mathf.Max(firstCell.Column, secondCell.Column);
-
-            foreach (var activeCell in _activeCellsCache)
-            {
-                if (activeCell.Line == line && activeCell.Column > startCol && activeCell.Column < endCol)
-                {
-                    return false;
-                }
-            }
-        }
-        else // onSameColumn
-        {
-            var col = firstCell.Column;
-            var startLine = Mathf.Min(firstCell.Line, secondCell.Line);
-            var endLine = Mathf.Max(firstCell.Line, secondCell.Line);
-
-            foreach (var activeCell in _activeCellsCache)
-            {
-                if (activeCell.Column == col && activeCell.Line > startLine && activeCell.Line < endLine)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
 
     public CellData GetCellDataById(Guid id)
     {
@@ -65,21 +23,8 @@ public class GridModel : IGridDataProvider
     public void SetCellActiveState(CellData data, bool isActive)
     {
         if (data.IsActive == isActive) return;
-
         data.SetActive(isActive);
-
-        if (isActive)
-        {
-            if (!_activeCellsCache.Contains(data))
-            {
-                _activeCellsCache.Add(data);
-            }
-        }
-        else
-        {
-            _activeCellsCache.Remove(data);
-        }
-
+        OnCellActiveStateChanged?.Invoke(data, isActive);
         OnCellUpdated?.Invoke(data);
     }
 
@@ -87,7 +32,6 @@ public class GridModel : IGridDataProvider
     {
         Cells.Clear();
         _cellDataMap.Clear();
-        _activeCellsCache.Clear();
         OnGridCleared?.Invoke();
     }
 
@@ -99,7 +43,7 @@ public class GridModel : IGridDataProvider
             var cellData = new CellData(Random.Range(1, 10), lineIndex, i);
             newLine.Add(cellData);
             _cellDataMap[cellData.Id] = cellData;
-            _activeCellsCache.Add(cellData);
+            OnCellActiveStateChanged?.Invoke(cellData, true);
             OnCellAdded?.Invoke(cellData);
         }
 
@@ -118,7 +62,6 @@ public class GridModel : IGridDataProvider
         foreach (var cellData in Cells[lineIndex])
         {
             _cellDataMap.Remove(cellData.Id);
-            _activeCellsCache.Remove(cellData);
             OnCellRemoved?.Invoke(cellData.Id);
         }
 
@@ -133,9 +76,33 @@ public class GridModel : IGridDataProvider
         }
     }
 
-    public void AppendActiveNumbersToGrid()
+    public List<int> GetNumbersForTopLine(int numberLine, IGridDataProvider gridDataProvider)
     {
-        var numbersToAdd = GetAllActiveCellData().Select(cell => cell.Number).ToList();
+        var topNumbers = new List<int>(new int[GameConstants.QuantityByWidth]);
+        if (numberLine < 0) return topNumbers;
+
+        var activeCells = gridDataProvider.GetAllActiveCellData();
+
+        numberLine = Mathf.Min(numberLine, Cells.Count);
+        for (var col = 0; col < GameConstants.QuantityByWidth; col++)
+        {
+            for (var line = numberLine - 1; line >= 0; line--)
+            {
+                var cellData = activeCells.LastOrDefault(d => d.Column == col && d.Line == line);
+                if (cellData != null)
+                {
+                    topNumbers[col] = cellData.Number;
+                    break;
+                }
+            }
+        }
+
+        return topNumbers;
+    }
+
+    public void AppendActiveNumbersToGrid(IGridDataProvider gridDataProvider)
+    {
+        var numbersToAdd = gridDataProvider.GetAllActiveCellData().Select(cell => cell.Number).ToList();
         if (numbersToAdd.Count == 0) return;
         var lastLine = Cells.LastOrDefault();
         if (lastLine != null)
@@ -178,30 +145,9 @@ public class GridModel : IGridDataProvider
             var newCellData = new CellData(number, lineIndex, columnIndex);
             Cells[lineIndex].Add(newCellData);
             _cellDataMap[newCellData.Id] = newCellData;
-            _activeCellsCache.Add(newCellData);
+            OnCellActiveStateChanged?.Invoke(newCellData, true);
             OnCellAdded?.Invoke(newCellData);
             columnIndex++;
         }
-    }
-
-    public List<int> GetNumbersForTopLine(int numberLine)
-    {
-        var topNumbers = new List<int>(new int[GameConstants.QuantityByWidth]);
-        if (numberLine < 0) return topNumbers;
-        numberLine = Mathf.Min(numberLine, Cells.Count);
-        for (var col = 0; col < GameConstants.QuantityByWidth; col++)
-        {
-            for (var line = numberLine - 1; line >= 0; line--)
-            {
-                var cellData = _activeCellsCache.LastOrDefault(d => d.Column == col && d.Line == line);
-                if (cellData != null)
-                {
-                    topNumbers[col] = cellData.Number;
-                    break;
-                }
-            }
-        }
-
-        return topNumbers;
     }
 }

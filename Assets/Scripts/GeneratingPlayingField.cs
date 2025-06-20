@@ -6,9 +6,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(CellPool))]
 public class GeneratingPlayingField : MonoBehaviour
 {
-    [Header("Ссылки на компоненты")] [SerializeField]
-    private CanvasScaler canvasScaler;
-
+    [SerializeField] private CanvasScaler canvasScaler;
     [SerializeField] private GameObject cellPrefab;
     [SerializeField] private RectTransform contentContainer;
     [SerializeField] private ScrollRect scrollRect;
@@ -22,18 +20,20 @@ public class GeneratingPlayingField : MonoBehaviour
     private float _scrollLoggingThreshold;
     private float _lastLoggedScrollPosition;
     private GameController _gameController;
+    private IGridDataProvider _gridDataProvider;
 
     private void Awake()
     {
         _cellPool = GetComponent<CellPool>();
     }
 
-    public void Initialize(GridModel gridModel, TopLineController topLineController, WindowSwiper windowSwiper, GameController gameController)
+    public void Initialize(GridModel gridModel, TopLineController topLineController, WindowSwiper windowSwiper, GameController gameController, IGridDataProvider gridDataProvider)
     {
         _gridModel = gridModel;
         _topLineController = topLineController;
         _windowSwiper = windowSwiper;
         _gameController = gameController;
+        _gridDataProvider = gridDataProvider;
 
         _gridModel.OnCellAdded += HandleCellAdded;
         _gridModel.OnCellUpdated += HandleCellUpdated;
@@ -42,6 +42,14 @@ public class GeneratingPlayingField : MonoBehaviour
 
         _gameController.OnCellSelected += HandleCellSelected;
         _gameController.OnCellDeselected += HandleCellDeselected;
+    }
+
+    private void RefreshTopLine()
+    {
+        if (!_topLineController) return;
+        var numberLine = Mathf.RoundToInt(_lastLoggedScrollPosition / _cellSize);
+        var activeNumbers = _gridModel.GetNumbersForTopLine(numberLine, _gridDataProvider);
+        _topLineController.UpdateDisplayedNumbers(activeNumbers);
     }
 
     private void Start()
@@ -111,7 +119,6 @@ public class GeneratingPlayingField : MonoBehaviour
 
     public void HandleInvalidMatch()
     {
-        // Здесь можно добавить визуальный/звуковой отклик на неверный выбор
     }
 
     private void HandleCellAdded(CellData data)
@@ -175,14 +182,6 @@ public class GeneratingPlayingField : MonoBehaviour
         {
             cellView.Animator.MoveTo(cellView.targetRectTransform, targetPosition, GameConstants.CellMoveDuration);
         }
-    }
-
-    private void RefreshTopLine()
-    {
-        if (!_topLineController) return;
-        var numberLine = Mathf.RoundToInt(_lastLoggedScrollPosition / _cellSize);
-        var activeNumbers = _gridModel.GetNumbersForTopLine(numberLine);
-        _topLineController.UpdateDisplayedNumbers(activeNumbers);
     }
 
     private void OnScrollValueChanged(Vector2 position)

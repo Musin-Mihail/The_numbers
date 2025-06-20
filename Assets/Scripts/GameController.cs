@@ -8,15 +8,23 @@ public class GameController
     public event Action OnInvalidMatch;
     public event Action<Guid> OnCellSelected;
     public event Action<Guid> OnCellDeselected;
+
     private readonly GridModel _gridModel;
     private readonly CalculatingMatches _calculatingMatches;
     private const int InitialQuantityByHeight = 5;
     private Guid? _firstSelectedCellId;
+    private readonly IGridDataProvider _gridDataProvider;
 
-    public GameController(GridModel gridModel, CalculatingMatches calculatingMatches)
+    public GameController(GridModel gridModel, CalculatingMatches calculatingMatches, IGridDataProvider gridDataProvider)
     {
         _gridModel = gridModel;
         _calculatingMatches = calculatingMatches;
+        _gridDataProvider = gridDataProvider;
+    }
+
+    public void AddExistingNumbersAsNewLines()
+    {
+        _gridModel.AppendActiveNumbersToGrid(_gridDataProvider);
     }
 
     public void HandleCellSelection(Guid cellId)
@@ -85,10 +93,5 @@ public class GameController
         {
             _gridModel.CreateLine(i);
         }
-    }
-
-    public void AddExistingNumbersAsNewLines()
-    {
-        _gridModel.AppendActiveNumbersToGrid();
     }
 }
