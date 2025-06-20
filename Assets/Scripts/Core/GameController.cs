@@ -26,6 +26,7 @@ namespace Core
         public void AddExistingNumbersAsNewLines()
         {
             _gridModel.AppendActiveNumbersToGrid();
+            _actionHistory.Clear();
         }
 
         public void UndoLastAction()

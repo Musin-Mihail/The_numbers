@@ -24,6 +24,11 @@ namespace Core
             var calculatingMatches = new MatchValidator(gridDataProvider);
             _gameController = new GameController(_gridModel, calculatingMatches);
             view.Initialize(_gridModel, headerNumberDisplay, windowSwiper, _gameController);
+            if (windowSwiper)
+            {
+                windowSwiper.Initialize(_gridModel);
+            }
+
             SubscribeToEvents();
         }
 

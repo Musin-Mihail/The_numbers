@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using Model;
+using UnityEngine;
 using UnityEngine.UI;
+// ИЗМЕНЕНИЕ: Добавлен using.
 
 namespace View.UI
 {
@@ -21,6 +23,7 @@ namespace View.UI
         private Vector2 _windowMenuTargetPosition;
         private Vector2 _windowGameTargetPosition;
         private float _canvasWidth;
+        private GridModel _gridModel;
 
         private void Start()
         {
@@ -44,6 +47,11 @@ namespace View.UI
             AnimateCanvasPositions();
         }
 
+        public void Initialize(GridModel gridModel)
+        {
+            _gridModel = gridModel;
+        }
+
         public void SwitchToWindowMenu()
         {
             if (_currentWindowIndex == WindowState.Menu) return;
@@ -54,6 +62,11 @@ namespace View.UI
 
         public void SwitchToWindowGame()
         {
+            if (_gridModel != null && _gridModel.GetAllActiveCellData().Count == 0)
+            {
+                return;
+            }
+
             if (_currentWindowIndex == WindowState.Game) return;
             _currentWindowIndex = WindowState.Game;
             _windowMenuTargetPosition = new Vector2(-_canvasWidth, 0);
