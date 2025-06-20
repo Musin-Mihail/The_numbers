@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class GridModel : IGridDataProvider
+public class GridModel
 {
     public event Action<CellData> OnCellAdded;
     public event Action<CellData> OnCellUpdated;
@@ -78,9 +78,7 @@ public class GridModel : IGridDataProvider
     {
         var topNumbers = new List<int>(new int[GameConstants.QuantityByWidth]);
         if (numberLine < 0) return topNumbers;
-
-        var activeCells = GetAllActiveCellData(); // Используем свой же метод
-
+        var activeCells = GetAllActiveCellData();
         numberLine = Mathf.Min(numberLine, Cells.Count);
         for (var col = 0; col < GameConstants.QuantityByWidth; col++)
         {
@@ -151,27 +149,5 @@ public class GridModel : IGridDataProvider
     public List<CellData> GetAllActiveCellData()
     {
         return _cellDataMap.Values.Where(cell => cell.IsActive).ToList();
-    }
-
-    public bool AreCellsOnSameLineOrColumnWithoutGaps(CellData firstCell, CellData secondCell)
-    {
-        var onSameLine = firstCell.Line == secondCell.Line;
-        var onSameColumn = firstCell.Column == secondCell.Column;
-
-        if (!onSameLine && !onSameColumn) return false;
-
-        if (onSameLine)
-        {
-            var line = firstCell.Line;
-            var startCol = Mathf.Min(firstCell.Column, secondCell.Column);
-            var endCol = Mathf.Max(firstCell.Column, secondCell.Column);
-            return !_cellDataMap.Values.Any(cell => cell.IsActive && cell.Line == line && cell.Column > startCol && cell.Column < endCol);
-        }
-
-        var col = firstCell.Column;
-        var startLine = Mathf.Min(firstCell.Line, secondCell.Line);
-        var endLine = Mathf.Max(firstCell.Line, secondCell.Line);
-
-        return !_cellDataMap.Values.Any(cell => cell.IsActive && cell.Column == col && cell.Line > startLine && cell.Line < endLine);
     }
 }
