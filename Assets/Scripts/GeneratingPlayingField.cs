@@ -20,6 +20,7 @@ public class GeneratingPlayingField : MonoBehaviour
     private float _scrollLoggingThreshold;
     private float _lastLoggedScrollPosition;
     private GameController _gameController;
+    private Guid? _firstSelectedCellId;
 
     private void Awake()
     {
@@ -37,9 +38,6 @@ public class GeneratingPlayingField : MonoBehaviour
         _gridModel.OnCellUpdated += HandleCellUpdated;
         _gridModel.OnCellRemoved += HandleCellRemoved;
         _gridModel.OnGridCleared += HandleGridCleared;
-
-        _gameController.OnCellSelected += HandleCellSelected;
-        _gameController.OnCellDeselected += HandleCellDeselected;
     }
 
     private void RefreshTopLine()
@@ -85,12 +83,6 @@ public class GeneratingPlayingField : MonoBehaviour
             _gridModel.OnCellRemoved -= HandleCellRemoved;
             _gridModel.OnGridCleared -= HandleGridCleared;
         }
-
-        if (_gameController != null)
-        {
-            _gameController.OnCellSelected -= HandleCellSelected;
-            _gameController.OnCellDeselected -= HandleCellDeselected;
-        }
     }
 
     public void HandleMatchFound(Guid firstCellId, Guid secondCellId)
@@ -99,19 +91,37 @@ public class GeneratingPlayingField : MonoBehaviour
         RefreshTopLine();
     }
 
-    private void HandleCellSelected(Guid cellId)
+    private void HandleCellClicked(Guid clickedCellId)
     {
-        if (_cellViewInstances.TryGetValue(cellId, out var cellView))
+        if (!_firstSelectedCellId.HasValue)
         {
-            cellView.SetSelected(true);
+            _firstSelectedCellId = clickedCellId;
+            if (_cellViewInstances.TryGetValue(clickedCellId, out var cellView))
+            {
+                cellView.SetSelected(true);
+            }
         }
-    }
-
-    private void HandleCellDeselected(Guid cellId)
-    {
-        if (_cellViewInstances.TryGetValue(cellId, out var cellView))
+        else
         {
-            cellView.SetSelected(false);
+            if (_firstSelectedCellId.Value == clickedCellId)
+            {
+                if (_cellViewInstances.TryGetValue(clickedCellId, out var cellView))
+                {
+                    cellView.SetSelected(false);
+                }
+
+                _firstSelectedCellId = null;
+            }
+            else
+            {
+                if (_cellViewInstances.TryGetValue(_firstSelectedCellId.Value, out var firstCellView))
+                {
+                    firstCellView.SetSelected(false);
+                }
+
+                _gameController.AttemptMatch(_firstSelectedCellId.Value, clickedCellId);
+                _firstSelectedCellId = null;
+            }
         }
     }
 
@@ -123,7 +133,7 @@ public class GeneratingPlayingField : MonoBehaviour
     {
         var newCellView = _cellPool.GetCell();
         newCellView.UpdateFromData(data);
-        newCellView.OnClickedCallback = _gameController.HandleCellSelection;
+        newCellView.OnClickedCallback = HandleCellClicked;
         _cellViewInstances[data.Id] = newCellView;
 
         UpdateCellPosition(data, newCellView);
@@ -152,6 +162,7 @@ public class GeneratingPlayingField : MonoBehaviour
 
     private void HandleGridCleared()
     {
+        _firstSelectedCellId = null;
         foreach (var cell in _cellViewInstances.Values)
         {
             _cellPool.ReturnCell(cell);

@@ -6,13 +6,9 @@ public class GameController
 {
     public event Action<Guid, Guid> OnMatchFound;
     public event Action OnInvalidMatch;
-    public event Action<Guid> OnCellSelected;
-    public event Action<Guid> OnCellDeselected;
-
     private readonly GridModel _gridModel;
     private readonly CalculatingMatches _calculatingMatches;
     private const int InitialQuantityByHeight = 5;
-    private Guid? _firstSelectedCellId;
 
     public GameController(GridModel gridModel, CalculatingMatches calculatingMatches)
     {
@@ -25,34 +21,18 @@ public class GameController
         _gridModel.AppendActiveNumbersToGrid();
     }
 
-    public void HandleCellSelection(Guid cellId)
+    public void AttemptMatch(Guid firstCellId, Guid secondCellId)
     {
-        var data = _gridModel.GetCellDataById(cellId);
-        if (data is not { IsActive: true }) return;
-        if (_firstSelectedCellId == null)
+        var firstData = _gridModel.GetCellDataById(firstCellId);
+        var secondData = _gridModel.GetCellDataById(secondCellId);
+
+        if (firstData != null && secondData != null && _calculatingMatches.IsAValidMatch(firstData, secondData))
         {
-            _firstSelectedCellId = cellId;
-            OnCellSelected?.Invoke(cellId);
-        }
-        else if (_firstSelectedCellId == cellId)
-        {
-            OnCellDeselected?.Invoke(cellId);
-            _firstSelectedCellId = null;
+            ProcessValidMatch(firstData, secondData);
         }
         else
         {
-            var firstData = _gridModel.GetCellDataById(_firstSelectedCellId.Value);
-            OnCellDeselected?.Invoke(_firstSelectedCellId.Value);
-            if (firstData != null && _calculatingMatches.IsAValidMatch(firstData, data))
-            {
-                ProcessValidMatch(firstData, data);
-            }
-            else
-            {
-                OnInvalidMatch?.Invoke();
-            }
-
-            _firstSelectedCellId = null;
+            OnInvalidMatch?.Invoke();
         }
     }
 
@@ -68,7 +48,7 @@ public class GameController
     {
         var linesToRemove = new HashSet<int>();
         if (_gridModel.IsLineEmpty(line1)) linesToRemove.Add(line1);
-        if (line1 != line2 && _gridModel.IsLineEmpty(line2)) linesToRemove.Add(line2); // Проверка, чтобы не добавлять одну и ту же линию дважды
+        if (line1 != line2 && _gridModel.IsLineEmpty(line2)) linesToRemove.Add(line2);
         if (linesToRemove.Count > 0)
         {
             foreach (var lineIndex in linesToRemove.OrderByDescending(i => i))
@@ -80,12 +60,6 @@ public class GameController
 
     public void StartNewGame()
     {
-        if (_firstSelectedCellId.HasValue)
-        {
-            OnCellDeselected?.Invoke(_firstSelectedCellId.Value);
-            _firstSelectedCellId = null;
-        }
-
         _gridModel.ClearField();
         for (var i = 0; i < InitialQuantityByHeight; i++)
         {
