@@ -10,9 +10,28 @@ public class GridModel
     public event Action<CellData> OnCellUpdated;
     public event Action<Guid> OnCellRemoved;
     public event Action OnGridCleared;
-
     public List<List<CellData>> Cells { get; } = new();
     private readonly Dictionary<Guid, CellData> _cellDataMap = new();
+    private readonly List<CellData> _activeCellsCache = new();
+    private bool _isCacheDirty = true;
+
+    public List<CellData> GetAllActiveCellData()
+    {
+        if (_isCacheDirty)
+        {
+            _activeCellsCache.Clear();
+            _activeCellsCache.AddRange(_cellDataMap.Values.Where(cell => cell.IsActive));
+
+            _activeCellsCache.Sort((a, b) =>
+            {
+                var lineComparison = a.Line.CompareTo(b.Line);
+                return lineComparison != 0 ? lineComparison : a.Column.CompareTo(b.Column);
+            });
+            _isCacheDirty = false;
+        }
+
+        return _activeCellsCache;
+    }
 
     public CellData GetCellDataById(Guid id)
     {
@@ -24,6 +43,7 @@ public class GridModel
     {
         if (data.IsActive == isActive) return;
         data.SetActive(isActive);
+        _isCacheDirty = true;
         OnCellUpdated?.Invoke(data);
     }
 
@@ -31,6 +51,7 @@ public class GridModel
     {
         Cells.Clear();
         _cellDataMap.Clear();
+        _isCacheDirty = true;
         OnGridCleared?.Invoke();
     }
 
@@ -46,6 +67,7 @@ public class GridModel
         }
 
         Cells.Add(newLine);
+        _isCacheDirty = true;
     }
 
     public bool IsLineEmpty(int lineIndex)
@@ -72,6 +94,8 @@ public class GridModel
                 OnCellUpdated?.Invoke(cell);
             }
         }
+
+        _isCacheDirty = true;
     }
 
     public List<int> GetNumbersForTopLine(int numberLine)
@@ -144,10 +168,7 @@ public class GridModel
             OnCellAdded?.Invoke(newCellData);
             columnIndex++;
         }
-    }
 
-    public List<CellData> GetAllActiveCellData()
-    {
-        return _cellDataMap.Values.Where(cell => cell.IsActive).ToList();
+        _isCacheDirty = true;
     }
 }
