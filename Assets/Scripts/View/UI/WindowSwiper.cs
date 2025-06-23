@@ -1,7 +1,6 @@
 ﻿using Model;
 using UnityEngine;
 using UnityEngine.UI;
-// ИЗМЕНЕНИЕ: Добавлен using.
 
 namespace View.UI
 {

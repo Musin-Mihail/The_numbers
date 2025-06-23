@@ -20,7 +20,7 @@ namespace Core
         private GridModel _gridModel;
         private float _remainingTime;
         private bool _isTimerRunning;
-        private const float GameDuration = 120f;
+        private const float GameDuration = 300f;
 
         private void Awake()
         {
