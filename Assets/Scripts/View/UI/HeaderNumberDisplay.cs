@@ -30,6 +30,14 @@ namespace View.UI
             CreateLineDisplay();
         }
 
+        public void SetContainerActive(bool isActive)
+        {
+            if (container)
+            {
+                container.gameObject.SetActive(isActive);
+            }
+        }
+
         private void CreateLineDisplay()
         {
             for (var i = 0; i < GameConstants.QuantityByWidth; i++)

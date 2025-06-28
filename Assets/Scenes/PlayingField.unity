@@ -876,6 +876,7 @@ MonoBehaviour:
   headerNumberDisplay: {fileID: 382419723}
   windowSwiper: {fileID: 614222512}
   confirmationDialog: {fileID: 196455909}
+  topLineToggle: {fileID: 1346984341}
 --- !u!114 &382419723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2206,7 +2207,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 20}
+  m_SizeDelta: {x: 132.53, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1346984341
 MonoBehaviour:

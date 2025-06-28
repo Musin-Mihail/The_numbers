@@ -2,6 +2,7 @@
 using Gameplay;
 using Model;
 using UnityEngine;
+using UnityEngine.UI;
 using View.Grid;
 using View.UI;
 
@@ -13,7 +14,7 @@ namespace Core
         [SerializeField] private HeaderNumberDisplay headerNumberDisplay;
         [SerializeField] private WindowSwiper windowSwiper;
         [SerializeField] private ConfirmationDialog confirmationDialog;
-
+        [SerializeField] private Toggle topLineToggle;
         private GameController _gameController;
         private GridModel _gridModel;
 
@@ -32,11 +33,29 @@ namespace Core
             SubscribeToEvents();
         }
 
+        private void Start()
+        {
+            if (topLineToggle)
+            {
+                ToggleTopLine(topLineToggle.isOn);
+                topLineToggle.onValueChanged.AddListener(ToggleTopLine);
+            }
+            else
+            {
+                ToggleTopLine(true);
+            }
+        }
+
         private void OnDisable()
         {
             if (_gameController != null)
             {
                 UnsubscribeFromEvents();
+            }
+
+            if (topLineToggle)
+            {
+                topLineToggle.onValueChanged.RemoveListener(ToggleTopLine);
             }
         }
 
@@ -45,6 +64,19 @@ namespace Core
             if (_gameController != null)
             {
                 SubscribeToEvents();
+            }
+        }
+
+        private void ToggleTopLine(bool isOn)
+        {
+            if (headerNumberDisplay)
+            {
+                headerNumberDisplay.SetContainerActive(isOn);
+            }
+
+            if (view)
+            {
+                view.SetTopPaddingActive(isOn);
             }
         }
 

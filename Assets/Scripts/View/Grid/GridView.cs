@@ -27,6 +27,7 @@ namespace View.Grid
         private float _lastLoggedScrollPosition;
         private GameController _gameController;
         private Guid? _firstSelectedCellId;
+        private float _topPaddingValue;
 
         private void Awake()
         {
@@ -65,17 +66,7 @@ namespace View.Grid
 
             var referenceWidth = canvasScaler.referenceResolution.x;
             _cellSize = (referenceWidth - GameConstants.Indent) / GameConstants.QuantityByWidth;
-
-            if (scrollviewContainer != null)
-            {
-                var topOffset = _cellSize * 1.1f;
-                scrollviewContainer.offsetMax = new Vector2(scrollviewContainer.offsetMax.x, -topOffset);
-            }
-            else
-            {
-                Debug.LogWarning("scrollviewContainer не назначен в инспекторе GridView. Отступ сверху не будет применен.");
-            }
-
+            _topPaddingValue = _cellSize * 1.1f;
             if (cellPrefab)
             {
                 cellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(_cellSize, _cellSize);
@@ -86,6 +77,19 @@ namespace View.Grid
             {
                 _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
                 scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
+            }
+        }
+
+        public void SetTopPaddingActive(bool isActive)
+        {
+            if (scrollviewContainer)
+            {
+                var topOffset = isActive ? -_topPaddingValue : 0;
+                scrollviewContainer.offsetMax = new Vector2(scrollviewContainer.offsetMax.x, topOffset);
+            }
+            else
+            {
+                Debug.LogWarning("scrollviewContainer не назначен в инспекторе GridView. Отступ сверху не будет применен.");
             }
         }
 
