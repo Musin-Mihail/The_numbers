@@ -12,7 +12,8 @@ namespace Model
         public event Action<CellData> OnCellUpdated;
         public event Action<Guid> OnCellRemoved;
         public event Action OnGridCleared;
-        public List<List<CellData>> Cells { get; } = new();
+        private readonly List<List<CellData>> _cells = new();
+        public IReadOnlyList<IReadOnlyList<CellData>> Cells => _cells;
         private readonly Dictionary<Guid, CellData> _cellDataMap = new();
         private readonly List<CellData> _activeCellsCache = new();
         private bool _isCacheDirty = true;
@@ -51,7 +52,7 @@ namespace Model
 
         public void ClearField()
         {
-            Cells.Clear();
+            _cells.Clear();
             _cellDataMap.Clear();
             _isCacheDirty = true;
             OnGridCleared?.Invoke();
@@ -68,29 +69,29 @@ namespace Model
                 OnCellAdded?.Invoke(cellData);
             }
 
-            Cells.Add(newLine);
+            _cells.Add(newLine);
             _isCacheDirty = true;
         }
 
         public bool IsLineEmpty(int lineIndex)
         {
-            if (lineIndex < 0 || lineIndex >= Cells.Count) return false;
-            return Cells[lineIndex].All(cellData => !cellData.IsActive);
+            if (lineIndex < 0 || lineIndex >= _cells.Count) return false;
+            return _cells[lineIndex].All(cellData => !cellData.IsActive);
         }
 
         public void RemoveLine(int lineIndex)
         {
-            if (lineIndex < 0 || lineIndex >= Cells.Count) return;
-            foreach (var cellData in Cells[lineIndex])
+            if (lineIndex < 0 || lineIndex >= _cells.Count) return;
+            foreach (var cellData in _cells[lineIndex])
             {
                 _cellDataMap.Remove(cellData.Id);
                 OnCellRemoved?.Invoke(cellData.Id);
             }
 
-            Cells.RemoveAt(lineIndex);
-            for (var i = lineIndex; i < Cells.Count; i++)
+            _cells.RemoveAt(lineIndex);
+            for (var i = lineIndex; i < _cells.Count; i++)
             {
-                foreach (var cell in Cells[i])
+                foreach (var cell in _cells[i])
                 {
                     cell.Line = i;
                     OnCellUpdated?.Invoke(cell);
@@ -102,18 +103,18 @@ namespace Model
 
         public void RestoreLine(int lineIndex, List<CellData> lineData)
         {
-            if (lineIndex < 0 || lineIndex > Cells.Count) return;
+            if (lineIndex < 0 || lineIndex > _cells.Count) return;
 
-            for (var i = lineIndex; i < Cells.Count; i++)
+            for (var i = lineIndex; i < _cells.Count; i++)
             {
-                foreach (var cell in Cells[i])
+                foreach (var cell in _cells[i])
                 {
                     cell.Line++;
                     OnCellUpdated?.Invoke(cell);
                 }
             }
 
-            Cells.Insert(lineIndex, lineData);
+            _cells.Insert(lineIndex, lineData);
             foreach (var cellData in lineData)
             {
                 _cellDataMap[cellData.Id] = cellData;
@@ -128,7 +129,7 @@ namespace Model
             var topNumbers = new List<int>(new int[GameConstants.QuantityByWidth]);
             if (numberLine < 0) return topNumbers;
             var activeCells = GetAllActiveCellData();
-            numberLine = Mathf.Min(numberLine, Cells.Count);
+            numberLine = Mathf.Min(numberLine, _cells.Count);
             for (var col = 0; col < GameConstants.QuantityByWidth; col++)
             {
                 for (var line = numberLine - 1; line >= 0; line--)
@@ -149,7 +150,7 @@ namespace Model
         {
             var numbersToAdd = GetAllActiveCellData().Select(cell => cell.Number).ToList();
             if (numbersToAdd.Count == 0) return;
-            var lastLine = Cells.LastOrDefault();
+            var lastLine = _cells.LastOrDefault();
             if (lastLine != null)
             {
                 for (var i = lastLine.Count - 1; i >= 0; i--)
@@ -168,11 +169,11 @@ namespace Model
                 }
             }
 
-            var lineIndex = Cells.Count > 0 ? Cells.Count - 1 : 0;
-            var columnIndex = Cells.Count > 0 && Cells[lineIndex] != null ? Cells[lineIndex].Count : 0;
-            if (Cells.Count == 0)
+            var lineIndex = _cells.Count > 0 ? _cells.Count - 1 : 0;
+            var columnIndex = _cells.Count > 0 && _cells[lineIndex] != null ? _cells[lineIndex].Count : 0;
+            if (_cells.Count == 0)
             {
-                Cells.Add(new List<CellData>());
+                _cells.Add(new List<CellData>());
             }
 
             foreach (var number in numbersToAdd)
@@ -181,14 +182,14 @@ namespace Model
                 {
                     columnIndex = 0;
                     lineIndex++;
-                    if (Cells.Count <= lineIndex)
+                    if (_cells.Count <= lineIndex)
                     {
-                        Cells.Add(new List<CellData>());
+                        _cells.Add(new List<CellData>());
                     }
                 }
 
                 var newCellData = new CellData(number, lineIndex, columnIndex);
-                Cells[lineIndex].Add(newCellData);
+                _cells[lineIndex].Add(newCellData);
                 _cellDataMap[newCellData.Id] = newCellData;
                 OnCellAdded?.Invoke(newCellData);
                 columnIndex++;

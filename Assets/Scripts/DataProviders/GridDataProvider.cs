@@ -24,20 +24,58 @@ namespace DataProviders
             var onSameLine = firstCell.Line == secondCell.Line;
             var onSameColumn = firstCell.Column == secondCell.Column;
             if (!onSameLine && !onSameColumn) return false;
-            var allActiveCells = GetAllActiveCellData();
+            var grid = _gridModel.Cells;
             if (onSameLine)
             {
                 var line = firstCell.Line;
-                var startCol = Mathf.Min(firstCell.Column, secondCell.Column);
+                if (line < 0 || line >= grid.Count) return false;
+                var startCol = Mathf.Min(firstCell.Column, secondCell.Column) + 1;
                 var endCol = Mathf.Max(firstCell.Column, secondCell.Column);
-                return !allActiveCells.Any(cell => cell.Line == line && cell.Column > startCol && cell.Column < endCol);
+                for (var column = startCol; column < endCol; column++)
+                {
+                    var cell = grid[line].FirstOrDefault(c => c.Column == column);
+                    if (cell is { IsActive: true })
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
             }
 
-            // else (onSameColumn)
             var col = firstCell.Column;
-            var startLine = Mathf.Min(firstCell.Line, secondCell.Line);
+            var startLine = Mathf.Min(firstCell.Line, secondCell.Line) + 1;
             var endLine = Mathf.Max(firstCell.Line, secondCell.Line);
-            return !allActiveCells.Any(cell => cell.Column == col && cell.Line > startLine && cell.Line < endLine);
+
+            for (var line = startLine; line < endLine; line++)
+            {
+                if (line < 0 || line >= grid.Count) continue;
+
+                var cell = grid[line].FirstOrDefault(c => c.Column == col);
+                if (cell is { IsActive: true })
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public CellData GetCellData(int line, int column)
+        {
+            if (line < 0 || line >= _gridModel.Cells.Count) return null;
+            if (column < 0 || column >= _gridModel.Cells[line].Count) return null;
+            return _gridModel.Cells[line].FirstOrDefault(c => c.Column == column);
+        }
+
+        public bool IsLineEmpty(int lineIndex)
+        {
+            return _gridModel.IsLineEmpty(lineIndex);
+        }
+
+        public int GetLineCount()
+        {
+            return _gridModel.Cells.Count;
         }
     }
 }
