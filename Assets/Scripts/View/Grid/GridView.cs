@@ -15,6 +15,7 @@ namespace View.Grid
         [SerializeField] private GameObject cellPrefab;
         [SerializeField] private RectTransform contentContainer;
         [SerializeField] private ScrollRect scrollRect;
+        [SerializeField] private RectTransform scrollviewContainer;
 
         private readonly Dictionary<Guid, Cell> _cellViewInstances = new();
         private HeaderNumberDisplay _headerNumberDisplay;
@@ -64,6 +65,17 @@ namespace View.Grid
 
             var referenceWidth = canvasScaler.referenceResolution.x;
             _cellSize = (referenceWidth - GameConstants.Indent) / GameConstants.QuantityByWidth;
+
+            if (scrollviewContainer != null)
+            {
+                var topOffset = _cellSize * 1.1f;
+                scrollviewContainer.offsetMax = new Vector2(scrollviewContainer.offsetMax.x, -topOffset);
+            }
+            else
+            {
+                Debug.LogWarning("scrollviewContainer не назначен в инспекторе GridView. Отступ сверху не будет применен.");
+            }
+
             if (cellPrefab)
             {
                 cellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(_cellSize, _cellSize);
@@ -181,7 +193,7 @@ namespace View.Grid
         {
             if (!contentContainer) return;
             var lineCount = _gridModel.Cells.Count;
-            var newHeight = lineCount * _cellSize + _cellSize * 1.1f + GameConstants.Indent;
+            var newHeight = lineCount * _cellSize + GameConstants.Indent;
             contentContainer.sizeDelta = new Vector2(contentContainer.sizeDelta.x, newHeight);
         }
 
@@ -189,7 +201,7 @@ namespace View.Grid
         {
             var targetPosition = new Vector2(
                 _cellSize * data.Column + GameConstants.Indent / 2f,
-                -_cellSize * data.Line - GameConstants.Indent / 2f - _cellSize * 1.1f
+                -_cellSize * data.Line - GameConstants.Indent / 2f
             );
 
             if (cellView.Animator)
