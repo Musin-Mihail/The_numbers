@@ -40,14 +40,11 @@ namespace Core
         {
             _gridModel.AppendActiveNumbersToGrid();
             _actionHistory.Clear();
-            GameEvents.RaiseGridStateChanged(_gridModel.GetAllActiveCellData().Count == 0);
         }
 
         private void UndoLastAction()
         {
             _actionHistory.Undo();
-            GameEvents.RaiseActionUndone();
-            GameEvents.RaiseGridStateChanged(_gridModel.GetAllActiveCellData().Count == 0);
         }
 
         private void AttemptMatch(Guid firstCellId, Guid secondCellId)
@@ -74,7 +71,6 @@ namespace Core
             CheckAndRemoveEmptyLines(data1.Line, data2.Line, removedLinesInfo);
             var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo);
             _actionHistory.Record(action);
-            GameEvents.RaiseGridStateChanged(_gridModel.GetAllActiveCellData().Count == 0);
         }
 
         private void CheckAndRemoveEmptyLines(int line1, int line2, List<Tuple<int, List<CellData>>> removedLinesInfo)
@@ -101,7 +97,6 @@ namespace Core
             }
 
             GameEvents.RaiseGameStarted();
-            GameEvents.RaiseGridStateChanged(false);
         }
 
         ~GameController()

@@ -19,7 +19,7 @@ namespace View.Grid
 
         private readonly Dictionary<Guid, Cell> _cellViewInstances = new();
         private HeaderNumberDisplay _headerNumberDisplay;
-        private WindowSwiper _windowSwiper;
+        private MenuManager _menuManager;
         private GridModel _gridModel;
         private CellPool _cellPool;
         private float _cellSize;
@@ -35,11 +35,11 @@ namespace View.Grid
             SubscribeToEvents();
         }
 
-        public void Initialize(GridModel gridModel, HeaderNumberDisplay headerNumberDisplay, WindowSwiper windowSwiper)
+        public void Initialize(GridModel gridModel, HeaderNumberDisplay headerNumberDisplay, MenuManager menuManager)
         {
             _gridModel = gridModel;
             _headerNumberDisplay = headerNumberDisplay;
-            _windowSwiper = windowSwiper;
+            _menuManager = menuManager;
 
             _gridModel.OnCellAdded += HandleCellAdded;
             _gridModel.OnCellUpdated += HandleCellUpdated;
@@ -52,7 +52,6 @@ namespace View.Grid
             GameEvents.OnMatchFound += HandleMatchFound;
             GameEvents.OnInvalidMatch += HandleInvalidMatch;
             GameEvents.OnToggleTopLine += SetTopPaddingActive;
-            GameEvents.OnActionUndone += HandleActionUndone;
             GameEvents.OnGameStarted += HandleGameStarted;
         }
 
@@ -61,7 +60,6 @@ namespace View.Grid
             GameEvents.OnMatchFound -= HandleMatchFound;
             GameEvents.OnInvalidMatch -= HandleInvalidMatch;
             GameEvents.OnToggleTopLine -= SetTopPaddingActive;
-            GameEvents.OnActionUndone -= HandleActionUndone;
             GameEvents.OnGameStarted -= HandleGameStarted;
         }
 
@@ -130,19 +128,11 @@ namespace View.Grid
             RefreshTopLine();
         }
 
-        private void HandleActionUndone()
-        {
-            if (_windowSwiper)
-            {
-                _windowSwiper.SwitchToWindowGame();
-            }
-        }
-
         private void HandleGameStarted()
         {
-            if (_windowSwiper)
+            if (_menuManager)
             {
-                _windowSwiper.SwitchToWindowGame();
+                _menuManager.HideMenu();
             }
         }
 
