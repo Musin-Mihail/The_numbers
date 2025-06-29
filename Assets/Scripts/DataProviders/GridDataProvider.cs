@@ -64,7 +64,6 @@ namespace DataProviders
         public CellData GetCellData(int line, int column)
         {
             if (line < 0 || line >= _gridModel.Cells.Count) return null;
-            if (column < 0 || column >= _gridModel.Cells[line].Count) return null;
             return _gridModel.Cells[line].FirstOrDefault(c => c.Column == column);
         }
 
@@ -76,6 +75,44 @@ namespace DataProviders
         public int GetLineCount()
         {
             return _gridModel.Cells.Count;
+        }
+
+        public CellData FindFirstActiveCellInDirection(int startLine, int startCol, int dLine, int dCol)
+        {
+            var currentLine = startLine + dLine;
+            var currentCol = startCol + dCol;
+            var grid = _gridModel.Cells;
+
+            if (dCol == 0 && dLine != 0)
+            {
+                while (currentLine >= 0 && currentLine < grid.Count)
+                {
+                    var cell = GetCellData(currentLine, currentCol);
+                    if (cell is { IsActive: true })
+                    {
+                        return cell;
+                    }
+
+                    currentLine += dLine;
+                }
+            }
+            else if (dLine == 0 && dCol != 0)
+            {
+                if (startLine < 0 || startLine >= grid.Count) return null;
+
+                while (currentCol is >= 0 and < GameConstants.QuantityByWidth)
+                {
+                    var cell = GetCellData(startLine, currentCol);
+                    if (cell is { IsActive: true })
+                    {
+                        return cell;
+                    }
+
+                    currentCol += dCol;
+                }
+            }
+
+            return null;
         }
     }
 }

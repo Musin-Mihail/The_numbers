@@ -10,15 +10,16 @@ namespace Core
     {
         private readonly GridModel _gridModel;
         private readonly MatchValidator _matchValidator;
+        private readonly IGridDataProvider _gridDataProvider;
         private readonly ActionHistory _actionHistory;
         private const int InitialQuantityByHeight = 5;
 
-        public GameController(GridModel gridModel, MatchValidator matchValidator)
+        public GameController(GridModel gridModel, MatchValidator matchValidator, IGridDataProvider gridDataProvider)
         {
             _gridModel = gridModel;
             _matchValidator = matchValidator;
+            _gridDataProvider = gridDataProvider;
             _actionHistory = new ActionHistory(_gridModel);
-
             SubscribeToInputEvents();
         }
 
@@ -41,15 +42,22 @@ namespace Core
         private void FindAndShowHint()
         {
             var activeCells = _gridModel.GetAllActiveCellData();
-            for (var i = 0; i < activeCells.Count; i++)
+            var directions = new List<(int dLine, int dCol)> { (0, 1), (0, -1), (1, 0), (-1, 0) };
+
+            foreach (var cell1 in activeCells)
             {
-                for (var j = i + 1; j < activeCells.Count; j++)
+                foreach (var dir in directions)
                 {
-                    var cell1 = activeCells[i];
-                    var cell2 = activeCells[j];
-                    if (!_matchValidator.IsAValidMatch(cell1, cell2)) continue;
-                    GameEvents.RaiseHintFound(cell1.Id, cell2.Id);
-                    return;
+                    var cell2 = _gridDataProvider.FindFirstActiveCellInDirection(cell1.Line, cell1.Column, dir.dLine, dir.dCol);
+
+                    if (cell2 != null)
+                    {
+                        if (_matchValidator.IsAValidMatch(cell1, cell2))
+                        {
+                            GameEvents.RaiseHintFound(cell1.Id, cell2.Id);
+                            return;
+                        }
+                    }
                 }
             }
             // Сюда можно добавить логику, если подходящих пар не найдено

@@ -25,7 +25,7 @@ namespace Core
             _gridModel = new GridModel();
             var gridDataProvider = new GridDataProvider(_gridModel);
             var calculatingMatches = new MatchValidator(gridDataProvider);
-            _gameController = new GameController(_gridModel, calculatingMatches);
+            _gameController = new GameController(_gridModel, calculatingMatches, gridDataProvider);
             view.Initialize(_gridModel, headerNumberDisplay);
         }
 

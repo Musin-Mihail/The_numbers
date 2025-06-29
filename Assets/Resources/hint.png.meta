@@ -20,9 +20,6 @@ TextureImporter:
   - first:
       213: -4976865915644985433
     second: hint_5
-  - first:
-      213: 2289999503610690722
-    second: hint_6
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -147,10 +144,10 @@ TextureImporter:
       name: hint_0
       rect:
         serializedVersion: 2
-        x: 14
-        y: 442
-        width: 66
-        height: 48
+        x: 11
+        y: 62
+        width: 27
+        height: 27
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -169,10 +166,10 @@ TextureImporter:
       name: hint_1
       rect:
         serializedVersion: 2
-        x: 81
-        y: 4
-        width: 340
-        height: 514
+        x: 34
+        y: 40
+        width: 30
+        height: 36
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -191,10 +188,10 @@ TextureImporter:
       name: hint_2
       rect:
         serializedVersion: 2
-        x: 422
-        y: 442
-        width: 66
-        height: 48
+        x: 62
+        y: 62
+        width: 27
+        height: 27
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -213,10 +210,10 @@ TextureImporter:
       name: hint_3
       rect:
         serializedVersion: 2
-        x: 4
-        y: 336
-        width: 48
-        height: 24
+        x: 11
+        y: 11
+        width: 27
+        height: 27
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -235,10 +232,10 @@ TextureImporter:
       name: hint_4
       rect:
         serializedVersion: 2
-        x: 450
-        y: 336
-        width: 48
-        height: 24
+        x: 44
+        y: 24
+        width: 11
+        height: 11
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -257,10 +254,10 @@ TextureImporter:
       name: hint_5
       rect:
         serializedVersion: 2
-        x: 14
-        y: 206
-        width: 66
-        height: 48
+        x: 62
+        y: 11
+        width: 27
+        height: 27
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -271,28 +268,6 @@ TextureImporter:
       bones: []
       spriteID: 7af3b3b71de9eeab0800000000000000
       internalID: -4976865915644985433
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: hint_6
-      rect:
-        serializedVersion: 2
-        x: 422
-        y: 206
-        width: 66
-        height: 48
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2ac39846a66b7cf10800000000000000
-      internalID: 2289999503610690722
       vertices: []
       indices: 
       edges: []
@@ -317,7 +292,6 @@ TextureImporter:
       hint_3: 1834645745885146840
       hint_4: 6185354257784583458
       hint_5: -4976865915644985433
-      hint_6: 2289999503610690722
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
