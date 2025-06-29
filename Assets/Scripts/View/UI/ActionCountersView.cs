@@ -23,9 +23,18 @@ namespace View.UI
 
         private void UpdateCountersUI(int undo, int add, int hint)
         {
-            if (undoCountText) undoCountText.text = undo.ToString();
-            if (addNumbersCountText) addNumbersCountText.text = add.ToString();
-            if (hintCountText) hintCountText.text = hint.ToString();
+            if (undo == -1)
+            {
+                if (undoCountText) undoCountText.text = "∞";
+                if (addNumbersCountText) addNumbersCountText.text = "∞";
+                if (hintCountText) hintCountText.text = "∞";
+            }
+            else
+            {
+                if (undoCountText) undoCountText.text = undo.ToString();
+                if (addNumbersCountText) addNumbersCountText.text = add.ToString();
+                if (hintCountText) hintCountText.text = hint.ToString();
+            }
         }
     }
 }

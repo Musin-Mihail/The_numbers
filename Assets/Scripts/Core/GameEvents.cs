@@ -54,5 +54,11 @@ namespace Core
 
         public static event Action OnRefillCountersConfirmed;
         public static void RaiseRefillCountersConfirmed() => OnRefillCountersConfirmed?.Invoke();
+
+        public static event Action OnRequestDisableCounters;
+        public static void RaiseRequestDisableCounters() => OnRequestDisableCounters?.Invoke();
+
+        public static event Action OnDisableCountersConfirmed;
+        public static void RaiseDisableCountersConfirmed() => OnDisableCountersConfirmed?.Invoke();
     }
 }

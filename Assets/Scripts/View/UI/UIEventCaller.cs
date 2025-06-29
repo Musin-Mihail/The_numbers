@@ -34,5 +34,10 @@ namespace View.UI
         {
             GameEvents.RaiseRequestHint();
         }
+
+        public void RaiseRequestDisableCounters()
+        {
+            GameEvents.RaiseRequestDisableCounters();
+        }
     }
 }

@@ -5,7 +5,7 @@
         public int UndoCount { get; private set; }
         public int AddNumbersCount { get; private set; }
         public int HintCount { get; private set; }
-
+        public bool AreCountersDisabled { get; private set; }
         private const int InitialCount = 5;
 
         public ActionCountersModel()
@@ -33,10 +33,16 @@
             UndoCount = InitialCount;
             AddNumbersCount = InitialCount;
             HintCount = InitialCount;
+            AreCountersDisabled = false;
         }
 
-        public bool IsUndoAvailable() => UndoCount > 0;
-        public bool IsAddNumbersAvailable() => AddNumbersCount > 0;
-        public bool IsHintAvailable() => HintCount > 0;
+        public void DisableCounters()
+        {
+            AreCountersDisabled = true;
+        }
+
+        public bool IsUndoAvailable() => AreCountersDisabled || UndoCount > 0;
+        public bool IsAddNumbersAvailable() => AreCountersDisabled || AddNumbersCount > 0;
+        public bool IsHintAvailable() => AreCountersDisabled || HintCount > 0;
     }
 }

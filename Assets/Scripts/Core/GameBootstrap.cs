@@ -46,11 +46,17 @@ namespace Core
                 _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
                 GameEvents.OnRequestNewGame += _requestNewGameAction;
                 GameEvents.OnRequestRefillCounters += HandleRequestRefillCounters;
+                GameEvents.OnRequestDisableCounters += HandleRequestDisableCounters;
             }
             else
             {
                 GameEvents.OnRequestNewGame += StartNewGameInternal;
             }
+        }
+
+        private void HandleRequestDisableCounters()
+        {
+            confirmationDialog.Show("Отключить счётчики?", () => { GameEvents.RaiseDisableCountersConfirmed(); });
         }
 
         private void HandleRequestRefillCounters()
@@ -73,6 +79,7 @@ namespace Core
                 }
 
                 GameEvents.OnRequestRefillCounters -= HandleRequestRefillCounters;
+                GameEvents.OnRequestDisableCounters -= HandleRequestDisableCounters;
             }
             else
             {

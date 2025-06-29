@@ -13,6 +13,7 @@ namespace Core
         private readonly IGridDataProvider _gridDataProvider;
         private readonly ActionHistory _actionHistory;
         private readonly ActionCountersModel _actionCountersModel;
+        private bool _countersPermanentlyDisabled;
         private const int InitialQuantityByHeight = 5;
 
         public GameController(GridModel gridModel, MatchValidator matchValidator, IGridDataProvider gridDataProvider)
@@ -22,6 +23,7 @@ namespace Core
             _gridDataProvider = gridDataProvider;
             _actionHistory = new ActionHistory(_gridModel);
             _actionCountersModel = new ActionCountersModel();
+            _countersPermanentlyDisabled = false;
             SubscribeToInputEvents();
         }
 
@@ -32,6 +34,7 @@ namespace Core
             GameEvents.OnUndoLastAction += UndoLastAction;
             GameEvents.OnRequestHint += FindAndShowHint;
             GameEvents.OnRefillCountersConfirmed += HandleRefillCountersConfirmed;
+            GameEvents.OnDisableCountersConfirmed += HandleDisableCountersConfirmed;
         }
 
         private void UnsubscribeFromInputEvents()
@@ -41,12 +44,33 @@ namespace Core
             GameEvents.OnUndoLastAction -= UndoLastAction;
             GameEvents.OnRequestHint -= FindAndShowHint;
             GameEvents.OnRefillCountersConfirmed -= HandleRefillCountersConfirmed;
+            GameEvents.OnDisableCountersConfirmed -= HandleDisableCountersConfirmed;
         }
 
         private void HandleRefillCountersConfirmed()
         {
+            _countersPermanentlyDisabled = false;
             _actionCountersModel.ResetCounters();
-            GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
+            RaiseCountersChangedEvent();
+        }
+
+        private void RaiseCountersChangedEvent()
+        {
+            if (_actionCountersModel.AreCountersDisabled)
+            {
+                GameEvents.RaiseCountersChanged(-1, -1, -1);
+            }
+            else
+            {
+                GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
+            }
+        }
+
+        private void HandleDisableCountersConfirmed()
+        {
+            _countersPermanentlyDisabled = true;
+            _actionCountersModel.DisableCounters();
+            RaiseCountersChangedEvent();
         }
 
         private void FindAndShowHint()
@@ -62,20 +86,16 @@ namespace Core
 
             foreach (var cell1 in activeCells)
             {
-                foreach (var dir in directions)
+                foreach (var cell2 in from dir in directions select _gridDataProvider.FindFirstActiveCellInDirection(cell1.Line, cell1.Column, dir.dLine, dir.dCol) into cell2 where cell2 != null where _matchValidator.IsAValidMatch(cell1, cell2) select cell2)
                 {
-                    var cell2 = _gridDataProvider.FindFirstActiveCellInDirection(cell1.Line, cell1.Column, dir.dLine, dir.dCol);
-
-                    if (cell2 != null)
+                    if (!_actionCountersModel.AreCountersDisabled)
                     {
-                        if (_matchValidator.IsAValidMatch(cell1, cell2))
-                        {
-                            _actionCountersModel.DecrementHint();
-                            GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
-                            GameEvents.RaiseHintFound(cell1.Id, cell2.Id);
-                            return;
-                        }
+                        _actionCountersModel.DecrementHint();
                     }
+
+                    RaiseCountersChangedEvent();
+                    GameEvents.RaiseHintFound(cell1.Id, cell2.Id);
+                    return;
                 }
             }
 
@@ -90,10 +110,14 @@ namespace Core
                 return;
             }
 
-            _actionCountersModel.DecrementAddNumbers();
+            if (!_actionCountersModel.AreCountersDisabled)
+            {
+                _actionCountersModel.DecrementAddNumbers();
+            }
+
             _gridModel.AppendActiveNumbersToGrid();
             _actionHistory.Clear();
-            GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
+            RaiseCountersChangedEvent();
         }
 
         private void UndoLastAction()
@@ -106,8 +130,12 @@ namespace Core
 
             if (!_actionHistory.CanUndo()) return;
             _actionHistory.Undo();
-            _actionCountersModel.DecrementUndo();
-            GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
+            if (!_actionCountersModel.AreCountersDisabled)
+            {
+                _actionCountersModel.DecrementUndo();
+            }
+
+            RaiseCountersChangedEvent();
         }
 
         private void AttemptMatch(Guid firstCellId, Guid secondCellId)
@@ -155,7 +183,13 @@ namespace Core
             _gridModel.ClearField();
             _actionHistory.Clear();
             _actionCountersModel.ResetCounters();
-            GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
+
+            if (_countersPermanentlyDisabled)
+            {
+                _actionCountersModel.DisableCounters();
+            }
+
+            RaiseCountersChangedEvent();
 
             for (var i = 0; i < InitialQuantityByHeight; i++)
             {
