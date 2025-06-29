@@ -20,19 +20,15 @@ namespace Model
 
         public List<CellData> GetAllActiveCellData()
         {
-            if (_isCacheDirty)
+            if (!_isCacheDirty) return _activeCellsCache;
+            _activeCellsCache.Clear();
+            _activeCellsCache.AddRange(_cellDataMap.Values.Where(cell => cell.IsActive));
+            _activeCellsCache.Sort((a, b) =>
             {
-                _activeCellsCache.Clear();
-                _activeCellsCache.AddRange(_cellDataMap.Values.Where(cell => cell.IsActive));
-
-                _activeCellsCache.Sort((a, b) =>
-                {
-                    var lineComparison = a.Line.CompareTo(b.Line);
-                    return lineComparison != 0 ? lineComparison : a.Column.CompareTo(b.Column);
-                });
-                _isCacheDirty = false;
-            }
-
+                var lineComparison = a.Line.CompareTo(b.Line);
+                return lineComparison != 0 ? lineComparison : a.Column.CompareTo(b.Column);
+            });
+            _isCacheDirty = false;
             return _activeCellsCache;
         }
 
@@ -135,11 +131,9 @@ namespace Model
                 for (var line = numberLine - 1; line >= 0; line--)
                 {
                     var cellData = activeCells.LastOrDefault(d => d.Column == col && d.Line == line);
-                    if (cellData != null)
-                    {
-                        topNumbers[col] = cellData.Number;
-                        break;
-                    }
+                    if (cellData == null) continue;
+                    topNumbers[col] = cellData.Number;
+                    break;
                 }
             }
 

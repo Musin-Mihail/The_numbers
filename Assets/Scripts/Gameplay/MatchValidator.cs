@@ -37,14 +37,9 @@ namespace Gameplay
                 return true;
             }
 
-            if (activeCellCount > 1 &&
-                ((firstIndex == 0 && secondIndex == activeCellCount - 1) ||
-                 (secondIndex == 0 && firstIndex == activeCellCount - 1)))
-            {
-                return true;
-            }
-
-            return false;
+            return activeCellCount > 1 &&
+                   ((firstIndex == 0 && secondIndex == activeCellCount - 1) ||
+                    (secondIndex == 0 && firstIndex == activeCellCount - 1));
         }
     }
 }

@@ -82,14 +82,12 @@ namespace Core
             var linesToRemove = new HashSet<int>();
             if (_gridModel.IsLineEmpty(line1)) linesToRemove.Add(line1);
             if (line1 != line2 && _gridModel.IsLineEmpty(line2)) linesToRemove.Add(line2);
-            if (linesToRemove.Count > 0)
+            if (linesToRemove.Count <= 0) return;
+            foreach (var lineIndex in linesToRemove.OrderByDescending(i => i))
             {
-                foreach (var lineIndex in linesToRemove.OrderByDescending(i => i))
-                {
-                    var lineData = new List<CellData>(_gridModel.Cells[lineIndex]);
-                    removedLinesInfo.Add(new Tuple<int, List<CellData>>(lineIndex, lineData));
-                    _gridModel.RemoveLine(lineIndex);
-                }
+                var lineData = new List<CellData>(_gridModel.Cells[lineIndex]);
+                removedLinesInfo.Add(new Tuple<int, List<CellData>>(lineIndex, lineData));
+                _gridModel.RemoveLine(lineIndex);
             }
         }
 

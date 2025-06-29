@@ -57,11 +57,9 @@ namespace Core
 
         public void Undo()
         {
-            if (_actions.Count > 0)
-            {
-                var lastAction = _actions.Pop();
-                lastAction.Undo(_gridModel);
-            }
+            if (_actions.Count <= 0) return;
+            var lastAction = _actions.Pop();
+            lastAction.Undo(_gridModel);
         }
 
         public void Clear()

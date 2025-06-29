@@ -91,11 +91,9 @@ namespace View.Grid
             }
 
             _scrollLoggingThreshold = _cellSize / 2f;
-            if (scrollRect)
-            {
-                _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
-                scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
-            }
+            if (!scrollRect) return;
+            _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
+            scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
         }
 
         private void SetTopPaddingActive(bool isActive)
@@ -182,7 +180,7 @@ namespace View.Grid
             }
         }
 
-        public void HandleInvalidMatch()
+        private void HandleInvalidMatch()
         {
             // Здесь может быть логика для визуальной обратной связи, например, покачивание ячеек
         }
@@ -201,20 +199,16 @@ namespace View.Grid
 
         private void HandleCellUpdated(CellData data)
         {
-            if (_cellViewInstances.TryGetValue(data.Id, out var cellView))
-            {
-                cellView.UpdateFromData(data);
-                UpdateCellPosition(data, cellView);
-            }
+            if (!_cellViewInstances.TryGetValue(data.Id, out var cellView)) return;
+            cellView.UpdateFromData(data);
+            UpdateCellPosition(data, cellView);
         }
 
         private void HandleCellRemoved(Guid dataId)
         {
-            if (_cellViewInstances.TryGetValue(dataId, out var cellToReturn))
-            {
-                _cellPool.ReturnCell(cellToReturn);
-                _cellViewInstances.Remove(dataId);
-            }
+            if (!_cellViewInstances.TryGetValue(dataId, out var cellToReturn)) return;
+            _cellPool.ReturnCell(cellToReturn);
+            _cellViewInstances.Remove(dataId);
         }
 
         private void HandleGridCleared()
@@ -253,11 +247,9 @@ namespace View.Grid
         private void OnScrollValueChanged(Vector2 position)
         {
             var currentScrollPosition = scrollRect.content.anchoredPosition.y;
-            if (Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= _scrollLoggingThreshold)
-            {
-                _lastLoggedScrollPosition = currentScrollPosition;
-                RefreshTopLine();
-            }
+            if (!(Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= _scrollLoggingThreshold)) return;
+            _lastLoggedScrollPosition = currentScrollPosition;
+            RefreshTopLine();
         }
     }
 }

@@ -43,11 +43,9 @@ namespace View.Grid
                 text.text = Number.ToString();
             }
 
-            if (IsActive != data.IsActive)
-            {
-                IsActive = data.IsActive;
-                SetVisualState(IsActive);
-            }
+            if (IsActive == data.IsActive) return;
+            IsActive = data.IsActive;
+            SetVisualState(IsActive);
         }
 
         public void HandleClick()
