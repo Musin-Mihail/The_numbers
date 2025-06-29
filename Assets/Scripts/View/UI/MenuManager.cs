@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Core;
+using UnityEngine;
 
 namespace View.UI
 {
@@ -8,13 +9,22 @@ namespace View.UI
 
         private void Awake()
         {
+            GameEvents.OnShowMenu += ShowMenu;
+            GameEvents.OnHideMenu += HideMenu;
+
             if (windowMenu)
             {
                 windowMenu.SetActive(true);
             }
         }
 
-        public void ShowMenu()
+        private void OnDestroy()
+        {
+            GameEvents.OnShowMenu -= ShowMenu;
+            GameEvents.OnHideMenu -= HideMenu;
+        }
+
+        private void ShowMenu()
         {
             if (windowMenu)
             {
@@ -22,26 +32,11 @@ namespace View.UI
             }
         }
 
-        public void HideMenu()
+        private void HideMenu()
         {
             if (windowMenu)
             {
                 windowMenu.SetActive(false);
-            }
-        }
-
-        public void ToggleMenu()
-        {
-            if (!windowMenu) return;
-
-            var isMenuActive = windowMenu.activeSelf;
-            if (isMenuActive)
-            {
-                HideMenu();
-            }
-            else
-            {
-                ShowMenu();
             }
         }
     }

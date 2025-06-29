@@ -19,5 +19,15 @@ namespace View.UI
         {
             GameEvents.RaiseAddExistingNumbers();
         }
+
+        public void RaiseShowMenu()
+        {
+            GameEvents.RaiseShowMenu();
+        }
+
+        public void RaiseHideMenu()
+        {
+            GameEvents.RaiseHideMenu();
+        }
     }
 }

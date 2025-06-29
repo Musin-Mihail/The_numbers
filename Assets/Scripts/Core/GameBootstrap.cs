@@ -13,7 +13,6 @@ namespace Core
     {
         [SerializeField] private GridView view;
         [SerializeField] private HeaderNumberDisplay headerNumberDisplay;
-        [SerializeField] private MenuManager menuManager;
         [SerializeField] private ConfirmationDialog confirmationDialog;
         [SerializeField] private Toggle topLineToggle;
 
@@ -27,7 +26,7 @@ namespace Core
             var gridDataProvider = new GridDataProvider(_gridModel);
             var calculatingMatches = new MatchValidator(gridDataProvider);
             _gameController = new GameController(_gridModel, calculatingMatches);
-            view.Initialize(_gridModel, headerNumberDisplay, menuManager);
+            view.Initialize(_gridModel, headerNumberDisplay);
         }
 
         private void Start()

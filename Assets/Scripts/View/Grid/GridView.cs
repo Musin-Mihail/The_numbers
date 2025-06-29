@@ -19,7 +19,6 @@ namespace View.Grid
 
         private readonly Dictionary<Guid, Cell> _cellViewInstances = new();
         private HeaderNumberDisplay _headerNumberDisplay;
-        private MenuManager _menuManager;
         private GridModel _gridModel;
         private CellPool _cellPool;
         private float _cellSize;
@@ -35,11 +34,10 @@ namespace View.Grid
             SubscribeToEvents();
         }
 
-        public void Initialize(GridModel gridModel, HeaderNumberDisplay headerNumberDisplay, MenuManager menuManager)
+        public void Initialize(GridModel gridModel, HeaderNumberDisplay headerNumberDisplay)
         {
             _gridModel = gridModel;
             _headerNumberDisplay = headerNumberDisplay;
-            _menuManager = menuManager;
 
             _gridModel.OnCellAdded += HandleCellAdded;
             _gridModel.OnCellUpdated += HandleCellUpdated;
@@ -130,10 +128,7 @@ namespace View.Grid
 
         private void HandleGameStarted()
         {
-            if (_menuManager)
-            {
-                _menuManager.HideMenu();
-            }
+            GameEvents.RaiseHideMenu();
         }
 
         private void HandleCellClicked(Guid clickedCellId)
