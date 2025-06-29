@@ -4,7 +4,6 @@ namespace Core
 {
     public static class GameEvents
     {
-        // ... (существующие события)
         public static event Action<Guid, Guid> OnAttemptMatch;
         public static void RaiseAttemptMatch(Guid cell1, Guid cell2) => OnAttemptMatch?.Invoke(cell1, cell2);
 
@@ -40,6 +39,9 @@ namespace Core
 
         public static event Action<Guid, Guid> OnHintFound;
         public static void RaiseHintFound(Guid cell1, Guid cell2) => OnHintFound?.Invoke(cell1, cell2);
+
+        public static event Action OnNoHintFound;
+        public static void RaiseNoHintFound() => OnNoHintFound?.Invoke();
 
         public static event Action OnClearHint;
         public static void RaiseClearHint() => OnClearHint?.Invoke();

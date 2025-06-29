@@ -78,6 +78,8 @@ namespace Core
                     }
                 }
             }
+
+            GameEvents.RaiseNoHintFound();
         }
 
         private void AddExistingNumbersAsNewLines()
@@ -102,12 +104,10 @@ namespace Core
                 return;
             }
 
-            if (_actionHistory.CanUndo())
-            {
-                _actionHistory.Undo();
-                _actionCountersModel.DecrementUndo(); // --
-                GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
-            }
+            if (!_actionHistory.CanUndo()) return;
+            _actionHistory.Undo();
+            _actionCountersModel.DecrementUndo();
+            GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
         }
 
         private void AttemptMatch(Guid firstCellId, Guid secondCellId)
