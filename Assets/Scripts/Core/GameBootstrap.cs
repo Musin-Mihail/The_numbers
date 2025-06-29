@@ -45,11 +45,17 @@ namespace Core
             {
                 _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
                 GameEvents.OnRequestNewGame += _requestNewGameAction;
+                GameEvents.OnRequestRefillCounters += HandleRequestRefillCounters;
             }
             else
             {
                 GameEvents.OnRequestNewGame += StartNewGameInternal;
             }
+        }
+
+        private void HandleRequestRefillCounters()
+        {
+            confirmationDialog.Show("Добавить количество к cчетчикам?", () => { GameEvents.RaiseRefillCountersConfirmed(); });
         }
 
         private void OnDestroy()
@@ -65,6 +71,8 @@ namespace Core
                 {
                     GameEvents.OnRequestNewGame -= _requestNewGameAction;
                 }
+
+                GameEvents.OnRequestRefillCounters -= HandleRequestRefillCounters;
             }
             else
             {

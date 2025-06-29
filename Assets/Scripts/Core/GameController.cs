@@ -12,6 +12,7 @@ namespace Core
         private readonly MatchValidator _matchValidator;
         private readonly IGridDataProvider _gridDataProvider;
         private readonly ActionHistory _actionHistory;
+        private readonly ActionCountersModel _actionCountersModel;
         private const int InitialQuantityByHeight = 5;
 
         public GameController(GridModel gridModel, MatchValidator matchValidator, IGridDataProvider gridDataProvider)
@@ -20,6 +21,7 @@ namespace Core
             _matchValidator = matchValidator;
             _gridDataProvider = gridDataProvider;
             _actionHistory = new ActionHistory(_gridModel);
+            _actionCountersModel = new ActionCountersModel();
             SubscribeToInputEvents();
         }
 
@@ -29,6 +31,7 @@ namespace Core
             GameEvents.OnAddExistingNumbers += AddExistingNumbersAsNewLines;
             GameEvents.OnUndoLastAction += UndoLastAction;
             GameEvents.OnRequestHint += FindAndShowHint;
+            GameEvents.OnRefillCountersConfirmed += HandleRefillCountersConfirmed;
         }
 
         private void UnsubscribeFromInputEvents()
@@ -37,10 +40,23 @@ namespace Core
             GameEvents.OnAddExistingNumbers -= AddExistingNumbersAsNewLines;
             GameEvents.OnUndoLastAction -= UndoLastAction;
             GameEvents.OnRequestHint -= FindAndShowHint;
+            GameEvents.OnRefillCountersConfirmed -= HandleRefillCountersConfirmed;
+        }
+
+        private void HandleRefillCountersConfirmed()
+        {
+            _actionCountersModel.ResetCounters();
+            GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
         }
 
         private void FindAndShowHint()
         {
+            if (!_actionCountersModel.IsHintAvailable())
+            {
+                GameEvents.RaiseRequestRefillCounters();
+                return;
+            }
+
             var activeCells = _gridModel.GetAllActiveCellData();
             var directions = new List<(int dLine, int dCol)> { (0, 1), (0, -1), (1, 0), (-1, 0) };
 
@@ -54,24 +70,44 @@ namespace Core
                     {
                         if (_matchValidator.IsAValidMatch(cell1, cell2))
                         {
+                            _actionCountersModel.DecrementHint();
+                            GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
                             GameEvents.RaiseHintFound(cell1.Id, cell2.Id);
                             return;
                         }
                     }
                 }
             }
-            // Сюда можно добавить логику, если подходящих пар не найдено
         }
 
         private void AddExistingNumbersAsNewLines()
         {
+            if (!_actionCountersModel.IsAddNumbersAvailable())
+            {
+                GameEvents.RaiseRequestRefillCounters();
+                return;
+            }
+
+            _actionCountersModel.DecrementAddNumbers();
             _gridModel.AppendActiveNumbersToGrid();
             _actionHistory.Clear();
+            GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
         }
 
         private void UndoLastAction()
         {
-            _actionHistory.Undo();
+            if (!_actionCountersModel.IsUndoAvailable())
+            {
+                GameEvents.RaiseRequestRefillCounters();
+                return;
+            }
+
+            if (_actionHistory.CanUndo())
+            {
+                _actionHistory.Undo();
+                _actionCountersModel.DecrementUndo(); // --
+                GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
+            }
         }
 
         private void AttemptMatch(Guid firstCellId, Guid secondCellId)
@@ -118,6 +154,9 @@ namespace Core
         {
             _gridModel.ClearField();
             _actionHistory.Clear();
+            _actionCountersModel.ResetCounters();
+            GameEvents.RaiseCountersChanged(_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount);
+
             for (var i = 0; i < InitialQuantityByHeight; i++)
             {
                 _gridModel.CreateLine(i);

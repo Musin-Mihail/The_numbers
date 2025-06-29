@@ -62,6 +62,11 @@ namespace Core
             lastAction.Undo(_gridModel);
         }
 
+        public bool CanUndo()
+        {
+            return _actions.Count > 0;
+        }
+
         public void Clear()
         {
             _actions.Clear();

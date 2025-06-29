@@ -4,6 +4,7 @@ namespace Core
 {
     public static class GameEvents
     {
+        // ... (существующие события)
         public static event Action<Guid, Guid> OnAttemptMatch;
         public static void RaiseAttemptMatch(Guid cell1, Guid cell2) => OnAttemptMatch?.Invoke(cell1, cell2);
 
@@ -42,5 +43,14 @@ namespace Core
 
         public static event Action OnClearHint;
         public static void RaiseClearHint() => OnClearHint?.Invoke();
+
+        public static event Action<int, int, int> OnCountersChanged;
+        public static void RaiseCountersChanged(int undo, int add, int hint) => OnCountersChanged?.Invoke(undo, add, hint);
+
+        public static event Action OnRequestRefillCounters;
+        public static void RaiseRequestRefillCounters() => OnRequestRefillCounters?.Invoke();
+
+        public static event Action OnRefillCountersConfirmed;
+        public static void RaiseRefillCountersConfirmed() => OnRefillCountersConfirmed?.Invoke();
     }
 }
