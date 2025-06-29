@@ -15,6 +15,7 @@ namespace Core
         [SerializeField] private WindowSwiper windowSwiper;
         [SerializeField] private ConfirmationDialog confirmationDialog;
         [SerializeField] private Toggle topLineToggle;
+
         private GameController _gameController;
         private GridModel _gridModel;
 
@@ -24,81 +25,45 @@ namespace Core
             var gridDataProvider = new GridDataProvider(_gridModel);
             var calculatingMatches = new MatchValidator(gridDataProvider);
             _gameController = new GameController(_gridModel, calculatingMatches);
-            view.Initialize(_gridModel, headerNumberDisplay, windowSwiper, _gameController);
-            if (windowSwiper)
-            {
-                windowSwiper.Initialize(_gridModel);
-            }
-
-            SubscribeToEvents();
+            view.Initialize(_gridModel, headerNumberDisplay, windowSwiper);
         }
 
         private void Start()
         {
             if (topLineToggle)
             {
-                ToggleTopLine(topLineToggle.isOn);
-                topLineToggle.onValueChanged.AddListener(ToggleTopLine);
+                GameEvents.RaiseToggleTopLine(topLineToggle.isOn);
+                topLineToggle.onValueChanged.AddListener(GameEvents.RaiseToggleTopLine);
             }
             else
             {
-                ToggleTopLine(true);
+                GameEvents.RaiseToggleTopLine(true);
+            }
+
+            if (confirmationDialog)
+            {
+                GameEvents.OnRequestNewGame += () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
+            }
+            else
+            {
+                GameEvents.OnRequestNewGame += StartNewGameInternal;
             }
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
-            if (_gameController != null)
-            {
-                UnsubscribeFromEvents();
-            }
-
             if (topLineToggle)
             {
-                topLineToggle.onValueChanged.RemoveListener(ToggleTopLine);
-            }
-        }
-
-        private void OnEnable()
-        {
-            if (_gameController != null)
-            {
-                SubscribeToEvents();
-            }
-        }
-
-        private void ToggleTopLine(bool isOn)
-        {
-            if (headerNumberDisplay)
-            {
-                headerNumberDisplay.SetContainerActive(isOn);
+                topLineToggle.onValueChanged.RemoveListener(GameEvents.RaiseToggleTopLine);
             }
 
-            if (view)
+            if (confirmationDialog)
             {
-                view.SetTopPaddingActive(isOn);
+                GameEvents.OnRequestNewGame -= () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
             }
-        }
-
-        private void SubscribeToEvents()
-        {
-            _gameController.OnMatchFound += view.HandleMatchFound;
-            _gameController.OnInvalidMatch += view.HandleInvalidMatch;
-            _gameController.OnActionUndone += HandleActionUndone;
-        }
-
-        private void UnsubscribeFromEvents()
-        {
-            _gameController.OnMatchFound -= view.HandleMatchFound;
-            _gameController.OnInvalidMatch -= view.HandleInvalidMatch;
-            _gameController.OnActionUndone -= HandleActionUndone;
-        }
-
-        private void HandleActionUndone()
-        {
-            if (windowSwiper)
+            else
             {
-                windowSwiper.SwitchToWindowGame();
+                GameEvents.OnRequestNewGame -= StartNewGameInternal;
             }
         }
 
@@ -106,21 +71,5 @@ namespace Core
         {
             _gameController.StartNewGame();
         }
-
-        public void RequestNewGame()
-        {
-            if (confirmationDialog)
-            {
-                confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
-            }
-            else
-            {
-                Debug.LogWarning("ConfirmationDialog не назначен в GameBootstrap. Новая игра начнется немедленно.");
-                StartNewGameInternal();
-            }
-        }
-
-        public void AddExistingNumbersAsNewLines() => _gameController.AddExistingNumbersAsNewLines();
-        public void UndoLastMove() => _gameController.UndoLastAction();
     }
 }

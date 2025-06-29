@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Core;
 using Model;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +16,11 @@ namespace View.UI
         private readonly List<Cell> _topLineCells = new();
         private float _cellSize;
 
+        private void Awake()
+        {
+            GameEvents.OnToggleTopLine += SetContainerActive;
+        }
+
         private void Start()
         {
             if (!canvasScaler)
@@ -30,7 +36,12 @@ namespace View.UI
             CreateLineDisplay();
         }
 
-        public void SetContainerActive(bool isActive)
+        private void OnDestroy()
+        {
+            GameEvents.OnToggleTopLine -= SetContainerActive;
+        }
+
+        private void SetContainerActive(bool isActive)
         {
             if (container)
             {

@@ -1,4 +1,4 @@
-﻿using Model;
+﻿using Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,7 +22,12 @@ namespace View.UI
         private Vector2 _windowMenuTargetPosition;
         private Vector2 _windowGameTargetPosition;
         private float _canvasWidth;
-        private GridModel _gridModel;
+        private bool _isGridEmpty = true;
+
+        private void Awake()
+        {
+            GameEvents.OnGridStateChanged += OnGridStateChanged;
+        }
 
         private void Start()
         {
@@ -46,9 +51,14 @@ namespace View.UI
             AnimateCanvasPositions();
         }
 
-        public void Initialize(GridModel gridModel)
+        private void OnDestroy()
         {
-            _gridModel = gridModel;
+            GameEvents.OnGridStateChanged -= OnGridStateChanged;
+        }
+
+        private void OnGridStateChanged(bool isGridEmpty)
+        {
+            _isGridEmpty = isGridEmpty;
         }
 
         public void SwitchToWindowMenu()
@@ -61,7 +71,7 @@ namespace View.UI
 
         public void SwitchToWindowGame()
         {
-            if (_gridModel != null && _gridModel.GetAllActiveCellData().Count == 0)
+            if (_isGridEmpty)
             {
                 return;
             }

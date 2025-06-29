@@ -8,9 +8,6 @@ namespace Core
 {
     public class GameController
     {
-        public event Action<Guid, Guid> OnMatchFound;
-        public event Action OnInvalidMatch;
-        public event Action OnActionUndone;
         private readonly GridModel _gridModel;
         private readonly MatchValidator _matchValidator;
         private readonly ActionHistory _actionHistory;
@@ -21,21 +18,39 @@ namespace Core
             _gridModel = gridModel;
             _matchValidator = matchValidator;
             _actionHistory = new ActionHistory(_gridModel);
+
+            SubscribeToInputEvents();
         }
 
-        public void AddExistingNumbersAsNewLines()
+        private void SubscribeToInputEvents()
+        {
+            GameEvents.OnAttemptMatch += AttemptMatch;
+            GameEvents.OnAddExistingNumbers += AddExistingNumbersAsNewLines;
+            GameEvents.OnUndoLastAction += UndoLastAction;
+        }
+
+        private void UnsubscribeFromInputEvents()
+        {
+            GameEvents.OnAttemptMatch -= AttemptMatch;
+            GameEvents.OnAddExistingNumbers -= AddExistingNumbersAsNewLines;
+            GameEvents.OnUndoLastAction -= UndoLastAction;
+        }
+
+        private void AddExistingNumbersAsNewLines()
         {
             _gridModel.AppendActiveNumbersToGrid();
             _actionHistory.Clear();
+            GameEvents.RaiseGridStateChanged(_gridModel.GetAllActiveCellData().Count == 0);
         }
 
-        public void UndoLastAction()
+        private void UndoLastAction()
         {
             _actionHistory.Undo();
-            OnActionUndone?.Invoke();
+            GameEvents.RaiseActionUndone();
+            GameEvents.RaiseGridStateChanged(_gridModel.GetAllActiveCellData().Count == 0);
         }
 
-        public void AttemptMatch(Guid firstCellId, Guid secondCellId)
+        private void AttemptMatch(Guid firstCellId, Guid secondCellId)
         {
             var firstData = _gridModel.GetCellDataById(firstCellId);
             var secondData = _gridModel.GetCellDataById(secondCellId);
@@ -46,19 +61,20 @@ namespace Core
             }
             else
             {
-                OnInvalidMatch?.Invoke();
+                GameEvents.RaiseInvalidMatch();
             }
         }
 
         private void ProcessValidMatch(CellData data1, CellData data2)
         {
             var removedLinesInfo = new List<Tuple<int, List<CellData>>>();
-            OnMatchFound?.Invoke(data1.Id, data2.Id);
+            GameEvents.RaiseMatchFound(data1.Id, data2.Id);
             _gridModel.SetCellActiveState(data1, false);
             _gridModel.SetCellActiveState(data2, false);
             CheckAndRemoveEmptyLines(data1.Line, data2.Line, removedLinesInfo);
             var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo);
             _actionHistory.Record(action);
+            GameEvents.RaiseGridStateChanged(_gridModel.GetAllActiveCellData().Count == 0);
         }
 
         private void CheckAndRemoveEmptyLines(int line1, int line2, List<Tuple<int, List<CellData>>> removedLinesInfo)
@@ -85,6 +101,14 @@ namespace Core
             {
                 _gridModel.CreateLine(i);
             }
+
+            GameEvents.RaiseGameStarted();
+            GameEvents.RaiseGridStateChanged(false);
+        }
+
+        ~GameController()
+        {
+            UnsubscribeFromInputEvents();
         }
     }
 }

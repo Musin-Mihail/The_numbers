@@ -25,26 +25,44 @@ namespace View.Grid
         private float _cellSize;
         private float _scrollLoggingThreshold;
         private float _lastLoggedScrollPosition;
-        private GameController _gameController;
+
         private Guid? _firstSelectedCellId;
         private float _topPaddingValue;
 
         private void Awake()
         {
             _cellPool = GetComponent<CellPool>();
+            SubscribeToEvents();
         }
 
-        public void Initialize(GridModel gridModel, HeaderNumberDisplay headerNumberDisplay, WindowSwiper windowSwiper, GameController gameController)
+        public void Initialize(GridModel gridModel, HeaderNumberDisplay headerNumberDisplay, WindowSwiper windowSwiper)
         {
             _gridModel = gridModel;
             _headerNumberDisplay = headerNumberDisplay;
             _windowSwiper = windowSwiper;
-            _gameController = gameController;
 
             _gridModel.OnCellAdded += HandleCellAdded;
             _gridModel.OnCellUpdated += HandleCellUpdated;
             _gridModel.OnCellRemoved += HandleCellRemoved;
             _gridModel.OnGridCleared += HandleGridCleared;
+        }
+
+        private void SubscribeToEvents()
+        {
+            GameEvents.OnMatchFound += HandleMatchFound;
+            GameEvents.OnInvalidMatch += HandleInvalidMatch;
+            GameEvents.OnToggleTopLine += SetTopPaddingActive;
+            GameEvents.OnActionUndone += HandleActionUndone;
+            GameEvents.OnGameStarted += HandleGameStarted;
+        }
+
+        private void UnsubscribeFromEvents()
+        {
+            GameEvents.OnMatchFound -= HandleMatchFound;
+            GameEvents.OnInvalidMatch -= HandleInvalidMatch;
+            GameEvents.OnToggleTopLine -= SetTopPaddingActive;
+            GameEvents.OnActionUndone -= HandleActionUndone;
+            GameEvents.OnGameStarted -= HandleGameStarted;
         }
 
         private void RefreshTopLine()
@@ -80,7 +98,7 @@ namespace View.Grid
             }
         }
 
-        public void SetTopPaddingActive(bool isActive)
+        private void SetTopPaddingActive(bool isActive)
         {
             if (scrollviewContainer)
             {
@@ -104,12 +122,30 @@ namespace View.Grid
                 _gridModel.OnCellRemoved -= HandleCellRemoved;
                 _gridModel.OnGridCleared -= HandleGridCleared;
             }
+
+            UnsubscribeFromEvents();
         }
 
-        public void HandleMatchFound(Guid firstCellId, Guid secondCellId)
+        private void HandleMatchFound(Guid firstCellId, Guid secondCellId)
         {
             UpdateContentSize();
             RefreshTopLine();
+        }
+
+        private void HandleActionUndone()
+        {
+            if (_windowSwiper)
+            {
+                _windowSwiper.SwitchToWindowGame();
+            }
+        }
+
+        private void HandleGameStarted()
+        {
+            if (_windowSwiper)
+            {
+                _windowSwiper.SwitchToWindowGame();
+            }
         }
 
         private void HandleCellClicked(Guid clickedCellId)
@@ -140,7 +176,7 @@ namespace View.Grid
                         firstCellView.SetSelected(false);
                     }
 
-                    _gameController.AttemptMatch(_firstSelectedCellId.Value, clickedCellId);
+                    GameEvents.RaiseAttemptMatch(_firstSelectedCellId.Value, clickedCellId);
                     _firstSelectedCellId = null;
                 }
             }
@@ -148,6 +184,7 @@ namespace View.Grid
 
         public void HandleInvalidMatch()
         {
+            // Здесь может быть логика для визуальной обратной связи, например, покачивание ячеек
         }
 
         private void HandleCellAdded(CellData data)
@@ -160,7 +197,6 @@ namespace View.Grid
             UpdateCellPosition(data, newCellView);
             UpdateContentSize();
             RefreshTopLine();
-            _windowSwiper?.SwitchToWindowGame();
         }
 
         private void HandleCellUpdated(CellData data)
