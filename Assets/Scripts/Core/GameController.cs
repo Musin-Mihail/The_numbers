@@ -27,6 +27,7 @@ namespace Core
             GameEvents.OnAttemptMatch += AttemptMatch;
             GameEvents.OnAddExistingNumbers += AddExistingNumbersAsNewLines;
             GameEvents.OnUndoLastAction += UndoLastAction;
+            GameEvents.OnRequestHint += FindAndShowHint;
         }
 
         private void UnsubscribeFromInputEvents()
@@ -34,6 +35,24 @@ namespace Core
             GameEvents.OnAttemptMatch -= AttemptMatch;
             GameEvents.OnAddExistingNumbers -= AddExistingNumbersAsNewLines;
             GameEvents.OnUndoLastAction -= UndoLastAction;
+            GameEvents.OnRequestHint -= FindAndShowHint;
+        }
+
+        private void FindAndShowHint()
+        {
+            var activeCells = _gridModel.GetAllActiveCellData();
+            for (var i = 0; i < activeCells.Count; i++)
+            {
+                for (var j = i + 1; j < activeCells.Count; j++)
+                {
+                    var cell1 = activeCells[i];
+                    var cell2 = activeCells[j];
+                    if (!_matchValidator.IsAValidMatch(cell1, cell2)) continue;
+                    GameEvents.RaiseHintFound(cell1.Id, cell2.Id);
+                    return;
+                }
+            }
+            // Сюда можно добавить логику, если подходящих пар не найдено
         }
 
         private void AddExistingNumbersAsNewLines()

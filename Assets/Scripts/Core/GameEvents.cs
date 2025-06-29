@@ -33,5 +33,14 @@ namespace Core
 
         public static event Action OnHideMenu;
         public static void RaiseHideMenu() => OnHideMenu?.Invoke();
+
+        public static event Action OnRequestHint;
+        public static void RaiseRequestHint() => OnRequestHint?.Invoke();
+
+        public static event Action<Guid, Guid> OnHintFound;
+        public static void RaiseHintFound(Guid cell1, Guid cell2) => OnHintFound?.Invoke(cell1, cell2);
+
+        public static event Action OnClearHint;
+        public static void RaiseClearHint() => OnClearHint?.Invoke();
     }
 }

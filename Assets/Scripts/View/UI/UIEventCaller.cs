@@ -29,5 +29,10 @@ namespace View.UI
         {
             GameEvents.RaiseHideMenu();
         }
+
+        public void RaiseRequestHint()
+        {
+            GameEvents.RaiseRequestHint();
+        }
     }
 }

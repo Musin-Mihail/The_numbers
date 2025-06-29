@@ -24,9 +24,9 @@ namespace View.Grid
         private float _cellSize;
         private float _scrollLoggingThreshold;
         private float _lastLoggedScrollPosition;
-
         private Guid? _firstSelectedCellId;
         private float _topPaddingValue;
+        private readonly List<Guid> _hintedCellIds = new();
 
         private void Awake()
         {
@@ -51,6 +51,8 @@ namespace View.Grid
             GameEvents.OnInvalidMatch += HandleInvalidMatch;
             GameEvents.OnToggleTopLine += SetTopPaddingActive;
             GameEvents.OnGameStarted += HandleGameStarted;
+            GameEvents.OnHintFound += HandleHintFound;
+            GameEvents.OnClearHint += ClearHintVisuals;
         }
 
         private void UnsubscribeFromEvents()
@@ -59,6 +61,40 @@ namespace View.Grid
             GameEvents.OnInvalidMatch -= HandleInvalidMatch;
             GameEvents.OnToggleTopLine -= SetTopPaddingActive;
             GameEvents.OnGameStarted -= HandleGameStarted;
+            GameEvents.OnHintFound -= HandleHintFound;
+            GameEvents.OnClearHint -= ClearHintVisuals;
+        }
+
+        private void HandleHintFound(Guid firstId, Guid secondId)
+        {
+            ClearHintVisuals();
+            _hintedCellIds.Add(firstId);
+            _hintedCellIds.Add(secondId);
+
+            if (_cellViewInstances.TryGetValue(firstId, out var firstCell))
+            {
+                firstCell.SetHighlight(true);
+            }
+
+            if (_cellViewInstances.TryGetValue(secondId, out var secondCell))
+            {
+                secondCell.SetHighlight(true);
+            }
+        }
+
+        private void ClearHintVisuals()
+        {
+            if (_hintedCellIds.Count == 0) return;
+
+            foreach (var id in _hintedCellIds)
+            {
+                if (_cellViewInstances.TryGetValue(id, out var cell))
+                {
+                    cell.SetHighlight(false);
+                }
+            }
+
+            _hintedCellIds.Clear();
         }
 
         private void RefreshTopLine()
@@ -122,6 +158,7 @@ namespace View.Grid
 
         private void HandleMatchFound(Guid firstCellId, Guid secondCellId)
         {
+            GameEvents.RaiseClearHint();
             UpdateContentSize();
             RefreshTopLine();
         }
@@ -167,7 +204,7 @@ namespace View.Grid
 
         private void HandleInvalidMatch()
         {
-            // Здесь может быть логика для визуальной обратной связи, например, покачивание ячеек
+            GameEvents.RaiseClearHint();
         }
 
         private void HandleCellAdded(CellData data)
@@ -205,6 +242,7 @@ namespace View.Grid
             }
 
             _cellViewInstances.Clear();
+            ClearHintVisuals();
             UpdateContentSize();
         }
 
@@ -225,7 +263,7 @@ namespace View.Grid
 
             if (cellView.Animator)
             {
-                cellView.Animator.MoveTo(cellView.targetRectTransform, targetPosition, GameConstants.CellMoveDuration);
+                cellView.Animator.MoveTo(cellView.TargetRectTransform, targetPosition, GameConstants.CellMoveDuration);
             }
         }
 

@@ -60,7 +60,7 @@ namespace View.UI
                 cell.SetVisualState(false);
                 _topLineCells.Add(cell);
                 cellGo.SetActive(true);
-                var rectTransform = cell.targetRectTransform;
+                var rectTransform = cell.TargetRectTransform;
                 rectTransform.sizeDelta = new Vector2(_cellSize, _cellSize);
                 rectTransform.anchoredPosition = new Vector2(_cellSize * i + GameConstants.Indent / 2f, -GameConstants.Indent / 2f);
             }

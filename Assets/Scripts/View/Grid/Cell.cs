@@ -13,7 +13,8 @@ namespace View.Grid
         [SerializeField] private GameObject indicator;
         [SerializeField] private Sprite activeSprite;
         [SerializeField] private Sprite disabledSprite;
-        public RectTransform targetRectTransform { get; private set; }
+        [SerializeField] private Color hintColor = new(0.6f, 1f, 0.6f, 1f);
+        public RectTransform TargetRectTransform { get; private set; }
         public CellAnimator Animator { get; private set; }
         private Image _backgroundImage;
         public Action<Guid> OnClickedCallback { get; set; }
@@ -28,7 +29,7 @@ namespace View.Grid
         {
             _backgroundImage = GetComponent<Image>();
             Animator = GetComponent<CellAnimator>();
-            targetRectTransform = GetComponent<RectTransform>();
+            TargetRectTransform = GetComponent<RectTransform>();
         }
 
         public void UpdateFromData(CellData data)
@@ -58,6 +59,7 @@ namespace View.Grid
         {
             OnClickedCallback = null;
             SetSelected(false);
+            SetHighlight(false);
         }
 
         public void SetSelected(bool isSelected)
@@ -67,12 +69,22 @@ namespace View.Grid
             indicator.SetActive(_selected);
         }
 
+        public void SetHighlight(bool show)
+        {
+            if (_backgroundImage)
+            {
+                _backgroundImage.color = show ? hintColor : Color.white;
+            }
+        }
+
         public void SetVisualState(bool isActive)
         {
             text.enabled = isActive;
-            if (_backgroundImage)
+            if (!_backgroundImage) return;
+            _backgroundImage.sprite = isActive ? activeSprite : disabledSprite;
+            if (!isActive)
             {
-                _backgroundImage.sprite = isActive ? activeSprite : disabledSprite;
+                SetHighlight(false);
             }
         }
     }
