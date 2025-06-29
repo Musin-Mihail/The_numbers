@@ -1,4 +1,5 @@
-﻿using DataProviders;
+﻿using System;
+using DataProviders;
 using Gameplay;
 using Model;
 using UnityEngine;
@@ -18,6 +19,7 @@ namespace Core
 
         private GameController _gameController;
         private GridModel _gridModel;
+        private Action _requestNewGameAction;
 
         private void Awake()
         {
@@ -42,7 +44,8 @@ namespace Core
 
             if (confirmationDialog)
             {
-                GameEvents.OnRequestNewGame += () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
+                _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
+                GameEvents.OnRequestNewGame += _requestNewGameAction;
             }
             else
             {
@@ -59,7 +62,10 @@ namespace Core
 
             if (confirmationDialog)
             {
-                GameEvents.OnRequestNewGame -= () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
+                if (_requestNewGameAction != null)
+                {
+                    GameEvents.OnRequestNewGame -= _requestNewGameAction;
+                }
             }
             else
             {
