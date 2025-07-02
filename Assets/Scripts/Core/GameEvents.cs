@@ -1,6 +1,4 @@
-﻿// Assets/Scripts/Core/GameEvents.cs
-
-using System;
+﻿using System;
 
 namespace Core
 {
@@ -65,5 +63,11 @@ namespace Core
 
         public static event Action<long, int> OnStatisticsChanged;
         public static void RaiseStatisticsChanged(long score, int multiplier) => OnStatisticsChanged?.Invoke(score, multiplier);
+
+        public static event Action OnShowStatistics;
+        public static void RaiseShowStatistics() => OnShowStatistics?.Invoke();
+
+        public static event Action OnHideStatistics;
+        public static void RaiseHideStatistics() => OnHideStatistics?.Invoke();
     }
 }

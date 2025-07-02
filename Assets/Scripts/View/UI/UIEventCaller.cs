@@ -39,5 +39,15 @@ namespace View.UI
         {
             GameEvents.RaiseRequestDisableCounters();
         }
+
+        public void RaiseShowStatistics()
+        {
+            GameEvents.RaiseShowStatistics();
+        }
+
+        public void RaiseHideStatistics()
+        {
+            GameEvents.RaiseHideStatistics();
+        }
     }
 }
