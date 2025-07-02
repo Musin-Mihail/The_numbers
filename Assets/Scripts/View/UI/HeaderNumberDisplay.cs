@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Core;
+using Core.Events;
 using Model;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,16 +9,23 @@ namespace View.UI
 {
     public class HeaderNumberDisplay : MonoBehaviour
     {
+        [Header("Scene Dependencies")]
         [SerializeField] private CanvasScaler canvasScaler;
         [SerializeField] private GameObject cellPrefab;
         [SerializeField] private RectTransform container;
 
+        [Header("Event Listening")]
+        [SerializeField] private BoolEvent onToggleTopLine;
+
         private readonly List<Cell> _topLineCells = new();
         private float _cellSize;
 
-        private void Awake()
+        private void OnEnable()
         {
-            GameEvents.OnToggleTopLine += SetContainerActive;
+            if (onToggleTopLine)
+            {
+                onToggleTopLine.AddListener(SetContainerActive);
+            }
         }
 
         private void Start()
@@ -36,9 +43,12 @@ namespace View.UI
             CreateLineDisplay();
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
-            GameEvents.OnToggleTopLine -= SetContainerActive;
+            if (onToggleTopLine)
+            {
+                onToggleTopLine.RemoveListener(SetContainerActive);
+            }
         }
 
         private void SetContainerActive(bool isActive)

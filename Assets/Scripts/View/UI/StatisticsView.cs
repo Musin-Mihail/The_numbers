@@ -1,4 +1,4 @@
-﻿using Core;
+﻿using Core.Events;
 using TMPro;
 using UnityEngine;
 
@@ -6,30 +6,44 @@ namespace View.UI
 {
     public class StatisticsView : MonoBehaviour
     {
+        [Header("UI Dependencies")]
         [SerializeField] private TextMeshProUGUI scoreText;
         [SerializeField] private TextMeshProUGUI multiplierText;
 
+        [Header("Event Listening")]
+        [SerializeField] private StatisticsChangedEvent onStatisticsChanged;
+
+        private void OnEnable()
+        {
+            if (onStatisticsChanged != null)
+            {
+                onStatisticsChanged.AddListener(UpdateStatisticsUI);
+            }
+        }
+
         private void Start()
         {
-            GameEvents.OnStatisticsChanged += UpdateStatisticsUI;
-            UpdateStatisticsUI(0, 1);
+            UpdateStatisticsUI((0, 1));
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
-            GameEvents.OnStatisticsChanged -= UpdateStatisticsUI;
+            if (onStatisticsChanged != null)
+            {
+                onStatisticsChanged.RemoveListener(UpdateStatisticsUI);
+            }
         }
 
-        private void UpdateStatisticsUI(long score, int multiplier)
+        private void UpdateStatisticsUI((long score, int multiplier) data)
         {
             if (scoreText)
             {
-                scoreText.text = $"Счет: {score}";
+                scoreText.text = $"Счет: {data.score}";
             }
 
             if (multiplierText)
             {
-                multiplierText.text = $"Множитель: x{multiplier}";
+                multiplierText.text = $"Множитель: x{data.multiplier}";
             }
         }
     }

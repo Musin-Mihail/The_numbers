@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using Core;
+using Core.Events;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,10 +8,15 @@ namespace View.UI
     [RequireComponent(typeof(RectTransform), typeof(Button))]
     public class ButtonAnimator : MonoBehaviour
     {
+        [Header("Animation Settings")]
         [SerializeField] private Color highlightColor = Color.green;
         [SerializeField] private float animationSpeed = 2.0f;
         [SerializeField] private float scaleAmount = 1.1f;
         [SerializeField] private float rotationAmount = 5f;
+
+        [Header("Event Listening")]
+        [SerializeField] private VoidEvent onAnimationStart;
+        [SerializeField] private VoidEvent onAnimationStop;
 
         private RectTransform _rectTransform;
         private Image _buttonImage;
@@ -32,15 +37,19 @@ namespace View.UI
 
             _originalScale = _rectTransform.localScale;
             _originalRotation = _rectTransform.localRotation;
-
-            GameEvents.OnAddExistingNumbers += StopAnimation;
-            GameEvents.OnNoHintFound += StartAnimation;
         }
 
-        private void OnDestroy()
+        private void OnEnable()
         {
-            GameEvents.OnAddExistingNumbers -= StopAnimation;
-            GameEvents.OnNoHintFound -= StartAnimation;
+            if (onAnimationStart) onAnimationStart.AddListener(StartAnimation);
+            if (onAnimationStop) onAnimationStop.AddListener(StopAnimation);
+        }
+
+        private void OnDisable()
+        {
+            if (onAnimationStart) onAnimationStart.RemoveListener(StartAnimation);
+            if (onAnimationStop) onAnimationStop.RemoveListener(StopAnimation);
+
             if (_animationCoroutine != null)
             {
                 StopCoroutine(_animationCoroutine);
@@ -49,6 +58,7 @@ namespace View.UI
 
         private void StartAnimation()
         {
+            if (!enabled || !gameObject.activeInHierarchy) return;
             if (_animationCoroutine != null)
             {
                 StopCoroutine(_animationCoroutine);

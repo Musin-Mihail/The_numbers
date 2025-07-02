@@ -1,4 +1,4 @@
-﻿using Core;
+﻿using Core.Events;
 using UnityEngine;
 
 namespace View.UI
@@ -7,21 +7,28 @@ namespace View.UI
     {
         [SerializeField] private GameObject statisticsWindow;
 
-        private void Awake()
-        {
-            GameEvents.OnShowStatistics += ShowStatisticsWindow;
-            GameEvents.OnHideStatistics += HideStatisticsWindow;
+        [Header("Event Listening")]
+        [SerializeField] private VoidEvent onShowStatistics;
+        [SerializeField] private VoidEvent onHideStatistics;
 
+        private void OnEnable()
+        {
+            if (onShowStatistics) onShowStatistics.AddListener(ShowStatisticsWindow);
+            if (onHideStatistics) onHideStatistics.AddListener(HideStatisticsWindow);
+        }
+
+        private void Start()
+        {
             if (statisticsWindow)
             {
                 statisticsWindow.SetActive(false);
             }
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
-            GameEvents.OnShowStatistics -= ShowStatisticsWindow;
-            GameEvents.OnHideStatistics -= HideStatisticsWindow;
+            if (onShowStatistics) onShowStatistics.RemoveListener(ShowStatisticsWindow);
+            if (onHideStatistics) onHideStatistics.RemoveListener(HideStatisticsWindow);
         }
 
         private void ShowStatisticsWindow()

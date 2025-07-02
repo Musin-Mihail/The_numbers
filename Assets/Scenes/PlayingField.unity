@@ -1451,6 +1451,27 @@ MonoBehaviour:
   headerNumberDisplay: {fileID: 382419723}
   confirmationDialog: {fileID: 196455909}
   topLineToggle: {fileID: 1346984341}
+  onRequestNewGame: {fileID: 11400000, guid: 21b6a8a81ce78194c8effeca177d2c2f, type: 2}
+  onNewGameStarted: {fileID: 11400000, guid: 83a282d04823d7f4f9c7b4b8092fcc16, type: 2}
+  onRequestRefillCounters: {fileID: 11400000, guid: ef066355403df3f4b9468f453ae59691, type: 2}
+  onRefillCountersConfirmed: {fileID: 11400000, guid: 5100f5e5b746d6348a025118913b270d, type: 2}
+  onRequestDisableCounters: {fileID: 11400000, guid: 6b8453de070a6cc458f5c5a41c65d5c1, type: 2}
+  onDisableCountersConfirmed: {fileID: 11400000, guid: 89fc5ba551a590b44880711d48220ee2, type: 2}
+  onToggleTopLine: {fileID: 11400000, guid: 6b981f9830c5ee243b8a0556f03b0fcc, type: 2}
+  onAttemptMatch: {fileID: 11400000, guid: d14aa99f0755d6e4c9ac2a66bd55f36d, type: 2}
+  onMatchFound: {fileID: 11400000, guid: a3dc017e9d8d336428df3f83216e4da4, type: 2}
+  onInvalidMatch: {fileID: 11400000, guid: 8404d8adbbe192c478a147edb21e8d81, type: 2}
+  onUndoLastAction: {fileID: 11400000, guid: 120b2cac6e87f3841a52dffd7bdef7bf, type: 2}
+  onAddExistingNumbers: {fileID: 11400000, guid: 45a6b4bb6aa4f1e44b151473e1e2bff4, type: 2}
+  onRequestHint: {fileID: 11400000, guid: 27fd83d7291ed8047beae2afde3fb4b5, type: 2}
+  onHintFound: {fileID: 11400000, guid: b610d16f971bd4b409b01e963ceddf3d, type: 2}
+  onNoHintFound: {fileID: 11400000, guid: eadf4278efe0d5844b0f8e0968b908ef, type: 2}
+  onCountersChanged: {fileID: 11400000, guid: 5a49033be5be8d74f94248cf8438b298, type: 2}
+  onStatisticsChanged: {fileID: 11400000, guid: 8b3fcd37ed7d873438d874fb08a548ac, type: 2}
+  onPairScoreAdded: {fileID: 11400000, guid: 39272f154d25db2409653622935f55b7, type: 2}
+  onLineScoreAdded: {fileID: 11400000, guid: bacebd5d9bab88a4486534f31adbe8fd, type: 2}
+  onPairScoreUndone: {fileID: 11400000, guid: 996c9821592d2274380c05d70790ef69, type: 2}
+  onLineScoreUndone: {fileID: 11400000, guid: f7ff1135d14e05844ba7c0a9e319b3d6, type: 2}
 --- !u!114 &382419723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1466,6 +1487,7 @@ MonoBehaviour:
   canvasScaler: {fileID: 111448985}
   cellPrefab: {fileID: 4519391986074129742, guid: 6c74060d7ef2add4297f914d651f7528, type: 3}
   container: {fileID: 946409690}
+  onToggleTopLine: {fileID: 11400000, guid: 6b981f9830c5ee243b8a0556f03b0fcc, type: 2}
 --- !u!114 &382419724
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1478,6 +1500,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ff85503cb8343359e8495a7d6d42f95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onRequestNewGame: {fileID: 11400000, guid: 21b6a8a81ce78194c8effeca177d2c2f, type: 2}
+  onUndoLastAction: {fileID: 11400000, guid: 120b2cac6e87f3841a52dffd7bdef7bf, type: 2}
+  onAddExistingNumbers: {fileID: 11400000, guid: 45a6b4bb6aa4f1e44b151473e1e2bff4, type: 2}
+  onShowMenu: {fileID: 11400000, guid: fc9fef1ee9745fd4c897ca04b13f557f, type: 2}
+  onHideMenu: {fileID: 11400000, guid: e6df8d22085a28f499af489a67957b18, type: 2}
+  onRequestHint: {fileID: 11400000, guid: 27fd83d7291ed8047beae2afde3fb4b5, type: 2}
+  onRequestDisableCounters: {fileID: 11400000, guid: 6b8453de070a6cc458f5c5a41c65d5c1, type: 2}
+  onShowStatistics: {fileID: 11400000, guid: e7de97d3d18b61547bbe9014b507dcf4, type: 2}
+  onHideStatistics: {fileID: 11400000, guid: b7cbc2599a773d043a474efaa5f656dc, type: 2}
 --- !u!114 &382419725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1491,6 +1522,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   windowMenu: {fileID: 1578535001}
+  onShowMenu: {fileID: 11400000, guid: fc9fef1ee9745fd4c897ca04b13f557f, type: 2}
+  onHideMenu: {fileID: 11400000, guid: e6df8d22085a28f499af489a67957b18, type: 2}
+  onNewGameStarted: {fileID: 11400000, guid: 83a282d04823d7f4f9c7b4b8092fcc16, type: 2}
 --- !u!114 &382419726
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1506,6 +1540,7 @@ MonoBehaviour:
   undoCountText: {fileID: 1835601408}
   addNumbersCountText: {fileID: 969915750}
   hintCountText: {fileID: 2121251067}
+  onCountersChanged: {fileID: 11400000, guid: 5a49033be5be8d74f94248cf8438b298, type: 2}
 --- !u!114 &382419727
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1520,6 +1555,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scoreText: {fileID: 1540637244}
   multiplierText: {fileID: 251003694}
+  onStatisticsChanged: {fileID: 11400000, guid: 8b3fcd37ed7d873438d874fb08a548ac, type: 2}
 --- !u!114 &382419728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1533,6 +1569,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   statisticsWindow: {fileID: 1572926991}
+  onShowStatistics: {fileID: 11400000, guid: e7de97d3d18b61547bbe9014b507dcf4, type: 2}
+  onHideStatistics: {fileID: 11400000, guid: b7cbc2599a773d043a474efaa5f656dc, type: 2}
 --- !u!114 &382419729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3104,6 +3142,8 @@ MonoBehaviour:
   animationSpeed: 2
   scaleAmount: 1.1
   rotationAmount: 5
+  onAnimationStart: {fileID: 11400000, guid: eadf4278efe0d5844b0f8e0968b908ef, type: 2}
+  onAnimationStop: {fileID: 11400000, guid: 45a6b4bb6aa4f1e44b151473e1e2bff4, type: 2}
 --- !u!1 &1172191231
 GameObject:
   m_ObjectHideFlags: 0

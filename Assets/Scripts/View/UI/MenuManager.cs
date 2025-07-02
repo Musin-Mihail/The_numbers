@@ -1,4 +1,4 @@
-﻿using Core;
+﻿using Core.Events;
 using UnityEngine;
 
 namespace View.UI
@@ -7,21 +7,31 @@ namespace View.UI
     {
         [SerializeField] private GameObject windowMenu;
 
-        private void Awake()
-        {
-            GameEvents.OnShowMenu += ShowMenu;
-            GameEvents.OnHideMenu += HideMenu;
+        [Header("Event Listening")]
+        [SerializeField] private VoidEvent onShowMenu;
+        [SerializeField] private VoidEvent onHideMenu;
+        [SerializeField] private VoidEvent onNewGameStarted;
 
+        private void OnEnable()
+        {
+            if (onShowMenu) onShowMenu.AddListener(ShowMenu);
+            if (onHideMenu) onHideMenu.AddListener(HideMenu);
+            if (onNewGameStarted) onNewGameStarted.AddListener(HideMenu);
+        }
+
+        private void Start()
+        {
             if (windowMenu)
             {
                 windowMenu.SetActive(true);
             }
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
-            GameEvents.OnShowMenu -= ShowMenu;
-            GameEvents.OnHideMenu -= HideMenu;
+            if (onShowMenu) onShowMenu.RemoveListener(ShowMenu);
+            if (onHideMenu) onHideMenu.RemoveListener(HideMenu);
+            if (onNewGameStarted) onNewGameStarted.RemoveListener(HideMenu);
         }
 
         private void ShowMenu()
