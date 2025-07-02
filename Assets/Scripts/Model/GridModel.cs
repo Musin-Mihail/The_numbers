@@ -8,7 +8,7 @@ namespace Model
 {
     public class GridModel
     {
-        public event Action<CellData> OnCellAdded;
+        public event Action<CellData, bool> OnCellAdded;
         public event Action<CellData> OnCellUpdated;
         public event Action<Guid> OnCellRemoved;
         public event Action OnGridCleared;
@@ -17,6 +17,17 @@ namespace Model
         private readonly Dictionary<Guid, CellData> _cellDataMap = new();
         private readonly List<CellData> _activeCellsCache = new();
         private bool _isCacheDirty = true;
+
+        private static void Shuffle<T>(IList<T> list)
+        {
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = Random.Range(0, n + 1);
+                (list[k], list[n]) = (list[n], list[k]);
+            }
+        }
 
         public List<CellData> GetAllActiveCellData()
         {
@@ -62,7 +73,7 @@ namespace Model
                 var cellData = new CellData(Random.Range(1, 10), lineIndex, i);
                 newLine.Add(cellData);
                 _cellDataMap[cellData.Id] = cellData;
-                OnCellAdded?.Invoke(cellData);
+                OnCellAdded?.Invoke(cellData, true);
             }
 
             _cells.Add(newLine);
@@ -114,7 +125,7 @@ namespace Model
             foreach (var cellData in lineData)
             {
                 _cellDataMap[cellData.Id] = cellData;
-                OnCellAdded?.Invoke(cellData);
+                OnCellAdded?.Invoke(cellData, true);
             }
 
             _isCacheDirty = true;
@@ -144,6 +155,7 @@ namespace Model
         {
             var numbersToAdd = GetAllActiveCellData().Select(cell => cell.Number).ToList();
             if (numbersToAdd.Count == 0) return;
+            Shuffle(numbersToAdd);
             var lastLine = _cells.LastOrDefault();
             if (lastLine != null)
             {
@@ -185,7 +197,7 @@ namespace Model
                 var newCellData = new CellData(number, lineIndex, columnIndex);
                 _cells[lineIndex].Add(newCellData);
                 _cellDataMap[newCellData.Id] = newCellData;
-                OnCellAdded?.Invoke(newCellData);
+                OnCellAdded?.Invoke(newCellData, false);
                 columnIndex++;
             }
 

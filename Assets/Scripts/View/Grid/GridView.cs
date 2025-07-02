@@ -221,14 +221,14 @@ namespace View.Grid
             GameEvents.RaiseClearHint();
         }
 
-        private void HandleCellAdded(CellData data)
+        private void HandleCellAdded(CellData data, bool animate)
         {
             var newCellView = _cellPool.GetCell();
             newCellView.UpdateFromData(data);
             newCellView.OnClickedCallback = HandleCellClicked;
             _cellViewInstances[data.Id] = newCellView;
 
-            UpdateCellPosition(data, newCellView);
+            UpdateCellPosition(data, newCellView, animate);
             UpdateContentSize();
             RefreshTopLine();
         }
@@ -237,7 +237,7 @@ namespace View.Grid
         {
             if (!_cellViewInstances.TryGetValue(data.Id, out var cellView)) return;
             cellView.UpdateFromData(data);
-            UpdateCellPosition(data, cellView);
+            UpdateCellPosition(data, cellView, true);
         }
 
         private void HandleCellRemoved(Guid dataId)
@@ -268,14 +268,13 @@ namespace View.Grid
             contentContainer.sizeDelta = new Vector2(contentContainer.sizeDelta.x, newHeight);
         }
 
-        private void UpdateCellPosition(CellData data, Cell cellView)
+        private void UpdateCellPosition(CellData data, Cell cellView, bool animate = true)
         {
             var targetPosition = GetCellPosition(data);
 
-            if (cellView.Animator)
-            {
-                cellView.Animator.MoveTo(cellView.TargetRectTransform, targetPosition, GameConstants.CellMoveDuration);
-            }
+            if (!cellView.Animator) return;
+            var duration = animate ? GameConstants.CellMoveDuration : 0f;
+            cellView.Animator.MoveTo(cellView.TargetRectTransform, targetPosition, duration);
         }
 
         private void OnScrollValueChanged(Vector2 position)
@@ -315,6 +314,7 @@ namespace View.Grid
                 Debug.LogWarning($"Не удалось найти данные для ячеек {cell1Id} или {cell2Id} для отображения очков.");
                 return;
             }
+
             var pos1Pivot = GetCellPosition(cell1Data);
             var pos2Pivot = GetCellPosition(cell2Data);
             var midPoint = (pos1Pivot + pos2Pivot) / 2f;
