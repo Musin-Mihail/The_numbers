@@ -21,25 +21,37 @@ namespace Core
         [Header("Event Channels")]
         [SerializeField] private GameEvents gameEvents;
 
-        private GameController _gameController;
-        private GridModel _gridModel;
         private Action _requestNewGameAction;
 
         private void Awake()
         {
-            _gridModel = new GridModel();
-            var gridDataProvider = new GridDataProvider(_gridModel);
-            var calculatingMatches = new MatchValidator(gridDataProvider);
-            _gameController = new GameController(
-                _gridModel,
-                calculatingMatches,
-                gameEvents
-            );
-            view.Initialize(
-                _gridModel,
-                headerNumberDisplay,
-                gameEvents
-            );
+            ServiceProvider.Clear();
+
+            ServiceProvider.Register(gameEvents);
+
+            var gridModel = new GridModel();
+            ServiceProvider.Register(gridModel);
+
+            var statisticsModel = new StatisticsModel();
+            ServiceProvider.Register(statisticsModel);
+
+            var actionCountersModel = new ActionCountersModel();
+            ServiceProvider.Register(actionCountersModel);
+
+            var actionHistory = new ActionHistory();
+            ServiceProvider.Register(actionHistory);
+
+            var gridDataProvider = new GridDataProvider(gridModel);
+            ServiceProvider.Register<IGridDataProvider>(gridDataProvider);
+
+            var matchValidator = new MatchValidator(gridDataProvider);
+            ServiceProvider.Register(matchValidator);
+
+            var gameController = new GameController();
+            ServiceProvider.Register(gameController);
+
+            ServiceProvider.Register(view);
+            ServiceProvider.Register(headerNumberDisplay);
         }
 
         private void Start()
@@ -98,11 +110,19 @@ namespace Core
             {
                 gameEvents.onRequestNewGame.RemoveListener(StartNewGameInternal);
             }
+
+            ServiceProvider.Clear();
         }
 
         private void StartNewGameInternal()
         {
-            _gameController.StartNewGame();
+            var gameController = ServiceProvider.GetService<GameController>();
+            gameController.StartNewGame();
+
+            if (topLineToggle)
+            {
+                gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
+            }
         }
     }
 }

@@ -14,6 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onRequestNewGame: {fileID: 11400000, guid: 21b6a8a81ce78194c8effeca177d2c2f, type: 2}
   onNewGameStarted: {fileID: 11400000, guid: 83a282d04823d7f4f9c7b4b8092fcc16, type: 2}
+  onCellAdded: {fileID: 11400000, guid: 02a53295763631c4788abadccbc1e9e6, type: 2}
+  onCellUpdated: {fileID: 11400000, guid: c210cf43c21e2d049ad2061b4ceb4f6d, type: 2}
+  onCellRemoved: {fileID: 11400000, guid: 98a8152bf034d784887becd1f913ac70, type: 2}
+  onGridCleared: {fileID: 11400000, guid: ea3e303b3f14527408b0271daa15b11c, type: 2}
   onUndoLastAction: {fileID: 11400000, guid: 120b2cac6e87f3841a52dffd7bdef7bf, type: 2}
   onAddExistingNumbers: {fileID: 11400000, guid: 45a6b4bb6aa4f1e44b151473e1e2bff4, type: 2}
   onRequestHint: {fileID: 11400000, guid: 27fd83d7291ed8047beae2afde3fb4b5, type: 2}

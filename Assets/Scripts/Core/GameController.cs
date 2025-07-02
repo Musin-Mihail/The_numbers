@@ -4,30 +4,35 @@ using System.Linq;
 using Core.Events;
 using Gameplay;
 using Model;
-using UnityEngine;
 
 namespace Core
 {
     public class GameController
     {
-        private readonly GridModel _gridModel;
-        private readonly MatchValidator _matchValidator;
-        private readonly ActionHistory _actionHistory;
-        private readonly ActionCountersModel _actionCountersModel;
-        private readonly StatisticsModel _statisticsModel;
+        private GridModel _gridModel;
+        private MatchValidator _matchValidator;
+        private ActionHistory _actionHistory;
+        private ActionCountersModel _actionCountersModel;
+        private StatisticsModel _statisticsModel;
+        private GameEvents _gameEvents;
+
         private bool _countersPermanentlyDisabled;
         private const int InitialQuantityByHeight = 5;
-        private readonly GameEvents _gameEvents;
 
-        public GameController(GridModel gridModel, MatchValidator matchValidator, GameEvents gameEvents)
+        public GameController()
         {
-            _gridModel = gridModel;
-            _matchValidator = matchValidator;
-            _gameEvents = gameEvents;
+            Initialize();
+        }
 
-            _actionHistory = new ActionHistory(_gridModel, _gameEvents.onPairScoreUndone, _gameEvents.onLineScoreUndone);
-            _actionCountersModel = new ActionCountersModel();
-            _statisticsModel = new StatisticsModel();
+        private void Initialize()
+        {
+            _gridModel = ServiceProvider.GetService<GridModel>();
+            _matchValidator = ServiceProvider.GetService<MatchValidator>();
+            _gameEvents = ServiceProvider.GetService<GameEvents>();
+            _actionHistory = ServiceProvider.GetService<ActionHistory>();
+            _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
+            _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
+
             _countersPermanentlyDisabled = false;
 
             SubscribeToInputEvents();
@@ -83,7 +88,6 @@ namespace Core
             var activeCells = _gridModel.GetAllActiveCellData();
             if (activeCells.Count < 2)
             {
-                Debug.Log("No active cells found");
                 _gameEvents.onNoHintFound.Raise();
                 return;
             }
@@ -100,8 +104,6 @@ namespace Core
                     return;
                 }
             }
-
-            Debug.Log("No active cells found");
 
             _gameEvents.onNoHintFound.Raise();
         }
@@ -145,7 +147,7 @@ namespace Core
 
             if (!_actionHistory.CanUndo()) return;
 
-            _actionHistory.Undo(_statisticsModel);
+            _actionHistory.Undo();
 
             if (!_actionCountersModel.AreCountersDisabled)
             {

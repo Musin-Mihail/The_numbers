@@ -9,6 +9,12 @@ namespace Core.Events
         public VoidEvent onRequestNewGame;
         public VoidEvent onNewGameStarted;
 
+        [Header("События сетки (Grid)")]
+        public CellDataAnimateEvent onCellAdded;
+        public CellDataEvent onCellUpdated;
+        public GuidEvent onCellRemoved;
+        public VoidEvent onGridCleared;
+
         [Header("Действия пользователя")]
         public VoidEvent onUndoLastAction;
         public VoidEvent onAddExistingNumbers;

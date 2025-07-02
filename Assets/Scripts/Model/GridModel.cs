@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core;
+using Core.Events;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -8,23 +10,26 @@ namespace Model
 {
     public class GridModel
     {
-        public event Action<CellData, bool> OnCellAdded;
-        public event Action<CellData> OnCellUpdated;
-        public event Action<Guid> OnCellRemoved;
-        public event Action OnGridCleared;
         private readonly List<List<CellData>> _cells = new();
         public IReadOnlyList<IReadOnlyList<CellData>> Cells => _cells;
         private readonly Dictionary<Guid, CellData> _cellDataMap = new();
         private readonly List<CellData> _activeCellsCache = new();
         private bool _isCacheDirty = true;
 
+        private readonly GameEvents _gameEvents;
+
+        public GridModel()
+        {
+            _gameEvents = ServiceProvider.GetService<GameEvents>();
+        }
+
         private static void Shuffle<T>(IList<T> list)
         {
-            int n = list.Count;
+            var n = list.Count;
             while (n > 1)
             {
                 n--;
-                int k = Random.Range(0, n + 1);
+                var k = Random.Range(0, n + 1);
                 (list[k], list[n]) = (list[n], list[k]);
             }
         }
@@ -54,7 +59,7 @@ namespace Model
             if (data.IsActive == isActive) return;
             data.SetActive(isActive);
             _isCacheDirty = true;
-            OnCellUpdated?.Invoke(data);
+            _gameEvents.onCellUpdated.Raise(data);
         }
 
         public void ClearField()
@@ -62,7 +67,7 @@ namespace Model
             _cells.Clear();
             _cellDataMap.Clear();
             _isCacheDirty = true;
-            OnGridCleared?.Invoke();
+            _gameEvents.onGridCleared.Raise();
         }
 
         public void CreateLine(int lineIndex)
@@ -73,7 +78,7 @@ namespace Model
                 var cellData = new CellData(Random.Range(1, 10), lineIndex, i);
                 newLine.Add(cellData);
                 _cellDataMap[cellData.Id] = cellData;
-                OnCellAdded?.Invoke(cellData, true);
+                _gameEvents.onCellAdded.Raise((cellData, true));
             }
 
             _cells.Add(newLine);
@@ -92,7 +97,7 @@ namespace Model
             foreach (var cellData in _cells[lineIndex])
             {
                 _cellDataMap.Remove(cellData.Id);
-                OnCellRemoved?.Invoke(cellData.Id);
+                _gameEvents.onCellRemoved.Raise(cellData.Id);
             }
 
             _cells.RemoveAt(lineIndex);
@@ -101,7 +106,7 @@ namespace Model
                 foreach (var cell in _cells[i])
                 {
                     cell.Line = i;
-                    OnCellUpdated?.Invoke(cell);
+                    _gameEvents.onCellUpdated.Raise(cell);
                 }
             }
 
@@ -117,7 +122,7 @@ namespace Model
                 foreach (var cell in _cells[i])
                 {
                     cell.Line++;
-                    OnCellUpdated?.Invoke(cell);
+                    _gameEvents.onCellUpdated.Raise(cell);
                 }
             }
 
@@ -125,7 +130,7 @@ namespace Model
             foreach (var cellData in lineData)
             {
                 _cellDataMap[cellData.Id] = cellData;
-                OnCellAdded?.Invoke(cellData, true);
+                _gameEvents.onCellAdded.Raise((cellData, true));
             }
 
             _isCacheDirty = true;
@@ -165,7 +170,7 @@ namespace Model
                     if (!cell.IsActive)
                     {
                         _cellDataMap.Remove(cell.Id);
-                        OnCellRemoved?.Invoke(cell.Id);
+                        _gameEvents.onCellRemoved.Raise(cell.Id);
                         lastLine.RemoveAt(i);
                     }
                     else
@@ -197,7 +202,7 @@ namespace Model
                 var newCellData = new CellData(number, lineIndex, columnIndex);
                 _cells[lineIndex].Add(newCellData);
                 _cellDataMap[newCellData.Id] = newCellData;
-                OnCellAdded?.Invoke(newCellData, false);
+                _gameEvents.onCellAdded.Raise((newCellData, false));
                 columnIndex++;
             }
 

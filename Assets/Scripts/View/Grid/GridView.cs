@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core;
 using Core.Events;
 using Model;
 using UnityEngine;
@@ -27,6 +28,8 @@ namespace View.Grid
         private HeaderNumberDisplay _headerNumberDisplay;
         private GridModel _gridModel;
         private CellPool _cellPool;
+        private GameEvents _gameEvents;
+
         private float _cellSize;
         private float _scrollLoggingThreshold;
         private float _lastLoggedScrollPosition;
@@ -34,29 +37,24 @@ namespace View.Grid
         private float _topPaddingValue;
         private readonly List<Guid> _hintedCellIds = new();
 
-        private GameEvents _gameEvents;
-
         private void Awake()
         {
             _cellPool = GetComponent<CellPool>();
-        }
 
-        public void Initialize(GridModel gridModel, HeaderNumberDisplay headerNumberDisplay, GameEvents gameEvents)
-        {
-            _gridModel = gridModel;
-            _headerNumberDisplay = headerNumberDisplay;
-            _gameEvents = gameEvents;
-
-            _gridModel.OnCellAdded += HandleCellAdded;
-            _gridModel.OnCellUpdated += HandleCellUpdated;
-            _gridModel.OnCellRemoved += HandleCellRemoved;
-            _gridModel.OnGridCleared += HandleGridCleared;
+            _gameEvents = ServiceProvider.GetService<GameEvents>();
+            _gridModel = ServiceProvider.GetService<GridModel>();
+            _headerNumberDisplay = ServiceProvider.GetService<HeaderNumberDisplay>();
 
             SubscribeToEvents();
         }
 
         private void SubscribeToEvents()
         {
+            _gameEvents.onCellAdded.AddListener(HandleCellAdded);
+            _gameEvents.onCellUpdated.AddListener(HandleCellUpdated);
+            _gameEvents.onCellRemoved.AddListener(HandleCellRemoved);
+            _gameEvents.onGridCleared.AddListener(HandleGridCleared);
+
             _gameEvents.onMatchFound.AddListener(HandleMatchFound);
             _gameEvents.onInvalidMatch.AddListener(HandleInvalidMatch);
             _gameEvents.onToggleTopLine.AddListener(SetTopPaddingActive);
@@ -70,6 +68,13 @@ namespace View.Grid
 
         private void UnsubscribeFromEvents()
         {
+            if (!_gameEvents) return;
+
+            _gameEvents.onCellAdded.RemoveListener(HandleCellAdded);
+            _gameEvents.onCellUpdated.RemoveListener(HandleCellUpdated);
+            _gameEvents.onCellRemoved.RemoveListener(HandleCellRemoved);
+            _gameEvents.onGridCleared.RemoveListener(HandleGridCleared);
+
             _gameEvents.onMatchFound.RemoveListener(HandleMatchFound);
             _gameEvents.onInvalidMatch.RemoveListener(HandleInvalidMatch);
             _gameEvents.onToggleTopLine.RemoveListener(SetTopPaddingActive);
@@ -160,19 +165,7 @@ namespace View.Grid
         private void OnDestroy()
         {
             if (scrollRect) scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
-
-            if (_gridModel != null)
-            {
-                _gridModel.OnCellAdded -= HandleCellAdded;
-                _gridModel.OnCellUpdated -= HandleCellUpdated;
-                _gridModel.OnCellRemoved -= HandleCellRemoved;
-                _gridModel.OnGridCleared -= HandleGridCleared;
-            }
-
-            if (_gameEvents)
-            {
-                UnsubscribeFromEvents();
-            }
+            UnsubscribeFromEvents();
         }
 
         private void HandleMatchFound((Guid firstCellId, Guid secondCellId) data)
@@ -227,14 +220,14 @@ namespace View.Grid
             ClearHintVisuals();
         }
 
-        private void HandleCellAdded(CellData data, bool animate)
+        private void HandleCellAdded((CellData data, bool animate) payload)
         {
             var newCellView = _cellPool.GetCell();
-            newCellView.UpdateFromData(data);
+            newCellView.UpdateFromData(payload.data);
             newCellView.OnClickedCallback = HandleCellClicked;
-            _cellViewInstances[data.Id] = newCellView;
+            _cellViewInstances[payload.data.Id] = newCellView;
 
-            UpdateCellPosition(data, newCellView, animate);
+            UpdateCellPosition(payload.data, newCellView, payload.animate);
             UpdateContentSize();
             RefreshTopLine();
         }

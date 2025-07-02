@@ -8,7 +8,7 @@ namespace Core
 {
     public interface IUndoableAction
     {
-        void Undo(GridModel gridModel, StatisticsModel statisticsModel, PairScoreEvent onPairScoreUndone, LineScoreEvent onLineScoreUndone);
+        void Undo();
     }
 
     public class MatchAction : IUndoableAction
@@ -18,9 +18,12 @@ namespace Core
         private readonly List<Tuple<int, List<CellData>>> _removedLines;
         private readonly long _scoreBeforeAction;
         private readonly int _multiplierBeforeAction;
-
         private readonly int _pairScore;
         private readonly Dictionary<int, int> _lineScores;
+
+        private readonly GridModel _gridModel;
+        private readonly StatisticsModel _statisticsModel;
+        private readonly GameEvents _gameEvents;
 
         public MatchAction(Guid cell1Id, Guid cell2Id, List<Tuple<int, List<CellData>>> removedLines, long scoreBefore, int multiplierBefore, int pairScore, Dictionary<int, int> lineScores)
         {
@@ -31,49 +34,47 @@ namespace Core
             _multiplierBeforeAction = multiplierBefore;
             _pairScore = pairScore;
             _lineScores = lineScores ?? new Dictionary<int, int>();
+
+            _gridModel = ServiceProvider.GetService<GridModel>();
+            _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
+            _gameEvents = ServiceProvider.GetService<GameEvents>();
         }
 
-        public void Undo(GridModel gridModel, StatisticsModel statisticsModel, PairScoreEvent onPairScoreUndone, LineScoreEvent onLineScoreUndone)
+        public void Undo()
         {
             if (_removedLines is { Count: > 0 })
             {
                 foreach (var lineInfo in _removedLines.OrderBy(l => l.Item1))
                 {
-                    gridModel.RestoreLine(lineInfo.Item1, lineInfo.Item2);
+                    _gridModel.RestoreLine(lineInfo.Item1, lineInfo.Item2);
                 }
 
                 foreach (var lineScore in _lineScores)
                 {
-                    onLineScoreUndone.Raise((lineScore.Key, lineScore.Value));
+                    _gameEvents.onLineScoreUndone.Raise((lineScore.Key, lineScore.Value));
                 }
             }
 
-            var cell1 = gridModel.GetCellDataById(_cell1Id);
-            var cell2 = gridModel.GetCellDataById(_cell2Id);
-            if (cell1 != null) gridModel.SetCellActiveState(cell1, true);
-            if (cell2 != null) gridModel.SetCellActiveState(cell2, true);
+            var cell1 = _gridModel.GetCellDataById(_cell1Id);
+            var cell2 = _gridModel.GetCellDataById(_cell2Id);
+            if (cell1 != null) _gridModel.SetCellActiveState(cell1, true);
+            if (cell2 != null) _gridModel.SetCellActiveState(cell2, true);
 
             if (_pairScore > 0)
             {
-                onPairScoreUndone.Raise((_cell1Id, _cell2Id, _pairScore));
+                _gameEvents.onPairScoreUndone.Raise((_cell1Id, _cell2Id, _pairScore));
             }
 
-            statisticsModel.SetState(_scoreBeforeAction, _multiplierBeforeAction);
+            _statisticsModel.SetState(_scoreBeforeAction, _multiplierBeforeAction);
         }
     }
 
     public class ActionHistory
     {
         private readonly Stack<IUndoableAction> _actions = new();
-        private readonly GridModel _gridModel;
-        private readonly PairScoreEvent _onPairScoreUndone;
-        private readonly LineScoreEvent _onLineScoreUndone;
 
-        public ActionHistory(GridModel gridModel, PairScoreEvent onPairScoreUndone, LineScoreEvent onLineScoreUndone)
+        public ActionHistory()
         {
-            _gridModel = gridModel;
-            _onPairScoreUndone = onPairScoreUndone;
-            _onLineScoreUndone = onLineScoreUndone;
         }
 
         public void Record(IUndoableAction action)
@@ -81,11 +82,11 @@ namespace Core
             _actions.Push(action);
         }
 
-        public void Undo(StatisticsModel statisticsModel)
+        public void Undo()
         {
             if (_actions.Count <= 0) return;
             var lastAction = _actions.Pop();
-            lastAction.Undo(_gridModel, statisticsModel, _onPairScoreUndone, _onLineScoreUndone);
+            lastAction.Undo();
         }
 
         public bool CanUndo()
