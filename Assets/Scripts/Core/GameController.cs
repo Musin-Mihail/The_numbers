@@ -17,79 +17,40 @@ namespace Core
         private readonly StatisticsModel _statisticsModel;
         private bool _countersPermanentlyDisabled;
         private const int InitialQuantityByHeight = 5;
+        private readonly GameEvents _gameEvents;
 
-        private readonly CellPairEvent _onAttemptMatch;
-        private readonly VoidEvent _onAddExistingNumbers;
-        private readonly VoidEvent _onUndoLastAction;
-        private readonly VoidEvent _onRequestHint;
-        private readonly VoidEvent _onRefillCountersConfirmed;
-        private readonly VoidEvent _onDisableCountersConfirmed;
-
-        private readonly CountersChangedEvent _onCountersChanged;
-        private readonly VoidEvent _onRequestRefillCounters;
-        private readonly VoidEvent _onNoHintFound;
-        private readonly CellPairEvent _onHintFound;
-        private readonly CellPairEvent _onMatchFound;
-        private readonly VoidEvent _onInvalidMatch;
-        private readonly PairScoreEvent _onPairScoreAdded;
-        private readonly LineScoreEvent _onLineScoreAdded;
-        private readonly StatisticsChangedEvent _onStatisticsChanged;
-        private readonly VoidEvent _onGameStarted;
-
-
-        public GameController(GridModel gridModel, MatchValidator matchValidator,
-            CellPairEvent onAttemptMatch, VoidEvent onAddExistingNumbers, VoidEvent onUndoLastAction,
-            VoidEvent onRequestHint, VoidEvent onRefillCountersConfirmed, VoidEvent onDisableCountersConfirmed,
-            CountersChangedEvent onCountersChanged, VoidEvent onRequestRefillCounters, VoidEvent onNoHintFound,
-            CellPairEvent onHintFound, CellPairEvent onMatchFound, VoidEvent onInvalidMatch,
-            PairScoreEvent onPairScoreAdded, LineScoreEvent onLineScoreAdded, StatisticsChangedEvent onStatisticsChanged,
-            VoidEvent onGameStarted, PairScoreEvent onPairScoreUndone, LineScoreEvent onLineScoreUndone)
+        public GameController(GridModel gridModel, MatchValidator matchValidator, GameEvents gameEvents)
         {
             _gridModel = gridModel;
             _matchValidator = matchValidator;
-            _actionHistory = new ActionHistory(_gridModel, onPairScoreUndone, onLineScoreUndone);
+            _gameEvents = gameEvents;
+
+            _actionHistory = new ActionHistory(_gridModel, _gameEvents.onPairScoreUndone, _gameEvents.onLineScoreUndone);
             _actionCountersModel = new ActionCountersModel();
             _statisticsModel = new StatisticsModel();
             _countersPermanentlyDisabled = false;
-
-            _onAttemptMatch = onAttemptMatch;
-            _onAddExistingNumbers = onAddExistingNumbers;
-            _onUndoLastAction = onUndoLastAction;
-            _onRequestHint = onRequestHint;
-            _onRefillCountersConfirmed = onRefillCountersConfirmed;
-            _onDisableCountersConfirmed = onDisableCountersConfirmed;
-            _onCountersChanged = onCountersChanged;
-            _onRequestRefillCounters = onRequestRefillCounters;
-            _onNoHintFound = onNoHintFound;
-            _onHintFound = onHintFound;
-            _onMatchFound = onMatchFound;
-            _onInvalidMatch = onInvalidMatch;
-            _onPairScoreAdded = onPairScoreAdded;
-            _onLineScoreAdded = onLineScoreAdded;
-            _onStatisticsChanged = onStatisticsChanged;
-            _onGameStarted = onGameStarted;
 
             SubscribeToInputEvents();
         }
 
         private void SubscribeToInputEvents()
         {
-            _onAttemptMatch.AddListener(AttemptMatch);
-            _onAddExistingNumbers.AddListener(AddExistingNumbersAsNewLines);
-            _onUndoLastAction.AddListener(UndoLastAction);
-            _onRequestHint.AddListener(FindAndShowHint);
-            _onRefillCountersConfirmed.AddListener(HandleRefillCountersConfirmed);
-            _onDisableCountersConfirmed.AddListener(HandleDisableCountersConfirmed);
+            _gameEvents.onAttemptMatch.AddListener(AttemptMatch);
+            _gameEvents.onAddExistingNumbers.AddListener(AddExistingNumbersAsNewLines);
+            _gameEvents.onUndoLastAction.AddListener(UndoLastAction);
+            _gameEvents.onRequestHint.AddListener(FindAndShowHint);
+            _gameEvents.onRefillCountersConfirmed.AddListener(HandleRefillCountersConfirmed);
+            _gameEvents.onDisableCountersConfirmed.AddListener(HandleDisableCountersConfirmed);
         }
 
         private void UnsubscribeFromInputEvents()
         {
-            _onAttemptMatch.RemoveListener(AttemptMatch);
-            _onAddExistingNumbers.RemoveListener(AddExistingNumbersAsNewLines);
-            _onUndoLastAction.RemoveListener(UndoLastAction);
-            _onRequestHint.RemoveListener(FindAndShowHint);
-            _onRefillCountersConfirmed.RemoveListener(HandleRefillCountersConfirmed);
-            _onDisableCountersConfirmed.RemoveListener(HandleDisableCountersConfirmed);
+            _gameEvents.onAttemptMatch.RemoveListener(AttemptMatch);
+            _gameEvents.onAddExistingNumbers.RemoveListener(AddExistingNumbersAsNewLines);
+            _gameEvents.onUndoLastAction.RemoveListener(UndoLastAction);
+            _gameEvents.onRequestHint.RemoveListener(FindAndShowHint);
+            _gameEvents.onRefillCountersConfirmed.RemoveListener(HandleRefillCountersConfirmed);
+            _gameEvents.onDisableCountersConfirmed.RemoveListener(HandleDisableCountersConfirmed);
         }
 
         private void HandleRefillCountersConfirmed()
@@ -101,7 +62,7 @@ namespace Core
 
         private void RaiseCountersChangedEvent()
         {
-            _onCountersChanged.Raise(_actionCountersModel.AreCountersDisabled ? (-1, -1, -1) : (_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount));
+            _gameEvents.onCountersChanged.Raise(_actionCountersModel.AreCountersDisabled ? (-1, -1, -1) : (_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount));
         }
 
         private void HandleDisableCountersConfirmed()
@@ -115,7 +76,7 @@ namespace Core
         {
             if (!_actionCountersModel.IsHintAvailable())
             {
-                _onRequestRefillCounters.Raise();
+                _gameEvents.onRequestRefillCounters.Raise();
                 return;
             }
 
@@ -123,7 +84,7 @@ namespace Core
             if (activeCells.Count < 2)
             {
                 Debug.Log("No active cells found");
-                _onNoHintFound.Raise();
+                _gameEvents.onNoHintFound.Raise();
                 return;
             }
 
@@ -142,7 +103,7 @@ namespace Core
 
             Debug.Log("No active cells found");
 
-            _onNoHintFound.Raise();
+            _gameEvents.onNoHintFound.Raise();
         }
 
         private void ShowHintAndDecrementCounter(CellData cell1, CellData cell2)
@@ -153,14 +114,14 @@ namespace Core
             }
 
             RaiseCountersChangedEvent();
-            _onHintFound.Raise((cell1.Id, cell2.Id));
+            _gameEvents.onHintFound.Raise((cell1.Id, cell2.Id));
         }
 
         private void AddExistingNumbersAsNewLines()
         {
             if (!_actionCountersModel.IsAddNumbersAvailable())
             {
-                _onRequestRefillCounters.Raise();
+                _gameEvents.onRequestRefillCounters.Raise();
                 return;
             }
 
@@ -178,7 +139,7 @@ namespace Core
         {
             if (!_actionCountersModel.IsUndoAvailable())
             {
-                _onRequestRefillCounters.Raise();
+                _gameEvents.onRequestRefillCounters.Raise();
                 return;
             }
 
@@ -192,7 +153,7 @@ namespace Core
             }
 
             RaiseCountersChangedEvent();
-            _onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
+            _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
         }
 
         private void AttemptMatch((Guid firstCellId, Guid secondCellId) data)
@@ -206,7 +167,7 @@ namespace Core
             }
             else
             {
-                _onInvalidMatch.Raise();
+                _gameEvents.onInvalidMatch.Raise();
             }
         }
 
@@ -216,12 +177,12 @@ namespace Core
             var lineScores = new Dictionary<int, int>();
             var scoreBeforeAction = _statisticsModel.Score;
             var multiplierBeforeAction = _statisticsModel.Multiplier;
-            _onMatchFound.Raise((data1.Id, data2.Id));
+            _gameEvents.onMatchFound.Raise((data1.Id, data2.Id));
             _gridModel.SetCellActiveState(data1, false);
             _gridModel.SetCellActiveState(data2, false);
             var pairScore = 1 * _statisticsModel.Multiplier;
             _statisticsModel.AddScore(pairScore);
-            _onPairScoreAdded.Raise((data1.Id, data2.Id, pairScore));
+            _gameEvents.onPairScoreAdded.Raise((data1.Id, data2.Id, pairScore));
             CheckAndRemoveEmptyLines(data1.Line, data2.Line, removedLinesInfo, lineScores);
             if (_gridModel.GetAllActiveCellData().Count == 0)
             {
@@ -230,7 +191,7 @@ namespace Core
 
             var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo, scoreBeforeAction, multiplierBeforeAction, pairScore, lineScores);
             _actionHistory.Record(action);
-            _onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
+            _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
         }
 
         private int CheckAndRemoveEmptyLines(int line1, int line2, List<Tuple<int, List<CellData>>> removedLinesInfo, Dictionary<int, int> lineScores)
@@ -247,12 +208,11 @@ namespace Core
                 var scoreForLine = 10 * _statisticsModel.Multiplier;
                 _statisticsModel.AddScore(scoreForLine);
                 lineScores[lineIndex] = scoreForLine;
-                _onLineScoreAdded.Raise((lineIndex, scoreForLine));
+                _gameEvents.onLineScoreAdded.Raise((lineIndex, scoreForLine));
             }
 
             return linesToRemove.Count;
         }
-
 
         public void StartNewGame()
         {
@@ -267,14 +227,14 @@ namespace Core
             }
 
             RaiseCountersChangedEvent();
-            _onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
+            _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
 
             for (var i = 0; i < InitialQuantityByHeight; i++)
             {
                 _gridModel.CreateLine(i);
             }
 
-            _onGameStarted.Raise();
+            _gameEvents.onNewGameStarted.Raise();
         }
 
         ~GameController()

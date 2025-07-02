@@ -11,13 +11,13 @@ namespace View.UI
         [SerializeField] private TextMeshProUGUI multiplierText;
 
         [Header("Event Listening")]
-        [SerializeField] private StatisticsChangedEvent onStatisticsChanged;
+        [SerializeField] private GameEvents gameEvents;
 
         private void OnEnable()
         {
-            if (onStatisticsChanged != null)
+            if (gameEvents)
             {
-                onStatisticsChanged.AddListener(UpdateStatisticsUI);
+                gameEvents.onStatisticsChanged.AddListener(UpdateStatisticsUI);
             }
         }
 
@@ -28,9 +28,9 @@ namespace View.UI
 
         private void OnDisable()
         {
-            if (onStatisticsChanged != null)
+            if (gameEvents)
             {
-                onStatisticsChanged.RemoveListener(UpdateStatisticsUI);
+                gameEvents.onStatisticsChanged.RemoveListener(UpdateStatisticsUI);
             }
         }
 

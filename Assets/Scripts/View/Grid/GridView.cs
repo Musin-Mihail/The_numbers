@@ -34,42 +34,18 @@ namespace View.Grid
         private float _topPaddingValue;
         private readonly List<Guid> _hintedCellIds = new();
 
-        private CellPairEvent _onMatchFound;
-        private VoidEvent _onInvalidMatch;
-        private BoolEvent _onToggleTopLine;
-        private VoidEvent _onGameStarted;
-        private CellPairEvent _onHintFound;
-        private PairScoreEvent _onPairScoreAdded;
-        private LineScoreEvent _onLineScoreAdded;
-        private PairScoreEvent _onPairScoreUndone;
-        private LineScoreEvent _onLineScoreUndone;
-        private CellPairEvent _onAttemptMatch;
-        private VoidEvent _onClearHint;
+        private GameEvents _gameEvents;
 
         private void Awake()
         {
             _cellPool = GetComponent<CellPool>();
         }
 
-        public void Initialize(GridModel gridModel, HeaderNumberDisplay headerNumberDisplay,
-            CellPairEvent onMatchFound, VoidEvent onInvalidMatch, BoolEvent onToggleTopLine,
-            VoidEvent onGameStarted, CellPairEvent onHintFound, PairScoreEvent onPairScoreAdded,
-            LineScoreEvent onLineScoreAdded, PairScoreEvent onPairScoreUndone, LineScoreEvent onLineScoreUndone,
-            CellPairEvent onAttemptMatch)
+        public void Initialize(GridModel gridModel, HeaderNumberDisplay headerNumberDisplay, GameEvents gameEvents)
         {
             _gridModel = gridModel;
             _headerNumberDisplay = headerNumberDisplay;
-
-            _onMatchFound = onMatchFound;
-            _onInvalidMatch = onInvalidMatch;
-            _onToggleTopLine = onToggleTopLine;
-            _onGameStarted = onGameStarted;
-            _onHintFound = onHintFound;
-            _onPairScoreAdded = onPairScoreAdded;
-            _onLineScoreAdded = onLineScoreAdded;
-            _onPairScoreUndone = onPairScoreUndone;
-            _onLineScoreUndone = onLineScoreUndone;
-            _onAttemptMatch = onAttemptMatch;
+            _gameEvents = gameEvents;
 
             _gridModel.OnCellAdded += HandleCellAdded;
             _gridModel.OnCellUpdated += HandleCellUpdated;
@@ -81,28 +57,28 @@ namespace View.Grid
 
         private void SubscribeToEvents()
         {
-            _onMatchFound.AddListener(HandleMatchFound);
-            _onInvalidMatch.AddListener(HandleInvalidMatch);
-            _onToggleTopLine.AddListener(SetTopPaddingActive);
-            _onGameStarted.AddListener(HandleGameStarted);
-            _onHintFound.AddListener(HandleHintFound);
-            _onPairScoreAdded.AddListener(HandlePairScoreAdded);
-            _onLineScoreAdded.AddListener(HandleLineScoreAdded);
-            _onPairScoreUndone.AddListener(HandlePairScoreUndone);
-            _onLineScoreUndone.AddListener(HandleLineScoreUndone);
+            _gameEvents.onMatchFound.AddListener(HandleMatchFound);
+            _gameEvents.onInvalidMatch.AddListener(HandleInvalidMatch);
+            _gameEvents.onToggleTopLine.AddListener(SetTopPaddingActive);
+            _gameEvents.onNewGameStarted.AddListener(HandleGameStarted);
+            _gameEvents.onHintFound.AddListener(HandleHintFound);
+            _gameEvents.onPairScoreAdded.AddListener(HandlePairScoreAdded);
+            _gameEvents.onLineScoreAdded.AddListener(HandleLineScoreAdded);
+            _gameEvents.onPairScoreUndone.AddListener(HandlePairScoreUndone);
+            _gameEvents.onLineScoreUndone.AddListener(HandleLineScoreUndone);
         }
 
         private void UnsubscribeFromEvents()
         {
-            _onMatchFound.RemoveListener(HandleMatchFound);
-            _onInvalidMatch.RemoveListener(HandleInvalidMatch);
-            _onToggleTopLine.RemoveListener(SetTopPaddingActive);
-            _onGameStarted.RemoveListener(HandleGameStarted);
-            _onHintFound.RemoveListener(HandleHintFound);
-            _onPairScoreAdded.RemoveListener(HandlePairScoreAdded);
-            _onLineScoreAdded.RemoveListener(HandleLineScoreAdded);
-            _onPairScoreUndone.RemoveListener(HandlePairScoreUndone);
-            _onLineScoreUndone.RemoveListener(HandleLineScoreUndone);
+            _gameEvents.onMatchFound.RemoveListener(HandleMatchFound);
+            _gameEvents.onInvalidMatch.RemoveListener(HandleInvalidMatch);
+            _gameEvents.onToggleTopLine.RemoveListener(SetTopPaddingActive);
+            _gameEvents.onNewGameStarted.RemoveListener(HandleGameStarted);
+            _gameEvents.onHintFound.RemoveListener(HandleHintFound);
+            _gameEvents.onPairScoreAdded.RemoveListener(HandlePairScoreAdded);
+            _gameEvents.onLineScoreAdded.RemoveListener(HandleLineScoreAdded);
+            _gameEvents.onPairScoreUndone.RemoveListener(HandlePairScoreUndone);
+            _gameEvents.onLineScoreUndone.RemoveListener(HandleLineScoreUndone);
         }
 
         private void HandleHintFound((Guid firstId, Guid secondId) data)
@@ -193,7 +169,10 @@ namespace View.Grid
                 _gridModel.OnGridCleared -= HandleGridCleared;
             }
 
-            UnsubscribeFromEvents();
+            if (_gameEvents)
+            {
+                UnsubscribeFromEvents();
+            }
         }
 
         private void HandleMatchFound((Guid firstCellId, Guid secondCellId) data)
@@ -205,7 +184,8 @@ namespace View.Grid
 
         private void HandleGameStarted()
         {
-            // GameEvents.RaiseHideMenu(); // Это событие теперь может вызываться из UIEventCaller напрямую
+            // Это событие теперь может вызываться из UIEventCaller напрямую,
+            // но если здесь нужна специфичная для GridView логика, ее можно добавить.
         }
 
         private void HandleCellClicked(Guid clickedCellId)
@@ -236,7 +216,7 @@ namespace View.Grid
                         firstCellView.SetSelected(false);
                     }
 
-                    _onAttemptMatch.Raise((_firstSelectedCellId.Value, clickedCellId));
+                    _gameEvents.onAttemptMatch.Raise((_firstSelectedCellId.Value, clickedCellId));
                     _firstSelectedCellId = null;
                 }
             }

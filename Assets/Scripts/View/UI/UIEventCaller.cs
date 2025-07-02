@@ -6,59 +6,51 @@ namespace View.UI
     public class UIEventCaller : MonoBehaviour
     {
         [Header("Event Raising")]
-        [SerializeField] private VoidEvent onRequestNewGame;
-        [SerializeField] private VoidEvent onUndoLastAction;
-        [SerializeField] private VoidEvent onAddExistingNumbers;
-        [SerializeField] private VoidEvent onShowMenu;
-        [SerializeField] private VoidEvent onHideMenu;
-        [SerializeField] private VoidEvent onRequestHint;
-        [SerializeField] private VoidEvent onRequestDisableCounters;
-        [SerializeField] private VoidEvent onShowStatistics;
-        [SerializeField] private VoidEvent onHideStatistics;
+        [SerializeField] private GameEvents gameEvents;
 
         public void RaiseRequestNewGame()
         {
-            if (onRequestNewGame) onRequestNewGame.Raise();
+            if (gameEvents) gameEvents.onRequestNewGame.Raise();
         }
 
         public void RaiseUndoLastAction()
         {
-            if (onUndoLastAction) onUndoLastAction.Raise();
+            if (gameEvents) gameEvents.onUndoLastAction.Raise();
         }
 
         public void RaiseAddExistingNumbers()
         {
-            if (onAddExistingNumbers) onAddExistingNumbers.Raise();
+            if (gameEvents) gameEvents.onAddExistingNumbers.Raise();
         }
 
         public void RaiseShowMenu()
         {
-            if (onShowMenu) onShowMenu.Raise();
+            if (gameEvents) gameEvents.onShowMenu.Raise();
         }
 
         public void RaiseHideMenu()
         {
-            if (onHideMenu) onHideMenu.Raise();
+            if (gameEvents) gameEvents.onHideMenu.Raise();
         }
 
         public void RaiseRequestHint()
         {
-            if (onRequestHint) onRequestHint.Raise();
+            if (gameEvents) gameEvents.onRequestHint.Raise();
         }
 
         public void RaiseRequestDisableCounters()
         {
-            if (onRequestDisableCounters) onRequestDisableCounters.Raise();
+            if (gameEvents) gameEvents.onRequestDisableCounters.Raise();
         }
 
         public void RaiseShowStatistics()
         {
-            if (onShowStatistics) onShowStatistics.Raise();
+            if (gameEvents) gameEvents.onShowStatistics.Raise();
         }
 
         public void RaiseHideStatistics()
         {
-            if (onHideStatistics) onHideStatistics.Raise();
+            if (gameEvents) gameEvents.onHideStatistics.Raise();
         }
     }
 }

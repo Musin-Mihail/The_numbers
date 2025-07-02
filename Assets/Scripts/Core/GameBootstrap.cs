@@ -19,27 +19,7 @@ namespace Core
         [SerializeField] private Toggle topLineToggle;
 
         [Header("Event Channels")]
-        [SerializeField] private VoidEvent onRequestNewGame;
-        [SerializeField] private VoidEvent onNewGameStarted;
-        [SerializeField] private VoidEvent onRequestRefillCounters;
-        [SerializeField] private VoidEvent onRefillCountersConfirmed;
-        [SerializeField] private VoidEvent onRequestDisableCounters;
-        [SerializeField] private VoidEvent onDisableCountersConfirmed;
-        [SerializeField] private BoolEvent onToggleTopLine;
-        [SerializeField] private CellPairEvent onAttemptMatch;
-        [SerializeField] private CellPairEvent onMatchFound;
-        [SerializeField] private VoidEvent onInvalidMatch;
-        [SerializeField] private VoidEvent onUndoLastAction;
-        [SerializeField] private VoidEvent onAddExistingNumbers;
-        [SerializeField] private VoidEvent onRequestHint;
-        [SerializeField] private CellPairEvent onHintFound;
-        [SerializeField] private VoidEvent onNoHintFound;
-        [SerializeField] private CountersChangedEvent onCountersChanged;
-        [SerializeField] private StatisticsChangedEvent onStatisticsChanged;
-        [SerializeField] private PairScoreEvent onPairScoreAdded;
-        [SerializeField] private LineScoreEvent onLineScoreAdded;
-        [SerializeField] private PairScoreEvent onPairScoreUndone;
-        [SerializeField] private LineScoreEvent onLineScoreUndone;
+        [SerializeField] private GameEvents gameEvents;
 
         private GameController _gameController;
         private GridModel _gridModel;
@@ -50,42 +30,15 @@ namespace Core
             _gridModel = new GridModel();
             var gridDataProvider = new GridDataProvider(_gridModel);
             var calculatingMatches = new MatchValidator(gridDataProvider);
-
             _gameController = new GameController(
                 _gridModel,
                 calculatingMatches,
-                onAttemptMatch,
-                onAddExistingNumbers,
-                onUndoLastAction,
-                onRequestHint,
-                onRefillCountersConfirmed,
-                onDisableCountersConfirmed,
-                onCountersChanged,
-                onRequestRefillCounters,
-                onNoHintFound,
-                onHintFound,
-                onMatchFound,
-                onInvalidMatch,
-                onPairScoreAdded,
-                onLineScoreAdded,
-                onStatisticsChanged,
-                onNewGameStarted,
-                onPairScoreUndone,
-                onLineScoreUndone
+                gameEvents
             );
             view.Initialize(
                 _gridModel,
                 headerNumberDisplay,
-                onMatchFound,
-                onInvalidMatch,
-                onToggleTopLine,
-                onNewGameStarted,
-                onHintFound,
-                onPairScoreAdded,
-                onLineScoreAdded,
-                onPairScoreUndone,
-                onLineScoreUndone,
-                onAttemptMatch
+                gameEvents
             );
         }
 
@@ -93,57 +46,57 @@ namespace Core
         {
             if (topLineToggle)
             {
-                onToggleTopLine.Raise(topLineToggle.isOn);
-                topLineToggle.onValueChanged.AddListener(onToggleTopLine.Raise);
+                gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
+                topLineToggle.onValueChanged.AddListener(gameEvents.onToggleTopLine.Raise);
             }
             else
             {
-                onToggleTopLine.Raise(true);
+                gameEvents.onToggleTopLine.Raise(true);
             }
 
             if (confirmationDialog)
             {
                 _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
-                onRequestNewGame.AddListener(_requestNewGameAction);
-                onRequestRefillCounters.AddListener(HandleRequestRefillCounters);
-                onRequestDisableCounters.AddListener(HandleRequestDisableCounters);
+                gameEvents.onRequestNewGame.AddListener(_requestNewGameAction);
+                gameEvents.onRequestRefillCounters.AddListener(HandleRequestRefillCounters);
+                gameEvents.onRequestDisableCounters.AddListener(HandleRequestDisableCounters);
             }
             else
             {
-                onRequestNewGame.AddListener(StartNewGameInternal);
+                gameEvents.onRequestNewGame.AddListener(StartNewGameInternal);
             }
         }
 
         private void HandleRequestDisableCounters()
         {
-            confirmationDialog.Show("Отключить счётчики?", () => { onDisableCountersConfirmed.Raise(); });
+            confirmationDialog.Show("Отключить счётчики?", () => { gameEvents.onDisableCountersConfirmed.Raise(); });
         }
 
         private void HandleRequestRefillCounters()
         {
-            confirmationDialog.Show("Добавить количество к cчетчикам?", () => { onRefillCountersConfirmed.Raise(); });
+            confirmationDialog.Show("Добавить количество к cчетчикам?", () => { gameEvents.onRefillCountersConfirmed.Raise(); });
         }
 
         private void OnDestroy()
         {
             if (topLineToggle)
             {
-                topLineToggle.onValueChanged.RemoveListener(onToggleTopLine.Raise);
+                topLineToggle.onValueChanged.RemoveListener(gameEvents.onToggleTopLine.Raise);
             }
 
             if (confirmationDialog)
             {
                 if (_requestNewGameAction != null)
                 {
-                    onRequestNewGame.RemoveListener(_requestNewGameAction);
+                    gameEvents.onRequestNewGame.RemoveListener(_requestNewGameAction);
                 }
 
-                onRequestRefillCounters.RemoveListener(HandleRequestRefillCounters);
-                onRequestDisableCounters.RemoveListener(HandleRequestDisableCounters);
+                gameEvents.onRequestRefillCounters.RemoveListener(HandleRequestRefillCounters);
+                gameEvents.onRequestDisableCounters.RemoveListener(HandleRequestDisableCounters);
             }
             else
             {
-                onRequestNewGame.RemoveListener(StartNewGameInternal);
+                gameEvents.onRequestNewGame.RemoveListener(StartNewGameInternal);
             }
         }
 

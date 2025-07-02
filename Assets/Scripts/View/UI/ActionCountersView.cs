@@ -12,13 +12,13 @@ namespace View.UI
         [SerializeField] private TextMeshProUGUI hintCountText;
 
         [Header("Event Listening")]
-        [SerializeField] private CountersChangedEvent onCountersChanged;
+        [SerializeField] private GameEvents gameEvents;
 
         private void OnEnable()
         {
-            if (onCountersChanged)
+            if (gameEvents)
             {
-                onCountersChanged.AddListener(UpdateCountersUI);
+                gameEvents.onCountersChanged.AddListener(UpdateCountersUI);
             }
         }
 
@@ -29,9 +29,9 @@ namespace View.UI
 
         private void OnDisable()
         {
-            if (onCountersChanged)
+            if (gameEvents != null)
             {
-                onCountersChanged.RemoveListener(UpdateCountersUI);
+                gameEvents.onCountersChanged.RemoveListener(UpdateCountersUI);
             }
         }
 

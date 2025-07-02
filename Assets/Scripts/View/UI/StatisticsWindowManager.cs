@@ -8,13 +8,13 @@ namespace View.UI
         [SerializeField] private GameObject statisticsWindow;
 
         [Header("Event Listening")]
-        [SerializeField] private VoidEvent onShowStatistics;
-        [SerializeField] private VoidEvent onHideStatistics;
+        [SerializeField] private GameEvents gameEvents;
 
         private void OnEnable()
         {
-            if (onShowStatistics) onShowStatistics.AddListener(ShowStatisticsWindow);
-            if (onHideStatistics) onHideStatistics.AddListener(HideStatisticsWindow);
+            if (!gameEvents) return;
+            gameEvents.onShowStatistics.AddListener(ShowStatisticsWindow);
+            gameEvents.onHideStatistics.AddListener(HideStatisticsWindow);
         }
 
         private void Start()
@@ -27,8 +27,9 @@ namespace View.UI
 
         private void OnDisable()
         {
-            if (onShowStatistics) onShowStatistics.RemoveListener(ShowStatisticsWindow);
-            if (onHideStatistics) onHideStatistics.RemoveListener(HideStatisticsWindow);
+            if (!gameEvents) return;
+            gameEvents.onShowStatistics.RemoveListener(ShowStatisticsWindow);
+            gameEvents.onHideStatistics.RemoveListener(HideStatisticsWindow);
         }
 
         private void ShowStatisticsWindow()

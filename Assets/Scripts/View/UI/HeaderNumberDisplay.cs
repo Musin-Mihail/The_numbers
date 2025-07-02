@@ -15,16 +15,16 @@ namespace View.UI
         [SerializeField] private RectTransform container;
 
         [Header("Event Listening")]
-        [SerializeField] private BoolEvent onToggleTopLine;
+        [SerializeField] private GameEvents gameEvents;
 
         private readonly List<Cell> _topLineCells = new();
         private float _cellSize;
 
         private void OnEnable()
         {
-            if (onToggleTopLine)
+            if (gameEvents)
             {
-                onToggleTopLine.AddListener(SetContainerActive);
+                gameEvents.onToggleTopLine.AddListener(SetContainerActive);
             }
         }
 
@@ -45,9 +45,9 @@ namespace View.UI
 
         private void OnDisable()
         {
-            if (onToggleTopLine)
+            if (gameEvents != null)
             {
-                onToggleTopLine.RemoveListener(SetContainerActive);
+                gameEvents.onToggleTopLine.RemoveListener(SetContainerActive);
             }
         }
 

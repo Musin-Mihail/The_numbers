@@ -8,15 +8,14 @@ namespace View.UI
         [SerializeField] private GameObject windowMenu;
 
         [Header("Event Listening")]
-        [SerializeField] private VoidEvent onShowMenu;
-        [SerializeField] private VoidEvent onHideMenu;
-        [SerializeField] private VoidEvent onNewGameStarted;
+        [SerializeField] private GameEvents gameEvents;
 
         private void OnEnable()
         {
-            if (onShowMenu) onShowMenu.AddListener(ShowMenu);
-            if (onHideMenu) onHideMenu.AddListener(HideMenu);
-            if (onNewGameStarted) onNewGameStarted.AddListener(HideMenu);
+            if (!gameEvents) return;
+            gameEvents.onShowMenu.AddListener(ShowMenu);
+            gameEvents.onHideMenu.AddListener(HideMenu);
+            gameEvents.onNewGameStarted.AddListener(HideMenu);
         }
 
         private void Start()
@@ -29,9 +28,10 @@ namespace View.UI
 
         private void OnDisable()
         {
-            if (onShowMenu) onShowMenu.RemoveListener(ShowMenu);
-            if (onHideMenu) onHideMenu.RemoveListener(HideMenu);
-            if (onNewGameStarted) onNewGameStarted.RemoveListener(HideMenu);
+            if (!gameEvents) return;
+            gameEvents.onShowMenu.RemoveListener(ShowMenu);
+            gameEvents.onHideMenu.RemoveListener(HideMenu);
+            gameEvents.onNewGameStarted.RemoveListener(HideMenu);
         }
 
         private void ShowMenu()
