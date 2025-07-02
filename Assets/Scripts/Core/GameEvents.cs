@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Assets/Scripts/Core/GameEvents.cs
+
+using System;
 
 namespace Core
 {
@@ -60,5 +62,8 @@ namespace Core
 
         public static event Action OnDisableCountersConfirmed;
         public static void RaiseDisableCountersConfirmed() => OnDisableCountersConfirmed?.Invoke();
+
+        public static event Action<long, int> OnStatisticsChanged;
+        public static void RaiseStatisticsChanged(long score, int multiplier) => OnStatisticsChanged?.Invoke(score, multiplier);
     }
 }

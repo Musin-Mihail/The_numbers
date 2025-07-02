@@ -7,7 +7,7 @@ namespace Core
 {
     public interface IUndoableAction
     {
-        void Undo(GridModel gridModel);
+        void Undo(GridModel gridModel, StatisticsModel statisticsModel);
     }
 
     public class MatchAction : IUndoableAction
@@ -16,14 +16,19 @@ namespace Core
         private readonly Guid _cell2Id;
         private readonly List<Tuple<int, List<CellData>>> _removedLines;
 
-        public MatchAction(Guid cell1Id, Guid cell2Id, List<Tuple<int, List<CellData>>> removedLines)
+        private readonly long _scoreBeforeAction;
+        private readonly int _multiplierBeforeAction;
+
+        public MatchAction(Guid cell1Id, Guid cell2Id, List<Tuple<int, List<CellData>>> removedLines, long scoreBefore, int multiplierBefore)
         {
             _cell1Id = cell1Id;
             _cell2Id = cell2Id;
             _removedLines = removedLines;
+            _scoreBeforeAction = scoreBefore;
+            _multiplierBeforeAction = multiplierBefore;
         }
 
-        public void Undo(GridModel gridModel)
+        public void Undo(GridModel gridModel, StatisticsModel statisticsModel)
         {
             if (_removedLines is { Count: > 0 })
             {
@@ -37,6 +42,8 @@ namespace Core
             var cell2 = gridModel.GetCellDataById(_cell2Id);
             if (cell1 != null) gridModel.SetCellActiveState(cell1, true);
             if (cell2 != null) gridModel.SetCellActiveState(cell2, true);
+
+            statisticsModel.SetState(_scoreBeforeAction, _multiplierBeforeAction);
         }
     }
 
@@ -55,11 +62,11 @@ namespace Core
             _actions.Push(action);
         }
 
-        public void Undo()
+        public void Undo(StatisticsModel statisticsModel)
         {
             if (_actions.Count <= 0) return;
             var lastAction = _actions.Pop();
-            lastAction.Undo(_gridModel);
+            lastAction.Undo(_gridModel, statisticsModel);
         }
 
         public bool CanUndo()

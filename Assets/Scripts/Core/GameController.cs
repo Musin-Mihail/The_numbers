@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Assets/Scripts/Core/GameController.cs
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Gameplay;
@@ -13,6 +15,7 @@ namespace Core
         private readonly IGridDataProvider _gridDataProvider;
         private readonly ActionHistory _actionHistory;
         private readonly ActionCountersModel _actionCountersModel;
+        private readonly StatisticsModel _statisticsModel;
         private bool _countersPermanentlyDisabled;
         private const int InitialQuantityByHeight = 5;
 
@@ -23,6 +26,7 @@ namespace Core
             _gridDataProvider = gridDataProvider;
             _actionHistory = new ActionHistory(_gridModel);
             _actionCountersModel = new ActionCountersModel();
+            _statisticsModel = new StatisticsModel();
             _countersPermanentlyDisabled = false;
             SubscribeToInputEvents();
         }
@@ -129,13 +133,16 @@ namespace Core
             }
 
             if (!_actionHistory.CanUndo()) return;
-            _actionHistory.Undo();
+
+            _actionHistory.Undo(_statisticsModel);
+
             if (!_actionCountersModel.AreCountersDisabled)
             {
                 _actionCountersModel.DecrementUndo();
             }
 
             RaiseCountersChangedEvent();
+            GameEvents.RaiseStatisticsChanged(_statisticsModel.Score, _statisticsModel.Multiplier);
         }
 
         private void AttemptMatch(Guid firstCellId, Guid secondCellId)
@@ -156,26 +163,47 @@ namespace Core
         private void ProcessValidMatch(CellData data1, CellData data2)
         {
             var removedLinesInfo = new List<Tuple<int, List<CellData>>>();
+
+            var scoreBeforeAction = _statisticsModel.Score;
+            var multiplierBeforeAction = _statisticsModel.Multiplier;
+
             GameEvents.RaiseMatchFound(data1.Id, data2.Id);
             _gridModel.SetCellActiveState(data1, false);
             _gridModel.SetCellActiveState(data2, false);
-            CheckAndRemoveEmptyLines(data1.Line, data2.Line, removedLinesInfo);
-            var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo);
+
+            _statisticsModel.AddScore(1 * _statisticsModel.Multiplier);
+
+            var removedLinesCount = CheckAndRemoveEmptyLines(data1.Line, data2.Line, removedLinesInfo);
+            if (removedLinesCount > 0)
+            {
+                _statisticsModel.AddScore(10 * _statisticsModel.Multiplier * removedLinesCount);
+            }
+
+            if (_gridModel.GetAllActiveCellData().Count == 0)
+            {
+                _statisticsModel.IncrementMultiplier();
+            }
+
+            var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo, scoreBeforeAction, multiplierBeforeAction);
             _actionHistory.Record(action);
+
+            GameEvents.RaiseStatisticsChanged(_statisticsModel.Score, _statisticsModel.Multiplier);
         }
 
-        private void CheckAndRemoveEmptyLines(int line1, int line2, List<Tuple<int, List<CellData>>> removedLinesInfo)
+        private int CheckAndRemoveEmptyLines(int line1, int line2, List<Tuple<int, List<CellData>>> removedLinesInfo)
         {
             var linesToRemove = new HashSet<int>();
             if (_gridModel.IsLineEmpty(line1)) linesToRemove.Add(line1);
             if (line1 != line2 && _gridModel.IsLineEmpty(line2)) linesToRemove.Add(line2);
-            if (linesToRemove.Count <= 0) return;
+            if (linesToRemove.Count <= 0) return 0;
             foreach (var lineIndex in linesToRemove.OrderByDescending(i => i))
             {
                 var lineData = new List<CellData>(_gridModel.Cells[lineIndex]);
                 removedLinesInfo.Add(new Tuple<int, List<CellData>>(lineIndex, lineData));
                 _gridModel.RemoveLine(lineIndex);
             }
+
+            return linesToRemove.Count;
         }
 
         public void StartNewGame()
@@ -183,6 +211,7 @@ namespace Core
             _gridModel.ClearField();
             _actionHistory.Clear();
             _actionCountersModel.ResetCounters();
+            _statisticsModel.Reset();
 
             if (_countersPermanentlyDisabled)
             {
@@ -190,6 +219,7 @@ namespace Core
             }
 
             RaiseCountersChangedEvent();
+            GameEvents.RaiseStatisticsChanged(_statisticsModel.Score, _statisticsModel.Multiplier);
 
             for (var i = 0; i < InitialQuantityByHeight; i++)
             {
