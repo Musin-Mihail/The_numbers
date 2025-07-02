@@ -19,6 +19,7 @@ namespace View.Grid
             else
             {
                 var cellObj = Instantiate(cellPrefab, canvasTransform);
+                cellObj.transform.SetAsFirstSibling();
                 cell = cellObj.GetComponent<Cell>();
             }
 

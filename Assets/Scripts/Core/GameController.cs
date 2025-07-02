@@ -84,24 +84,37 @@ namespace Core
             }
 
             var activeCells = _gridModel.GetAllActiveCellData();
-            var directions = new List<(int dLine, int dCol)> { (0, 1), (0, -1), (1, 0), (-1, 0) };
-
-            foreach (var cell1 in activeCells)
+            if (activeCells.Count < 2)
             {
-                foreach (var cell2 in from dir in directions select _gridDataProvider.FindFirstActiveCellInDirection(cell1.Line, cell1.Column, dir.dLine, dir.dCol) into cell2 where cell2 != null where _matchValidator.IsAValidMatch(cell1, cell2) select cell2)
-                {
-                    if (!_actionCountersModel.AreCountersDisabled)
-                    {
-                        _actionCountersModel.DecrementHint();
-                    }
+                GameEvents.RaiseNoHintFound();
+                return;
+            }
 
-                    RaiseCountersChangedEvent();
-                    GameEvents.RaiseHintFound(cell1.Id, cell2.Id);
+            for (var i = 0; i < activeCells.Count; i++)
+            {
+                for (var j = i + 1; j < activeCells.Count; j++)
+                {
+                    var cell1 = activeCells[i];
+                    var cell2 = activeCells[j];
+
+                    if (!_matchValidator.IsAValidMatch(cell1, cell2)) continue;
+                    ShowHintAndDecrementCounter(cell1, cell2);
                     return;
                 }
             }
 
             GameEvents.RaiseNoHintFound();
+        }
+
+        private void ShowHintAndDecrementCounter(CellData cell1, CellData cell2)
+        {
+            if (!_actionCountersModel.AreCountersDisabled)
+            {
+                _actionCountersModel.DecrementHint();
+            }
+
+            RaiseCountersChangedEvent();
+            GameEvents.RaiseHintFound(cell1.Id, cell2.Id);
         }
 
         private void AddExistingNumbersAsNewLines()
