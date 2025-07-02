@@ -1,6 +1,4 @@
-﻿// Assets/Scripts/Core/GameController.cs
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Gameplay;
@@ -163,34 +161,27 @@ namespace Core
         private void ProcessValidMatch(CellData data1, CellData data2)
         {
             var removedLinesInfo = new List<Tuple<int, List<CellData>>>();
-
+            var lineScores = new Dictionary<int, int>();
             var scoreBeforeAction = _statisticsModel.Score;
             var multiplierBeforeAction = _statisticsModel.Multiplier;
-
             GameEvents.RaiseMatchFound(data1.Id, data2.Id);
             _gridModel.SetCellActiveState(data1, false);
             _gridModel.SetCellActiveState(data2, false);
-
-            _statisticsModel.AddScore(1 * _statisticsModel.Multiplier);
-
-            var removedLinesCount = CheckAndRemoveEmptyLines(data1.Line, data2.Line, removedLinesInfo);
-            if (removedLinesCount > 0)
-            {
-                _statisticsModel.AddScore(10 * _statisticsModel.Multiplier * removedLinesCount);
-            }
-
+            var pairScore = 1 * _statisticsModel.Multiplier;
+            _statisticsModel.AddScore(pairScore);
+            GameEvents.RaisePairScoreAdded(data1.Id, data2.Id, pairScore);
+            CheckAndRemoveEmptyLines(data1.Line, data2.Line, removedLinesInfo, lineScores);
             if (_gridModel.GetAllActiveCellData().Count == 0)
             {
                 _statisticsModel.IncrementMultiplier();
             }
 
-            var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo, scoreBeforeAction, multiplierBeforeAction);
+            var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo, scoreBeforeAction, multiplierBeforeAction, pairScore, lineScores);
             _actionHistory.Record(action);
-
             GameEvents.RaiseStatisticsChanged(_statisticsModel.Score, _statisticsModel.Multiplier);
         }
 
-        private int CheckAndRemoveEmptyLines(int line1, int line2, List<Tuple<int, List<CellData>>> removedLinesInfo)
+        private int CheckAndRemoveEmptyLines(int line1, int line2, List<Tuple<int, List<CellData>>> removedLinesInfo, Dictionary<int, int> lineScores)
         {
             var linesToRemove = new HashSet<int>();
             if (_gridModel.IsLineEmpty(line1)) linesToRemove.Add(line1);
@@ -201,6 +192,10 @@ namespace Core
                 var lineData = new List<CellData>(_gridModel.Cells[lineIndex]);
                 removedLinesInfo.Add(new Tuple<int, List<CellData>>(lineIndex, lineData));
                 _gridModel.RemoveLine(lineIndex);
+                var scoreForLine = 10 * _statisticsModel.Multiplier;
+                _statisticsModel.AddScore(scoreForLine);
+                lineScores[lineIndex] = scoreForLine;
+                GameEvents.RaiseLineScoreAdded(lineIndex, scoreForLine);
             }
 
             return linesToRemove.Count;

@@ -17,6 +17,10 @@ namespace View.Grid
         [SerializeField] private ScrollRect scrollRect;
         [SerializeField] private RectTransform scrollviewContainer;
 
+        [SerializeField] private FloatingScorePool floatingScorePool;
+        [SerializeField] private Color positiveScoreColor = Color.green;
+        [SerializeField] private Color negativeScoreColor = Color.red;
+
         private readonly Dictionary<Guid, Cell> _cellViewInstances = new();
         private HeaderNumberDisplay _headerNumberDisplay;
         private GridModel _gridModel;
@@ -53,6 +57,11 @@ namespace View.Grid
             GameEvents.OnGameStarted += HandleGameStarted;
             GameEvents.OnHintFound += HandleHintFound;
             GameEvents.OnClearHint += ClearHintVisuals;
+
+            GameEvents.OnPairScoreAdded += HandlePairScoreAdded;
+            GameEvents.OnLineScoreAdded += HandleLineScoreAdded;
+            GameEvents.OnPairScoreUndone += HandlePairScoreUndone;
+            GameEvents.OnLineScoreUndone += HandleLineScoreUndone;
         }
 
         private void UnsubscribeFromEvents()
@@ -63,6 +72,11 @@ namespace View.Grid
             GameEvents.OnGameStarted -= HandleGameStarted;
             GameEvents.OnHintFound -= HandleHintFound;
             GameEvents.OnClearHint -= ClearHintVisuals;
+
+            GameEvents.OnPairScoreAdded -= HandlePairScoreAdded;
+            GameEvents.OnLineScoreAdded -= HandleLineScoreAdded;
+            GameEvents.OnPairScoreUndone -= HandlePairScoreUndone;
+            GameEvents.OnLineScoreUndone -= HandleLineScoreUndone;
         }
 
         private void HandleHintFound(Guid firstId, Guid secondId)
@@ -256,10 +270,7 @@ namespace View.Grid
 
         private void UpdateCellPosition(CellData data, Cell cellView)
         {
-            var targetPosition = new Vector2(
-                _cellSize * data.Column + GameConstants.Indent / 2f,
-                -_cellSize * data.Line - GameConstants.Indent / 2f
-            );
+            var targetPosition = GetCellPosition(data);
 
             if (cellView.Animator)
             {
@@ -273,6 +284,65 @@ namespace View.Grid
             if (!(Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= _scrollLoggingThreshold)) return;
             _lastLoggedScrollPosition = currentScrollPosition;
             RefreshTopLine();
+        }
+
+        private void HandlePairScoreAdded(Guid cell1Id, Guid cell2Id, int score)
+        {
+            ShowFloatingScoreForPair(cell1Id, cell2Id, score, positiveScoreColor);
+        }
+
+        private void HandlePairScoreUndone(Guid cell1Id, Guid cell2Id, int score)
+        {
+            ShowFloatingScoreForPair(cell1Id, cell2Id, -score, negativeScoreColor);
+        }
+
+        private void HandleLineScoreAdded(int lineIndex, int score)
+        {
+            ShowFloatingScoreForLine(lineIndex, score, positiveScoreColor);
+        }
+
+        private void HandleLineScoreUndone(int lineIndex, int score)
+        {
+            ShowFloatingScoreForLine(lineIndex, -score, negativeScoreColor);
+        }
+
+        private void ShowFloatingScoreForPair(Guid cell1Id, Guid cell2Id, int score, Color color)
+        {
+            var cell1Data = _gridModel.GetCellDataById(cell1Id);
+            var cell2Data = _gridModel.GetCellDataById(cell2Id);
+            if (cell1Data == null || cell2Data == null)
+            {
+                Debug.LogWarning($"Не удалось найти данные для ячеек {cell1Id} или {cell2Id} для отображения очков.");
+                return;
+            }
+            var pos1Pivot = GetCellPosition(cell1Data);
+            var pos2Pivot = GetCellPosition(cell2Data);
+            var midPoint = (pos1Pivot + pos2Pivot) / 2f;
+            ShowFloatingScore(score, color, midPoint);
+        }
+
+        private void ShowFloatingScoreForLine(int lineIndex, int score, Color color)
+        {
+            var yPos = -lineIndex * _cellSize - (_cellSize / 2f) - (GameConstants.Indent / 2f);
+            var xPos = contentContainer.rect.width / 2f;
+            var position = new Vector2(xPos, yPos);
+            ShowFloatingScore(score, color, position);
+        }
+
+        private void ShowFloatingScore(int score, Color color, Vector2 position)
+        {
+            if (floatingScorePool == null) return;
+
+            var scoreTextInstance = floatingScorePool.GetScore();
+            scoreTextInstance.Show(score.ToString(), color, position, floatingScorePool.ReturnScore);
+        }
+
+        private Vector2 GetCellPosition(CellData data)
+        {
+            return new Vector2(
+                _cellSize * data.Column + GameConstants.Indent / 2f,
+                -_cellSize * data.Line - GameConstants.Indent / 2f
+            );
         }
     }
 }

@@ -1378,6 +1378,7 @@ GameObject:
   - component: {fileID: 382419726}
   - component: {fileID: 382419727}
   - component: {fileID: 382419728}
+  - component: {fileID: 382419729}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1402,6 +1403,9 @@ MonoBehaviour:
   contentContainer: {fileID: 2124303421}
   scrollRect: {fileID: 135620098}
   scrollviewContainer: {fileID: 135620097}
+  floatingScorePool: {fileID: 382419729}
+  positiveScoreColor: {r: 0, g: 1, b: 0, a: 1}
+  negativeScoreColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!4 &382419718
 Transform:
   m_ObjectHideFlags: 0
@@ -1529,6 +1533,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   statisticsWindow: {fileID: 1572926991}
+--- !u!114 &382419729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 382419716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82488b387f0f41698a5196de2228797e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  floatingScorePrefab: {fileID: 4760446042538872993, guid: 2c0f100fc3a0a8f46a8ad6662f987154, type: 3}
+  canvasTransform: {fileID: 111448987}
+  initialPoolSize: 10
+  parent: {fileID: 1218933059}
 --- !u!1 &489982509
 GameObject:
   m_ObjectHideFlags: 0

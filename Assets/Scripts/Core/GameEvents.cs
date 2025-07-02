@@ -1,5 +1,7 @@
 ﻿using System;
 
+// Добавлено для Vector3
+
 namespace Core
 {
     public static class GameEvents
@@ -69,5 +71,17 @@ namespace Core
 
         public static event Action OnHideStatistics;
         public static void RaiseHideStatistics() => OnHideStatistics?.Invoke();
+
+        public static event Action<Guid, Guid, int> OnPairScoreAdded;
+        public static void RaisePairScoreAdded(Guid cell1, Guid cell2, int score) => OnPairScoreAdded?.Invoke(cell1, cell2, score);
+
+        public static event Action<int, int> OnLineScoreAdded;
+        public static void RaiseLineScoreAdded(int lineIndex, int score) => OnLineScoreAdded?.Invoke(lineIndex, score);
+
+        public static event Action<Guid, Guid, int> OnPairScoreUndone;
+        public static void RaisePairScoreUndone(Guid cell1, Guid cell2, int score) => OnPairScoreUndone?.Invoke(cell1, cell2, score);
+
+        public static event Action<int, int> OnLineScoreUndone;
+        public static void RaiseLineScoreUndone(int lineIndex, int score) => OnLineScoreUndone?.Invoke(lineIndex, score);
     }
 }

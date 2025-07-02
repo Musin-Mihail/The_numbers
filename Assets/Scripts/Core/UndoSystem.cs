@@ -15,17 +15,21 @@ namespace Core
         private readonly Guid _cell1Id;
         private readonly Guid _cell2Id;
         private readonly List<Tuple<int, List<CellData>>> _removedLines;
-
         private readonly long _scoreBeforeAction;
         private readonly int _multiplierBeforeAction;
 
-        public MatchAction(Guid cell1Id, Guid cell2Id, List<Tuple<int, List<CellData>>> removedLines, long scoreBefore, int multiplierBefore)
+        private readonly int _pairScore;
+        private readonly Dictionary<int, int> _lineScores;
+
+        public MatchAction(Guid cell1Id, Guid cell2Id, List<Tuple<int, List<CellData>>> removedLines, long scoreBefore, int multiplierBefore, int pairScore, Dictionary<int, int> lineScores)
         {
             _cell1Id = cell1Id;
             _cell2Id = cell2Id;
             _removedLines = removedLines;
             _scoreBeforeAction = scoreBefore;
             _multiplierBeforeAction = multiplierBefore;
+            _pairScore = pairScore;
+            _lineScores = lineScores ?? new Dictionary<int, int>();
         }
 
         public void Undo(GridModel gridModel, StatisticsModel statisticsModel)
@@ -36,12 +40,22 @@ namespace Core
                 {
                     gridModel.RestoreLine(lineInfo.Item1, lineInfo.Item2);
                 }
+
+                foreach (var lineScore in _lineScores)
+                {
+                    GameEvents.RaiseLineScoreUndone(lineScore.Key, lineScore.Value);
+                }
             }
 
             var cell1 = gridModel.GetCellDataById(_cell1Id);
             var cell2 = gridModel.GetCellDataById(_cell2Id);
             if (cell1 != null) gridModel.SetCellActiveState(cell1, true);
             if (cell2 != null) gridModel.SetCellActiveState(cell2, true);
+
+            if (_pairScore > 0)
+            {
+                GameEvents.RaisePairScoreUndone(_cell1Id, _cell2Id, _pairScore);
+            }
 
             statisticsModel.SetState(_scoreBeforeAction, _multiplierBeforeAction);
         }
