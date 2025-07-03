@@ -219,12 +219,16 @@ namespace Core
             return linesToRemove.Count;
         }
 
-        public void StartNewGame()
+        public void StartNewGame(bool resetStatisticsAndCounters = true)
         {
             _gridModel.ClearField();
             _actionHistory.Clear();
-            _actionCountersModel.ResetCounters();
-            _statisticsModel.Reset();
+
+            if (resetStatisticsAndCounters)
+            {
+                _actionCountersModel.ResetCounters();
+                _statisticsModel.Reset();
+            }
 
             RaiseCountersChangedEvent();
             _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));

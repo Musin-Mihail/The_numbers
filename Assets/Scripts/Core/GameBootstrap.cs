@@ -65,9 +65,12 @@ namespace Core
 
             SetupListeners();
 
-            if (!_gameManager.LoadGame())
+            if (_gameManager.LoadGame()) return;
+            var gameController = ServiceProvider.GetService<GameController>();
+            gameController.StartNewGame(true);
+            if (topLineToggle)
             {
-                StartNewGameInternal();
+                gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
             }
         }
 
@@ -140,11 +143,8 @@ namespace Core
 
         private void StartNewGameInternal()
         {
-            SaveLoadService.DeleteSavedData();
-
             var gameController = ServiceProvider.GetService<GameController>();
-            gameController.StartNewGame();
-
+            gameController.StartNewGame(false);
             if (topLineToggle)
             {
                 gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
