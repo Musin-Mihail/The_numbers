@@ -14,37 +14,67 @@ namespace View.Grid
         [SerializeField] private Sprite activeSprite;
         [SerializeField] private Sprite disabledSprite;
         [SerializeField] private Color hintColor = new(0.6f, 1f, 0.6f, 1f);
-        public RectTransform TargetRectTransform { get; private set; }
-        public CellAnimator Animator { get; private set; }
+
+        private RectTransform _targetRectTransform;
+
+        public RectTransform TargetRectTransform
+        {
+            get
+            {
+                if (!_targetRectTransform)
+                {
+                    _targetRectTransform = GetComponent<RectTransform>();
+                }
+
+                return _targetRectTransform;
+            }
+        }
+
+        private CellAnimator _animator;
+
+        public CellAnimator Animator
+        {
+            get
+            {
+                if (!_animator)
+                {
+                    _animator = GetComponent<CellAnimator>();
+                }
+
+                return _animator;
+            }
+        }
+
         private Image _backgroundImage;
+
+        private Image BackgroundImage
+        {
+            get
+            {
+                if (!_backgroundImage)
+                {
+                    _backgroundImage = GetComponent<Image>();
+                }
+
+                return _backgroundImage;
+            }
+        }
+
         public Action<Guid> OnClickedCallback { get; set; }
         private Guid DataId { get; set; }
-        public int line { get; private set; }
-        public int column { get; private set; }
+        public int Line { get; private set; }
+        public int Column { get; private set; }
         private bool IsActive { get; set; }
         public int Number { get; private set; }
         private bool _selected;
 
-        private void Awake()
-        {
-            _backgroundImage = GetComponent<Image>();
-            Animator = GetComponent<CellAnimator>();
-            TargetRectTransform = GetComponent<RectTransform>();
-        }
-
         public void UpdateFromData(CellData data)
         {
             DataId = data.Id;
-            line = data.Line;
-            column = data.Column;
-
-            if (Number != data.Number)
-            {
-                Number = data.Number;
-                text.text = Number.ToString();
-            }
-
-            if (IsActive == data.IsActive) return;
+            Line = data.Line;
+            Column = data.Column;
+            Number = data.Number;
+            text.text = Number.ToString();
             IsActive = data.IsActive;
             SetVisualState(IsActive);
         }
@@ -71,17 +101,17 @@ namespace View.Grid
 
         public void SetHighlight(bool show)
         {
-            if (_backgroundImage)
+            if (BackgroundImage)
             {
-                _backgroundImage.color = show ? hintColor : Color.white;
+                BackgroundImage.color = show ? hintColor : Color.white;
             }
         }
 
         public void SetVisualState(bool isActive)
         {
             text.enabled = isActive;
-            if (!_backgroundImage) return;
-            _backgroundImage.sprite = isActive ? activeSprite : disabledSprite;
+            if (!BackgroundImage) return;
+            BackgroundImage.sprite = isActive ? activeSprite : disabledSprite;
             if (!isActive)
             {
                 SetHighlight(false);

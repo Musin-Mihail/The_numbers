@@ -1,4 +1,6 @@
-﻿namespace Model
+﻿using Core;
+
+namespace Model
 {
     public class ActionCountersModel
     {
@@ -11,6 +13,14 @@
         public ActionCountersModel()
         {
             ResetCounters();
+        }
+
+        public void RestoreState(ActionCountersModelSerializable data)
+        {
+            UndoCount = data.undoCount;
+            AddNumbersCount = data.addNumbersCount;
+            HintCount = data.hintCount;
+            AreCountersDisabled = data.areCountersDisabled;
         }
 
         public void DecrementUndo()

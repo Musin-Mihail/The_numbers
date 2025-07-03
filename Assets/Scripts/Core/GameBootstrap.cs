@@ -22,48 +22,61 @@ namespace Core
         [SerializeField] private GameEvents gameEvents;
 
         private Action _requestNewGameAction;
+        private GameManager _gameManager;
 
         private void Awake()
         {
+            if (!gameEvents)
+            {
+                Debug.LogError("ОШИБКА: 'GameEvents' не назначен в инспекторе для объекта " + gameObject.name + "! Пожалуйста, назначьте ScriptableObject 'GameEvents'.", this);
+                return;
+            }
+
             ServiceProvider.Clear();
 
             ServiceProvider.Register(gameEvents);
-
             var gridModel = new GridModel();
             ServiceProvider.Register(gridModel);
-
             var statisticsModel = new StatisticsModel();
             ServiceProvider.Register(statisticsModel);
-
             var actionCountersModel = new ActionCountersModel();
             ServiceProvider.Register(actionCountersModel);
-
             var actionHistory = new ActionHistory();
             ServiceProvider.Register(actionHistory);
 
             var gridDataProvider = new GridDataProvider(gridModel);
             ServiceProvider.Register<IGridDataProvider>(gridDataProvider);
-
             var matchValidator = new MatchValidator(gridDataProvider);
             ServiceProvider.Register(matchValidator);
 
-            var gameController = new GameController();
-            ServiceProvider.Register(gameController);
-
             ServiceProvider.Register(view);
             ServiceProvider.Register(headerNumberDisplay);
+
+            _gameManager = gameObject.AddComponent<GameManager>();
+            ServiceProvider.Register(_gameManager);
+
+            var gameController = new GameController();
+            ServiceProvider.Register(gameController);
         }
 
         private void Start()
         {
+            if (!_gameManager) return;
+
+            SetupListeners();
+
+            if (!_gameManager.LoadGame())
+            {
+                StartNewGameInternal();
+            }
+        }
+
+        private void SetupListeners()
+        {
             if (topLineToggle)
             {
-                gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
+                gameEvents.onToggleTopLine.AddListener(UpdateTopLineToggleState);
                 topLineToggle.onValueChanged.AddListener(gameEvents.onToggleTopLine.Raise);
-            }
-            else
-            {
-                gameEvents.onToggleTopLine.Raise(true);
             }
 
             if (confirmationDialog)
@@ -79,6 +92,14 @@ namespace Core
             }
         }
 
+        private void UpdateTopLineToggleState(bool isVisible)
+        {
+            if (topLineToggle != null)
+            {
+                topLineToggle.isOn = isVisible;
+            }
+        }
+
         private void HandleRequestDisableCounters()
         {
             confirmationDialog.Show("Отключить счётчики?", () => { gameEvents.onDisableCountersConfirmed.Raise(); });
@@ -91,8 +112,11 @@ namespace Core
 
         private void OnDestroy()
         {
+            if (!gameEvents) return;
+
             if (topLineToggle)
             {
+                gameEvents.onToggleTopLine.RemoveListener(UpdateTopLineToggleState);
                 topLineToggle.onValueChanged.RemoveListener(gameEvents.onToggleTopLine.Raise);
             }
 
@@ -116,6 +140,8 @@ namespace Core
 
         private void StartNewGameInternal()
         {
+            SaveLoadService.DeleteSavedData();
+
             var gameController = ServiceProvider.GetService<GameController>();
             gameController.StartNewGame();
 

@@ -45,7 +45,7 @@ namespace View.UI
 
         private void OnDisable()
         {
-            if (gameEvents != null)
+            if (gameEvents)
             {
                 gameEvents.onToggleTopLine.RemoveListener(SetContainerActive);
             }
@@ -61,11 +61,17 @@ namespace View.UI
 
         private void CreateLineDisplay()
         {
+            if (!cellPrefab)
+            {
+                Debug.LogError("Ошибка: 'cellPrefab' не назначен в инспекторе для HeaderNumberDisplay!", this);
+                return;
+            }
+
             for (var i = 0; i < GameConstants.QuantityByWidth; i++)
             {
                 var cellGo = Instantiate(cellPrefab, container);
                 var cell = cellGo.GetComponent<Cell>();
-                cell.enabled = false;
+
                 cell.SetSelected(false);
                 cell.SetVisualState(false);
                 _topLineCells.Add(cell);

@@ -21,11 +21,6 @@ namespace View.UI
             }
         }
 
-        private void Start()
-        {
-            UpdateStatisticsUI((0, 1));
-        }
-
         private void OnDisable()
         {
             if (gameEvents)

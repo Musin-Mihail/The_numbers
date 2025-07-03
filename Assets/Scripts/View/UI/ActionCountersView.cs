@@ -22,11 +22,6 @@ namespace View.UI
             }
         }
 
-        private void Start()
-        {
-            UpdateCountersUI((5, 5, 5));
-        }
-
         private void OnDisable()
         {
             if (gameEvents != null)

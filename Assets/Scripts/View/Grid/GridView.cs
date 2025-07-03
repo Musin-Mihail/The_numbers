@@ -40,51 +40,85 @@ namespace View.Grid
         private void Awake()
         {
             _cellPool = GetComponent<CellPool>();
-
             _gameEvents = ServiceProvider.GetService<GameEvents>();
             _gridModel = ServiceProvider.GetService<GridModel>();
             _headerNumberDisplay = ServiceProvider.GetService<HeaderNumberDisplay>();
-
             SubscribeToEvents();
+
+            if (!canvasScaler)
+            {
+                Debug.LogError("Ошибка: CanvasScaler не назначен в инспекторе!", this);
+                enabled = false;
+                return;
+            }
+
+            var referenceWidth = canvasScaler.referenceResolution.x;
+            _cellSize = (referenceWidth - GameConstants.Indent) / GameConstants.QuantityByWidth;
+            _topPaddingValue = _cellSize * 1.1f;
+            if (cellPrefab)
+            {
+                cellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(_cellSize, _cellSize);
+            }
+
+            _scrollLoggingThreshold = _cellSize / 2f;
+            if (!scrollRect) return;
+            _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
+            scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
         }
 
         private void SubscribeToEvents()
         {
-            _gameEvents.onCellAdded.AddListener(HandleCellAdded);
-            _gameEvents.onCellUpdated.AddListener(HandleCellUpdated);
-            _gameEvents.onCellRemoved.AddListener(HandleCellRemoved);
-            _gameEvents.onGridCleared.AddListener(HandleGridCleared);
+            if (!_gameEvents) return;
 
-            _gameEvents.onMatchFound.AddListener(HandleMatchFound);
-            _gameEvents.onInvalidMatch.AddListener(HandleInvalidMatch);
-            _gameEvents.onToggleTopLine.AddListener(SetTopPaddingActive);
-            _gameEvents.onNewGameStarted.AddListener(HandleGameStarted);
-            _gameEvents.onHintFound.AddListener(HandleHintFound);
-            _gameEvents.onPairScoreAdded.AddListener(HandlePairScoreAdded);
-            _gameEvents.onLineScoreAdded.AddListener(HandleLineScoreAdded);
-            _gameEvents.onPairScoreUndone.AddListener(HandlePairScoreUndone);
-            _gameEvents.onLineScoreUndone.AddListener(HandleLineScoreUndone);
+            _gameEvents.onCellAdded?.AddListener(HandleCellAdded);
+            _gameEvents.onCellUpdated?.AddListener(HandleCellUpdated);
+            _gameEvents.onCellRemoved?.AddListener(HandleCellRemoved);
+            _gameEvents.onGridCleared?.AddListener(HandleGridCleared);
+
+            _gameEvents.onMatchFound?.AddListener(HandleMatchFound);
+            _gameEvents.onInvalidMatch?.AddListener(HandleInvalidMatch);
+            _gameEvents.onToggleTopLine?.AddListener(SetTopPaddingActive);
+            _gameEvents.onNewGameStarted?.AddListener(HandleGameStarted);
+            _gameEvents.onHintFound?.AddListener(HandleHintFound);
+            _gameEvents.onPairScoreAdded?.AddListener(HandlePairScoreAdded);
+            _gameEvents.onLineScoreAdded?.AddListener(HandleLineScoreAdded);
+            _gameEvents.onPairScoreUndone?.AddListener(HandlePairScoreUndone);
+            _gameEvents.onLineScoreUndone?.AddListener(HandleLineScoreUndone);
         }
 
         private void UnsubscribeFromEvents()
         {
-            if (!_gameEvents) return;
+            if (_gameEvents == null) return;
 
-            _gameEvents.onCellAdded.RemoveListener(HandleCellAdded);
-            _gameEvents.onCellUpdated.RemoveListener(HandleCellUpdated);
-            _gameEvents.onCellRemoved.RemoveListener(HandleCellRemoved);
-            _gameEvents.onGridCleared.RemoveListener(HandleGridCleared);
+            _gameEvents.onCellAdded?.RemoveListener(HandleCellAdded);
+            _gameEvents.onCellUpdated?.RemoveListener(HandleCellUpdated);
+            _gameEvents.onCellRemoved?.RemoveListener(HandleCellRemoved);
+            _gameEvents.onGridCleared?.RemoveListener(HandleGridCleared);
 
-            _gameEvents.onMatchFound.RemoveListener(HandleMatchFound);
-            _gameEvents.onInvalidMatch.RemoveListener(HandleInvalidMatch);
-            _gameEvents.onToggleTopLine.RemoveListener(SetTopPaddingActive);
-            _gameEvents.onNewGameStarted.RemoveListener(HandleGameStarted);
-            _gameEvents.onHintFound.RemoveListener(HandleHintFound);
-            _gameEvents.onPairScoreAdded.RemoveListener(HandlePairScoreAdded);
-            _gameEvents.onLineScoreAdded.RemoveListener(HandleLineScoreAdded);
-            _gameEvents.onPairScoreUndone.RemoveListener(HandlePairScoreUndone);
-            _gameEvents.onLineScoreUndone.RemoveListener(HandleLineScoreUndone);
+            _gameEvents.onMatchFound?.RemoveListener(HandleMatchFound);
+            _gameEvents.onInvalidMatch?.RemoveListener(HandleInvalidMatch);
+            _gameEvents.onToggleTopLine?.RemoveListener(SetTopPaddingActive);
+            _gameEvents.onNewGameStarted?.RemoveListener(HandleGameStarted);
+            _gameEvents.onHintFound?.RemoveListener(HandleHintFound);
+            _gameEvents.onPairScoreAdded?.RemoveListener(HandlePairScoreAdded);
+            _gameEvents.onLineScoreAdded?.RemoveListener(HandleLineScoreAdded);
+            _gameEvents.onPairScoreUndone?.RemoveListener(HandlePairScoreUndone);
+            _gameEvents.onLineScoreUndone?.RemoveListener(HandleLineScoreUndone);
         }
+
+        public void FullRedraw()
+        {
+            HandleGridCleared();
+            var allCells = _gridModel.GetAllCellData();
+            foreach (var cellData in allCells)
+            {
+                HandleCellAdded((cellData, false));
+            }
+
+            UpdateContentSize();
+            RefreshTopLine();
+        }
+
 
         private void HandleHintFound((Guid firstId, Guid secondId) data)
         {
@@ -126,29 +160,6 @@ namespace View.Grid
             _headerNumberDisplay.UpdateDisplayedNumbers(activeNumbers);
         }
 
-        private void Start()
-        {
-            if (!canvasScaler)
-            {
-                Debug.LogError("Ошибка: CanvasScaler не назначен в инспекторе!", this);
-                enabled = false;
-                return;
-            }
-
-            var referenceWidth = canvasScaler.referenceResolution.x;
-            _cellSize = (referenceWidth - GameConstants.Indent) / GameConstants.QuantityByWidth;
-            _topPaddingValue = _cellSize * 1.1f;
-            if (cellPrefab)
-            {
-                cellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(_cellSize, _cellSize);
-            }
-
-            _scrollLoggingThreshold = _cellSize / 2f;
-            if (!scrollRect) return;
-            _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
-            scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
-        }
-
         private void SetTopPaddingActive(bool isActive)
         {
             if (scrollviewContainer)
@@ -177,8 +188,6 @@ namespace View.Grid
 
         private void HandleGameStarted()
         {
-            // Это событие теперь может вызываться из UIEventCaller напрямую,
-            // но если здесь нужна специфичная для GridView логика, ее можно добавить.
         }
 
         private void HandleCellClicked(Guid clickedCellId)
@@ -222,6 +231,8 @@ namespace View.Grid
 
         private void HandleCellAdded((CellData data, bool animate) payload)
         {
+            if (_cellViewInstances.ContainsKey(payload.data.Id)) return;
+
             var newCellView = _cellPool.GetCell();
             newCellView.UpdateFromData(payload.data);
             newCellView.OnClickedCallback = HandleCellClicked;
@@ -310,7 +321,6 @@ namespace View.Grid
             var cell2Data = _gridModel.GetCellDataById(cell2Id);
             if (cell1Data == null || cell2Data == null)
             {
-                Debug.LogWarning($"Не удалось найти данные для ячеек {cell1Id} или {cell2Id} для отображения очков.");
                 return;
             }
 

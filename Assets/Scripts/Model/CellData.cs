@@ -2,6 +2,7 @@
 
 namespace Model
 {
+    [Serializable]
     public class CellData
     {
         public Guid Id { get; }

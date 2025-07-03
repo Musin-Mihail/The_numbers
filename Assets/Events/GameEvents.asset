@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onRequestNewGame: {fileID: 11400000, guid: 21b6a8a81ce78194c8effeca177d2c2f, type: 2}
   onNewGameStarted: {fileID: 11400000, guid: 83a282d04823d7f4f9c7b4b8092fcc16, type: 2}
+  onGameLoaded: {fileID: 11400000, guid: 7fb26510bebe0fb4295f48528cbd0f70, type: 2}
   onCellAdded: {fileID: 11400000, guid: 02a53295763631c4788abadccbc1e9e6, type: 2}
   onCellUpdated: {fileID: 11400000, guid: c210cf43c21e2d049ad2061b4ceb4f6d, type: 2}
   onCellRemoved: {fileID: 11400000, guid: 98a8152bf034d784887becd1f913ac70, type: 2}

@@ -23,6 +23,51 @@ namespace Model
             _gameEvents = ServiceProvider.GetService<GameEvents>();
         }
 
+        public List<CellData> GetAllCellData()
+        {
+            return _cellDataMap.Values.ToList();
+        }
+
+        public void RestoreState(List<CellDataSerializable> savedCells)
+        {
+            ClearField();
+            var maxLine = -1;
+            if (savedCells == null || savedCells.Count == 0) return;
+
+            var lines = savedCells.GroupBy(c => c.line)
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            foreach (var lineGroup in lines)
+            {
+                var lineIndex = lineGroup.Key;
+                while (_cells.Count <= lineIndex)
+                {
+                    _cells.Add(new List<CellData>());
+                }
+
+                var lineData = new List<CellData>();
+                foreach (var savedCell in lineGroup.OrderBy(c => c.column))
+                {
+                    var cellData = new CellData(savedCell.number, savedCell.line, savedCell.column);
+                    cellData.SetActive(savedCell.isActive);
+                    lineData.Add(cellData);
+                    _cellDataMap[cellData.Id] = cellData;
+                }
+
+                _cells[lineIndex] = lineData;
+                if (lineIndex > maxLine) maxLine = lineIndex;
+            }
+
+            while (_cells.Count <= maxLine)
+            {
+                _cells.Add(new List<CellData>());
+            }
+
+            _isCacheDirty = true;
+        }
+
+
         private static void Shuffle<T>(IList<T> list)
         {
             var n = list.Count;
@@ -59,7 +104,7 @@ namespace Model
             if (data.IsActive == isActive) return;
             data.SetActive(isActive);
             _isCacheDirty = true;
-            _gameEvents.onCellUpdated.Raise(data);
+            _gameEvents?.onCellUpdated.Raise(data);
         }
 
         public void ClearField()
@@ -67,7 +112,7 @@ namespace Model
             _cells.Clear();
             _cellDataMap.Clear();
             _isCacheDirty = true;
-            _gameEvents.onGridCleared.Raise();
+            _gameEvents?.onGridCleared.Raise();
         }
 
         public void CreateLine(int lineIndex)
@@ -78,7 +123,7 @@ namespace Model
                 var cellData = new CellData(Random.Range(1, 10), lineIndex, i);
                 newLine.Add(cellData);
                 _cellDataMap[cellData.Id] = cellData;
-                _gameEvents.onCellAdded.Raise((cellData, true));
+                _gameEvents?.onCellAdded.Raise((cellData, true));
             }
 
             _cells.Add(newLine);
@@ -97,7 +142,7 @@ namespace Model
             foreach (var cellData in _cells[lineIndex])
             {
                 _cellDataMap.Remove(cellData.Id);
-                _gameEvents.onCellRemoved.Raise(cellData.Id);
+                _gameEvents?.onCellRemoved.Raise(cellData.Id);
             }
 
             _cells.RemoveAt(lineIndex);
@@ -106,7 +151,7 @@ namespace Model
                 foreach (var cell in _cells[i])
                 {
                     cell.Line = i;
-                    _gameEvents.onCellUpdated.Raise(cell);
+                    _gameEvents?.onCellUpdated.Raise(cell);
                 }
             }
 
@@ -122,7 +167,7 @@ namespace Model
                 foreach (var cell in _cells[i])
                 {
                     cell.Line++;
-                    _gameEvents.onCellUpdated.Raise(cell);
+                    _gameEvents?.onCellUpdated.Raise(cell);
                 }
             }
 
@@ -130,7 +175,7 @@ namespace Model
             foreach (var cellData in lineData)
             {
                 _cellDataMap[cellData.Id] = cellData;
-                _gameEvents.onCellAdded.Raise((cellData, true));
+                _gameEvents?.onCellAdded.Raise((cellData, true));
             }
 
             _isCacheDirty = true;
@@ -161,27 +206,14 @@ namespace Model
             var numbersToAdd = GetAllActiveCellData().Select(cell => cell.Number).ToList();
             if (numbersToAdd.Count == 0) return;
             Shuffle(numbersToAdd);
-            var lastLine = _cells.LastOrDefault();
-            if (lastLine != null)
-            {
-                for (var i = lastLine.Count - 1; i >= 0; i--)
-                {
-                    var cell = lastLine[i];
-                    if (!cell.IsActive)
-                    {
-                        _cellDataMap.Remove(cell.Id);
-                        _gameEvents.onCellRemoved.Raise(cell.Id);
-                        lastLine.RemoveAt(i);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
 
             var lineIndex = _cells.Count > 0 ? _cells.Count - 1 : 0;
-            var columnIndex = _cells.Count > 0 && _cells[lineIndex] != null ? _cells[lineIndex].Count : 0;
+            var columnIndex = 0;
+            if (_cells.Count > 0 && _cells[lineIndex] != null)
+            {
+                columnIndex = _cells[lineIndex].Count;
+            }
+
             if (_cells.Count == 0)
             {
                 _cells.Add(new List<CellData>());
