@@ -15,8 +15,6 @@ namespace Core
         private ActionCountersModel _actionCountersModel;
         private StatisticsModel _statisticsModel;
         private GameEvents _gameEvents;
-        private GameManager _gameManager;
-
         private const int InitialQuantityByHeight = 5;
 
         public GameController()
@@ -32,8 +30,6 @@ namespace Core
             _actionHistory = ServiceProvider.GetService<ActionHistory>();
             _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
             _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
-            _gameManager = ServiceProvider.GetService<GameManager>();
-
             SubscribeToInputEvents();
         }
 
@@ -61,7 +57,6 @@ namespace Core
         {
             _actionCountersModel.ResetCounters();
             RaiseCountersChangedEvent();
-            _gameManager.SaveGame();
         }
 
         private void RaiseCountersChangedEvent()
@@ -73,7 +68,6 @@ namespace Core
         {
             _actionCountersModel.DisableCounters();
             RaiseCountersChangedEvent();
-            _gameManager.SaveGame();
         }
 
         private void FindAndShowHint()
@@ -116,7 +110,6 @@ namespace Core
 
             RaiseCountersChangedEvent();
             _gameEvents.onHintFound.Raise((cell1.Id, cell2.Id));
-            _gameManager.SaveGame();
         }
 
         private void AddExistingNumbersAsNewLines()
@@ -135,7 +128,6 @@ namespace Core
             _gridModel.AppendActiveNumbersToGrid();
             _actionHistory.Clear();
             RaiseCountersChangedEvent();
-            _gameManager.SaveGame();
         }
 
         private void UndoLastAction()
@@ -157,7 +149,6 @@ namespace Core
 
             RaiseCountersChangedEvent();
             _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
-            _gameManager.SaveGame();
         }
 
         private void AttemptMatch((Guid firstCellId, Guid secondCellId) data)
@@ -196,7 +187,6 @@ namespace Core
             var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo, scoreBeforeAction, multiplierBeforeAction, pairScore, lineScores);
             _actionHistory.Record(action);
             _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
-            _gameManager.SaveGame();
         }
 
         private int CheckAndRemoveEmptyLines(int line1, int line2, List<Tuple<int, List<CellData>>> removedLinesInfo, Dictionary<int, int> lineScores)
@@ -239,7 +229,6 @@ namespace Core
             }
 
             _gameEvents.onNewGameStarted.Raise();
-            _gameManager.SaveGame();
         }
 
         ~GameController()

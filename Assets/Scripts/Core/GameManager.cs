@@ -21,45 +21,47 @@ namespace Core
             _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
             _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
             _gameEvents = ServiceProvider.GetService<GameEvents>();
-            SubscribeToSaveEvents();
+            SubscribeToEvents();
         }
 
         private void OnDestroy()
         {
-            UnsubscribeFromSaveEvents();
+            UnsubscribeFromEvents();
         }
 
-        private void SubscribeToSaveEvents()
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus)
+            {
+                SaveGame();
+            }
+        }
+
+        private void OnApplicationQuit()
+        {
+            SaveGame();
+        }
+
+        private void SubscribeToEvents()
         {
             if (!_gameEvents) return;
             _gameEvents.onToggleTopLine.AddListener(SetTopLineVisibilityAndSave);
-            _gameEvents.onCountersChanged.AddListener(data => SaveGame());
-            _gameEvents.onDisableCountersConfirmed.AddListener(SaveGame);
-            _gameEvents.onCellRemoved.AddListener(id => SaveGame());
-            _gameEvents.onLineScoreAdded.AddListener(data => SaveGame());
-            _gameEvents.onAddExistingNumbers.AddListener(SaveGame);
-            _gameEvents.onUndoLastAction.AddListener(SaveGame);
         }
 
-        private void UnsubscribeFromSaveEvents()
+        private void UnsubscribeFromEvents()
         {
             if (!_gameEvents) return;
             _gameEvents.onToggleTopLine.RemoveListener(SetTopLineVisibilityAndSave);
-            _gameEvents.onCountersChanged.RemoveListener(data => SaveGame());
-            _gameEvents.onDisableCountersConfirmed.RemoveListener(SaveGame);
-            _gameEvents.onCellRemoved.RemoveListener(id => SaveGame());
-            _gameEvents.onLineScoreAdded.RemoveListener(data => SaveGame());
-            _gameEvents.onAddExistingNumbers.RemoveListener(SaveGame);
-            _gameEvents.onUndoLastAction.RemoveListener(SaveGame);
         }
 
         private void SetTopLineVisibilityAndSave(bool isVisible)
         {
+            if (_isTopLineVisible == isVisible) return;
             _isTopLineVisible = isVisible;
             SaveGame();
         }
 
-        public void SaveGame()
+        private void SaveGame()
         {
             if (_isLoading) return;
 
