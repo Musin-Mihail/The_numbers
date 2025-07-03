@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Core.Events;
 using Model;
+using PlayablesStudio.Plugins.YandexGamesSDK.Runtime;
 using UnityEngine;
 using View.Grid;
 
@@ -12,8 +14,15 @@ namespace Core
         private StatisticsModel _statisticsModel;
         private ActionCountersModel _actionCountersModel;
         private GameEvents _gameEvents;
+
         private bool _isTopLineVisible = true;
         private bool _isLoading;
+        private const string GameDataKey = "GameData";
+
+        private const float SaveCooldown = 5.0f;
+        private float _timeSinceLastSave = 5.0f;
+        private bool _savePending;
+        private bool _isSaving;
 
         private void Awake()
         {
@@ -22,6 +31,19 @@ namespace Core
             _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
             _gameEvents = ServiceProvider.GetService<GameEvents>();
             SubscribeToEvents();
+        }
+
+        private void Update()
+        {
+            if (_timeSinceLastSave < SaveCooldown)
+            {
+                _timeSinceLastSave += Time.deltaTime;
+            }
+
+            if (_savePending && _timeSinceLastSave >= SaveCooldown && !_isSaving)
+            {
+                SaveGame(true);
+            }
         }
 
         private void OnDestroy()
@@ -33,13 +55,13 @@ namespace Core
         {
             if (pauseStatus)
             {
-                SaveGame();
+                SaveGame(true);
             }
         }
 
         private void OnApplicationQuit()
         {
-            SaveGame();
+            SaveGame(false);
         }
 
         private void SubscribeToEvents()
@@ -58,12 +80,30 @@ namespace Core
         {
             if (_isTopLineVisible == isVisible) return;
             _isTopLineVisible = isVisible;
-            SaveGame();
+            RequestSave();
         }
 
-        private void SaveGame()
+        public void RequestSave()
         {
-            if (_isLoading) return;
+            if (_isSaving) return;
+
+            if (_timeSinceLastSave >= SaveCooldown)
+            {
+                SaveGame(true);
+            }
+            else
+            {
+                _savePending = true;
+            }
+        }
+
+        private void SaveGame(bool flushToCloud)
+        {
+            if (_isLoading || _isSaving) return;
+
+            _isSaving = true;
+            _savePending = false;
+            _timeSinceLastSave = 0f;
 
             var gameData = new GameData
             {
@@ -73,46 +113,62 @@ namespace Core
                 isTopLineVisible = _isTopLineVisible
             };
 
-            SaveLoadService.SaveGame(gameData);
+            YandexGamesSDK.Instance.CloudStorage.Save(GameDataKey, gameData, (success, error) =>
+            {
+                if (!success || !flushToCloud)
+                {
+                    _isSaving = false;
+                    return;
+                }
+
+                YandexGamesSDK.Instance.CloudStorage.FlushData((flushSuccess, flushError) => { _isSaving = false; });
+            });
         }
 
-        public bool LoadGame()
+        public void LoadGame(Action<bool> onComplete)
         {
-            var data = SaveLoadService.LoadGame();
-            if (data == null) return false;
-
             _isLoading = true;
 
-            _gridModel.RestoreState(data.gridCells);
-            _statisticsModel.SetState(data.statistics.score, data.statistics.multiplier);
-            _actionCountersModel.RestoreState(data.actionCounters);
-            _isTopLineVisible = data.isTopLineVisible;
-
-            var gridView = ServiceProvider.GetService<GridView>();
-            if (gridView)
+            YandexGamesSDK.Instance.CloudStorage.Load<GameData>(GameDataKey, (success, data, error) =>
             {
-                gridView.FullRedraw();
-            }
-
-            if (_gameEvents)
-            {
-                _gameEvents.onToggleTopLine?.Raise(_isTopLineVisible);
-
-                if (data.actionCounters.areCountersDisabled)
+                if (success && data != null)
                 {
-                    _gameEvents.onCountersChanged?.Raise((-1, -1, -1));
+                    _gridModel.RestoreState(data.gridCells);
+                    _statisticsModel.SetState(data.statistics.score, data.statistics.multiplier);
+                    _actionCountersModel.RestoreState(data.actionCounters);
+                    _isTopLineVisible = data.isTopLineVisible;
+
+                    var gridView = ServiceProvider.GetService<GridView>();
+                    if (gridView)
+                    {
+                        gridView.FullRedraw();
+                    }
+
+                    if (_gameEvents)
+                    {
+                        _gameEvents.onToggleTopLine?.Raise(_isTopLineVisible);
+                        if (data.actionCounters.areCountersDisabled)
+                        {
+                            _gameEvents.onCountersChanged?.Raise((-1, -1, -1));
+                        }
+                        else
+                        {
+                            _gameEvents.onCountersChanged?.Raise((data.actionCounters.undoCount, data.actionCounters.addNumbersCount, data.actionCounters.hintCount));
+                        }
+
+                        _gameEvents.onStatisticsChanged?.Raise((data.statistics.score, data.statistics.multiplier));
+                    }
+
+                    _isLoading = false;
+                    onComplete?.Invoke(true);
                 }
                 else
                 {
-                    _gameEvents.onCountersChanged?.Raise((data.actionCounters.undoCount, data.actionCounters.addNumbersCount, data.actionCounters.hintCount));
+                    Debug.LogWarning($"Failed to load data from cloud: {error}. A new game will be started.");
+                    _isLoading = false;
+                    onComplete?.Invoke(false);
                 }
-
-                _gameEvents.onStatisticsChanged?.Raise((data.statistics.score, data.statistics.multiplier));
-            }
-
-            _isLoading = false;
-
-            return true;
+            });
         }
     }
 }

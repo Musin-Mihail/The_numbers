@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Model;
-using UnityEngine;
 
 namespace Core
 {
@@ -22,6 +21,10 @@ namespace Core
         public int column;
         public bool isActive;
 
+        public CellDataSerializable()
+        {
+        }
+
         public CellDataSerializable(CellData cellData)
         {
             number = cellData.Number;
@@ -36,6 +39,10 @@ namespace Core
     {
         public long score;
         public int multiplier;
+
+        public StatisticsModelSerializable()
+        {
+        }
 
         public StatisticsModelSerializable(StatisticsModel model)
         {
@@ -52,42 +59,16 @@ namespace Core
         public int hintCount;
         public bool areCountersDisabled;
 
+        public ActionCountersModelSerializable()
+        {
+        }
+
         public ActionCountersModelSerializable(ActionCountersModel model)
         {
             undoCount = model.UndoCount;
             addNumbersCount = model.AddNumbersCount;
             hintCount = model.HintCount;
             areCountersDisabled = model.AreCountersDisabled;
-        }
-    }
-
-
-    public static class SaveLoadService
-    {
-        private const string GameDataKey = "GameData";
-
-        public static void SaveGame(GameData data)
-        {
-            var json = JsonUtility.ToJson(data);
-            PlayerPrefs.SetString(GameDataKey, json);
-            PlayerPrefs.Save();
-        }
-
-        public static GameData LoadGame()
-        {
-            if (PlayerPrefs.HasKey(GameDataKey))
-            {
-                var json = PlayerPrefs.GetString(GameDataKey);
-                var data = JsonUtility.FromJson<GameData>(json);
-                return data;
-            }
-
-            return null;
-        }
-
-        public static void DeleteSavedData()
-        {
-            PlayerPrefs.DeleteKey(GameDataKey);
         }
     }
 }

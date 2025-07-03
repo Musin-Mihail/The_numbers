@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using Core.Events;
 using DataProviders;
 using Gameplay;
 using Model;
+using PlayablesStudio.Plugins.YandexGamesSDK.Runtime;
 using UnityEngine;
 using UnityEngine.UI;
 using View.Grid;
@@ -17,7 +19,6 @@ namespace Core
         [SerializeField] private HeaderNumberDisplay headerNumberDisplay;
         [SerializeField] private ConfirmationDialog confirmationDialog;
         [SerializeField] private Toggle topLineToggle;
-
         [Header("Event Channels")]
         [SerializeField] private GameEvents gameEvents;
 
@@ -43,7 +44,6 @@ namespace Core
             ServiceProvider.Register(actionCountersModel);
             var actionHistory = new ActionHistory();
             ServiceProvider.Register(actionHistory);
-
             var gridDataProvider = new GridDataProvider(gridModel);
             ServiceProvider.Register<IGridDataProvider>(gridDataProvider);
             var matchValidator = new MatchValidator(gridDataProvider);
@@ -54,24 +54,34 @@ namespace Core
 
             _gameManager = gameObject.AddComponent<GameManager>();
             ServiceProvider.Register(_gameManager);
-
             var gameController = new GameController();
             ServiceProvider.Register(gameController);
         }
 
-        private void Start()
+        private IEnumerator Start()
         {
-            if (!_gameManager) return;
+            yield return YandexGamesSDK.Instance.Initialize();
+
+            if (!YandexGamesSDK.IsInitialized)
+            {
+                Debug.LogError("Yandex Games SDK failed to initialize.");
+                yield break;
+            }
+
+            if (!_gameManager) yield break;
 
             SetupListeners();
 
-            if (_gameManager.LoadGame()) return;
-            var gameController = ServiceProvider.GetService<GameController>();
-            gameController.StartNewGame(true);
-            if (topLineToggle)
+            _gameManager.LoadGame(loadSuccess =>
             {
-                gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
-            }
+                if (loadSuccess) return;
+                var gameController = ServiceProvider.GetService<GameController>();
+                gameController.StartNewGame(true);
+                if (topLineToggle)
+                {
+                    gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
+                }
+            });
         }
 
         private void SetupListeners()
@@ -116,7 +126,6 @@ namespace Core
         private void OnDestroy()
         {
             if (!gameEvents) return;
-
             if (topLineToggle)
             {
                 gameEvents.onToggleTopLine.RemoveListener(UpdateTopLineToggleState);

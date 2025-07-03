@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e0fbd0953ad1440ab3ee579ec796a34, type: 3}
+  m_Name: YandexGamesSDKConfig
+  m_EditorClassIdentifier: 
+  appID: YOUR_GAME_ID
+  isYandexPlatform: 0
+  verboseLogging: 0
+  useMockData: 1
+  mockData:
+    mockUserProfile:
+      id: 
+      name: 
+      isAuthorized: 0
+      avatarUrlSmall: 
+      avatarUrlMedium: 
+      avatarUrlLarge: 
+    mockLeaderboardEntries: []
+  pauseSettings:
+    pauseAudio: 1
+    pauseTime: 1
+    hideCursor: 1
+    cursorLockMode: 0
+  developmentSettings:
+    runLocalServerAfterBuild: 0
+    overrideOnBuild: 1
+    buildPath: 
+    serverPort: 8080

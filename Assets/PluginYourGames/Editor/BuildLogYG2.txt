@@ -1,3 +1,0 @@
-Build path: D:/GameBild/The numbers
-Build number: 4
-PluginYG version: 2.0032

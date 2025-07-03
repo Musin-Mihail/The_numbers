@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: efa747916aa66674d96ea40ca8a480b2, type: 3}
+  m_Script: {fileID: 0}
   m_Name: SettingsYG2
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp:YG:InfoYG
   Basic:
-    platform: {fileID: 11400000, guid: c2a303d33a9fd394bae4c4b88b9a1c44, type: 2}
+    platform: {fileID: 0}
     autoApplySettings: 1
     autoPauseGame: 1
     editEventSystem: 1
@@ -33,13 +33,13 @@ MonoBehaviour:
     testFailAds: 0
   Templates:
     logoImageFormat: 0
-    backgroundImgFormat: 1
+    backgroundImgFormat: 0
     gradientBackgroundByLoadGame:
       radial: 0
       angleInclination: 140
       color1: {r: 1, g: 0.831, b: 0.149, a: 1}
       color2: {r: 0.36, g: 0.09, b: 1, a: 1}
-    customProgressBar: 0
+    customProgressBar: 1
     progressBarSettigs:
       round: 1
       roundAngle: 10
@@ -47,8 +47,8 @@ MonoBehaviour:
       height: 24
       color1: {r: 0.25, g: 0.6392, b: 1, a: 1}
       color2: {r: 1, g: 0.831, b: 0.149, a: 0.7}
-    fixedAspectRatio: 1
-    aspectRatio: 9/16
+    fixedAspectRatio: 0
+    aspectRatio: 16/9
     fillBackground: 0
     gradientBackgroundByAspectRatio:
       radial: 0
