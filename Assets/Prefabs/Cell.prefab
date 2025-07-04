@@ -212,7 +212,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: {fileID: 4633507960198524735}
   indicator: {fileID: 7645662225628225519}
-  activeSprite: {fileID: 3051807238603390531, guid: 64a3645f96919004ca3954ffcb4b09b0, type: 3}
+  activeSprite: {fileID: 21300000, guid: 6beb90e346e342540abd46152cbae3f8, type: 3}
   disabledSprite: {fileID: 6231113568105247006, guid: 4520842aa2c3469449a962c40a5b7a77, type: 3}
   hintColor: {r: 0.6, g: 1, b: 0.6, a: 1}
 --- !u!114 &776307866008091198
@@ -235,7 +235,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 3051807238603390531, guid: 64a3645f96919004ca3954ffcb4b09b0, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6beb90e346e342540abd46152cbae3f8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
