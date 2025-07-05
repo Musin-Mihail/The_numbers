@@ -21,6 +21,8 @@ namespace Core
         private GameManager _gameManager;
         private const int InitialQuantityByHeight = 5;
 
+        private const string DisableCountersProductId = "disable_counters_product_id";
+
         public GameController()
         {
             Initialize();
@@ -96,10 +98,28 @@ namespace Core
 
         private void HandleDisableCountersConfirmed()
         {
-            _actionCountersModel.DisableCounters();
-            RaiseCountersChangedEvent();
-            _gameManager?.RequestSave();
+            var sdk = YandexGamesSDK.Instance;
+            if (sdk == null || sdk.Purchases == null)
+            {
+#if UNITY_EDITOR
+                _actionCountersModel.DisableCounters();
+                RaiseCountersChangedEvent();
+                _gameManager?.RequestSave();
+#endif
+                return;
+            }
+
+            sdk.Purchases.PurchaseProduct(DisableCountersProductId, (success, purchaseData, error) =>
+            {
+                if (success && purchaseData != null)
+                {
+                    _actionCountersModel.DisableCounters();
+                    RaiseCountersChangedEvent();
+                    _gameManager?.RequestSave();
+                }
+            });
         }
+
 
         private void FindAndShowHint()
         {

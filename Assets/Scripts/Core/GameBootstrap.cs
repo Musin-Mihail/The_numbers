@@ -107,7 +107,7 @@ namespace Core
 
         private void UpdateTopLineToggleState(bool isVisible)
         {
-            if (topLineToggle != null)
+            if (topLineToggle)
             {
                 topLineToggle.isOn = isVisible;
             }
@@ -115,7 +115,7 @@ namespace Core
 
         private void HandleRequestDisableCounters()
         {
-            confirmationDialog.Show("Отключить счётчики?", () => { gameEvents.onDisableCountersConfirmed.Raise(); });
+            confirmationDialog.Show("Отключить ограничения за плату?", () => { gameEvents.onDisableCountersConfirmed.Raise(); });
         }
 
         private void HandleRequestRefillCounters()
