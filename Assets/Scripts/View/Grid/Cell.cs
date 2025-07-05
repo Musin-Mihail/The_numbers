@@ -10,55 +10,15 @@ namespace View.Grid
     public class Cell : MonoBehaviour
     {
         public TextMeshProUGUI text;
-        [SerializeField] private GameObject indicator;
         [SerializeField] private Sprite activeSprite;
-        [SerializeField] private Sprite disabledSprite;
-        [SerializeField] private Color hintColor = new(0.6f, 1f, 0.6f, 1f);
-
-        private RectTransform _targetRectTransform;
-
-        public RectTransform TargetRectTransform
-        {
-            get
-            {
-                if (!_targetRectTransform)
-                {
-                    _targetRectTransform = GetComponent<RectTransform>();
-                }
-
-                return _targetRectTransform;
-            }
-        }
-
-        private CellAnimator _animator;
-
-        public CellAnimator Animator
-        {
-            get
-            {
-                if (!_animator)
-                {
-                    _animator = GetComponent<CellAnimator>();
-                }
-
-                return _animator;
-            }
-        }
-
-        private Image _backgroundImage;
-
-        private Image BackgroundImage
-        {
-            get
-            {
-                if (!_backgroundImage)
-                {
-                    _backgroundImage = GetComponent<Image>();
-                }
-
-                return _backgroundImage;
-            }
-        }
+        [SerializeField] private Color originalColor;
+        [SerializeField] private Color hintColor;
+        [SerializeField] private Color selectColor;
+        [SerializeField] private RectTransform targetRectTransform;
+        [SerializeField] private CellAnimator animator;
+        [SerializeField] private Image backgroundImage;
+        public RectTransform TargetRectTransform => targetRectTransform;
+        public CellAnimator Animator => animator;
 
         public Action<Guid> OnClickedCallback { get; set; }
         private Guid DataId { get; set; }
@@ -96,22 +56,20 @@ namespace View.Grid
         {
             if (_selected == isSelected) return;
             _selected = isSelected;
-            indicator.SetActive(_selected);
+            backgroundImage.color = _selected ? selectColor : originalColor;
         }
 
         public void SetHighlight(bool show)
         {
-            if (BackgroundImage)
+            if (backgroundImage)
             {
-                BackgroundImage.color = show ? hintColor : Color.white;
+                backgroundImage.color = show ? hintColor : originalColor;
             }
         }
 
         public void SetVisualState(bool isActive)
         {
             text.enabled = isActive;
-            if (!BackgroundImage) return;
-            BackgroundImage.sprite = isActive ? activeSprite : disabledSprite;
             if (!isActive)
             {
                 SetHighlight(false);
