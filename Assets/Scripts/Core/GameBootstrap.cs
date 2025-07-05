@@ -120,7 +120,7 @@ namespace Core
 
         private void HandleRequestRefillCounters()
         {
-            confirmationDialog.Show("Добавить количество к cчетчикам?", () => { gameEvents.onRefillCountersConfirmed.Raise(); });
+            confirmationDialog.Show("Посмотреть рекламу, чтобы пополнить счетчики?", () => { gameEvents.onShowRewardedAdForRefill.Raise(); });
         }
 
         private void OnDestroy()

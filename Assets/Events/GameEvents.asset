@@ -27,10 +27,10 @@ MonoBehaviour:
   onHintFound: {fileID: 11400000, guid: b610d16f971bd4b409b01e963ceddf3d, type: 2}
   onNoHintFound: {fileID: 11400000, guid: eadf4278efe0d5844b0f8e0968b908ef, type: 2}
   onRequestRefillCounters: {fileID: 11400000, guid: ef066355403df3f4b9468f453ae59691, type: 2}
-  onRefillCountersConfirmed: {fileID: 11400000, guid: 5100f5e5b746d6348a025118913b270d, type: 2}
   onRequestDisableCounters: {fileID: 11400000, guid: 6b8453de070a6cc458f5c5a41c65d5c1, type: 2}
   onDisableCountersConfirmed: {fileID: 11400000, guid: 89fc5ba551a590b44880711d48220ee2, type: 2}
   onCountersChanged: {fileID: 11400000, guid: 5a49033be5be8d74f94248cf8438b298, type: 2}
+  onShowRewardedAdForRefill: {fileID: 11400000, guid: f2f8df4f356f24f4ca7d79224ae6c7e3, type: 2}
   onPairScoreAdded: {fileID: 11400000, guid: 39272f154d25db2409653622935f55b7, type: 2}
   onLineScoreAdded: {fileID: 11400000, guid: bacebd5d9bab88a4486534f31adbe8fd, type: 2}
   onPairScoreUndone: {fileID: 11400000, guid: 996c9821592d2274380c05d70790ef69, type: 2}

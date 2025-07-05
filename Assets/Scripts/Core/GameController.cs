@@ -4,6 +4,9 @@ using System.Linq;
 using Core.Events;
 using Gameplay;
 using Model;
+using PlayablesStudio.Plugins.YandexGamesSDK.Runtime;
+using PlayablesStudio.Plugins.YandexGamesSDK.Runtime.Modules.Advertisement;
+using UnityEngine;
 
 namespace Core
 {
@@ -41,8 +44,8 @@ namespace Core
             _gameEvents.onAddExistingNumbers.AddListener(AddExistingNumbersAsNewLines);
             _gameEvents.onUndoLastAction.AddListener(UndoLastAction);
             _gameEvents.onRequestHint.AddListener(FindAndShowHint);
-            _gameEvents.onRefillCountersConfirmed.AddListener(HandleRefillCountersConfirmed);
             _gameEvents.onDisableCountersConfirmed.AddListener(HandleDisableCountersConfirmed);
+            _gameEvents.onShowRewardedAdForRefill.AddListener(HandleShowRewardedAdForRefill);
         }
 
         private void UnsubscribeFromInputEvents()
@@ -51,15 +54,39 @@ namespace Core
             _gameEvents.onAddExistingNumbers.RemoveListener(AddExistingNumbersAsNewLines);
             _gameEvents.onUndoLastAction.RemoveListener(UndoLastAction);
             _gameEvents.onRequestHint.RemoveListener(FindAndShowHint);
-            _gameEvents.onRefillCountersConfirmed.RemoveListener(HandleRefillCountersConfirmed);
             _gameEvents.onDisableCountersConfirmed.RemoveListener(HandleDisableCountersConfirmed);
+            _gameEvents.onShowRewardedAdForRefill.RemoveListener(HandleShowRewardedAdForRefill);
         }
 
-        private void HandleRefillCountersConfirmed()
+        private void HandleShowRewardedAdForRefill()
         {
-            _actionCountersModel.ResetCounters();
-            RaiseCountersChangedEvent();
-            _gameManager?.RequestSave();
+            var sdk = YandexGamesSDK.Instance;
+            if (!sdk || sdk.Advertisement == null)
+            {
+                Debug.LogWarning("YandexGamesSDK или модуль Advertisement не доступен. Это ожидаемое поведение в редакторе Unity. Симуляция награды для тестирования.");
+#if UNITY_EDITOR
+                _actionCountersModel.ResetCounters();
+                RaiseCountersChangedEvent();
+                _gameManager?.RequestSave();
+                Debug.Log("Счетчики пополнены (симуляция в редакторе).");
+#endif
+                return;
+            }
+
+            sdk.Advertisement.ShowRewardedAd((success, response, error) =>
+            {
+                if (success && response == YGAdResponse.AdRewarded)
+                {
+                    _actionCountersModel.ResetCounters();
+                    RaiseCountersChangedEvent();
+                    _gameManager?.RequestSave();
+                    Debug.Log("Счетчики пополнены после просмотра рекламы.");
+                }
+                else
+                {
+                    Debug.Log($"Реклама с вознаграждением не была завершена. Ответ: {response}, Ошибка: {error}");
+                }
+            });
         }
 
         private void RaiseCountersChangedEvent()

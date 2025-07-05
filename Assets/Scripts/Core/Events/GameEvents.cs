@@ -31,10 +31,12 @@ namespace Core.Events
 
         [Header("Счетчики действий")]
         public VoidEvent onRequestRefillCounters;
-        public VoidEvent onRefillCountersConfirmed;
         public VoidEvent onRequestDisableCounters;
         public VoidEvent onDisableCountersConfirmed;
         public CountersChangedEvent onCountersChanged;
+
+        [Header("Реклама")]
+        public VoidEvent onShowRewardedAdForRefill;
 
         [Header("Подсчет очков")]
         public PairScoreEvent onPairScoreAdded;
