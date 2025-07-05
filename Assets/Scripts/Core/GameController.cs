@@ -189,6 +189,7 @@ namespace Core
             if (_gridModel.GetAllActiveCellData().Count == 0)
             {
                 _statisticsModel.IncrementMultiplier();
+                _gameEvents.onBoardCleared.Raise();
             }
 
             var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo, scoreBeforeAction, multiplierBeforeAction, pairScore, lineScores);

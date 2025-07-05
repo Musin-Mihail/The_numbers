@@ -8,7 +8,6 @@ namespace View.UI
     public class FloatingScore : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI scoreText;
-        [SerializeField] private float moveSpeed = 50f;
         [SerializeField] private float fadeOutTime = 0.5f;
         [SerializeField] private float lifeTime = 1f;
 
@@ -20,11 +19,12 @@ namespace View.UI
             _rectTransform = GetComponent<RectTransform>();
         }
 
-        public void Show(string text, Color color, Vector2 centerPosition, Action<FloatingScore> onComplete)
+        public void Show(string text, Color color, Vector2 centerPosition, Vector2 size, Action<FloatingScore> onComplete)
         {
             _onComplete = onComplete;
             scoreText.text = text;
             scoreText.color = color;
+            _rectTransform.sizeDelta = size;
             _rectTransform.anchoredPosition = centerPosition;
 
             gameObject.SetActive(true);
@@ -38,8 +38,6 @@ namespace View.UI
 
             while (elapsedTime < lifeTime)
             {
-                _rectTransform.anchoredPosition += Vector2.up * (moveSpeed * Time.deltaTime);
-
                 if (elapsedTime > lifeTime - fadeOutTime)
                 {
                     var alpha = Mathf.Lerp(1f, 0f, (elapsedTime - (lifeTime - fadeOutTime)) / fadeOutTime);

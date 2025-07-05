@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using Core.Events;
 using Model;
@@ -68,12 +69,27 @@ namespace Core
         {
             if (!_gameEvents) return;
             _gameEvents.onToggleTopLine.AddListener(SetTopLineVisibilityAndSave);
+            _gameEvents.onBoardCleared.AddListener(HandleBoardCleared);
         }
 
         private void UnsubscribeFromEvents()
         {
             if (!_gameEvents) return;
             _gameEvents.onToggleTopLine.RemoveListener(SetTopLineVisibilityAndSave);
+            _gameEvents.onBoardCleared.RemoveListener(HandleBoardCleared);
+        }
+
+        private void HandleBoardCleared()
+        {
+            StartCoroutine(BoardClearedRoutine());
+        }
+
+        private IEnumerator BoardClearedRoutine()
+        {
+            yield return new WaitForSeconds(2.0f);
+
+            var gameController = ServiceProvider.GetService<GameController>();
+            gameController?.StartNewGame(false);
         }
 
         private void SetTopLineVisibilityAndSave(bool isVisible)

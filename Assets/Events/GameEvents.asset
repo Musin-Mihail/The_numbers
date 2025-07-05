@@ -36,6 +36,7 @@ MonoBehaviour:
   onPairScoreUndone: {fileID: 11400000, guid: 996c9821592d2274380c05d70790ef69, type: 2}
   onLineScoreUndone: {fileID: 11400000, guid: f7ff1135d14e05844ba7c0a9e319b3d6, type: 2}
   onStatisticsChanged: {fileID: 11400000, guid: 8b3fcd37ed7d873438d874fb08a548ac, type: 2}
+  onBoardCleared: {fileID: 11400000, guid: 97a206a2d5583954da43369559313e7e, type: 2}
   onToggleTopLine: {fileID: 11400000, guid: 6b981f9830c5ee243b8a0556f03b0fcc, type: 2}
   onShowMenu: {fileID: 11400000, guid: fc9fef1ee9745fd4c897ca04b13f557f, type: 2}
   onHideMenu: {fileID: 11400000, guid: e6df8d22085a28f499af489a67957b18, type: 2}

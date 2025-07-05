@@ -84,6 +84,7 @@ namespace View.Grid
             _gameEvents.onLineScoreAdded?.AddListener(HandleLineScoreAdded);
             _gameEvents.onPairScoreUndone?.AddListener(HandlePairScoreUndone);
             _gameEvents.onLineScoreUndone?.AddListener(HandleLineScoreUndone);
+            _gameEvents.onBoardCleared?.AddListener(HandleBoardCleared);
         }
 
         private void UnsubscribeFromEvents()
@@ -104,6 +105,17 @@ namespace View.Grid
             _gameEvents.onLineScoreAdded?.RemoveListener(HandleLineScoreAdded);
             _gameEvents.onPairScoreUndone?.RemoveListener(HandlePairScoreUndone);
             _gameEvents.onLineScoreUndone?.RemoveListener(HandleLineScoreUndone);
+            _gameEvents.onBoardCleared?.RemoveListener(HandleBoardCleared);
+        }
+
+        private void HandleBoardCleared()
+        {
+            if (floatingScorePool == null) return;
+            var centerPosition = new Vector2(scrollRect.viewport.rect.width / 2f, -scrollRect.viewport.rect.height / 2f);
+            var size = new Vector2(700, 250);
+            var adjustedPosition = new Vector2(centerPosition.x - size.x / 2f, centerPosition.y + size.y / 2f);
+            var scoreTextInstance = floatingScorePool.GetScore();
+            scoreTextInstance.Show("Множитель +1", positiveScoreColor, adjustedPosition, size, floatingScorePool.ReturnScore);
         }
 
         public void FullRedraw()
@@ -341,9 +353,8 @@ namespace View.Grid
         private void ShowFloatingScore(int score, Color color, Vector2 position)
         {
             if (floatingScorePool == null) return;
-
             var scoreTextInstance = floatingScorePool.GetScore();
-            scoreTextInstance.Show(Mathf.Abs(score).ToString(), color, position, floatingScorePool.ReturnScore);
+            scoreTextInstance.Show(Mathf.Abs(score).ToString(), color, position, new Vector2(107, 107), floatingScorePool.ReturnScore);
         }
 
         private Vector2 GetCellPosition(CellData data)

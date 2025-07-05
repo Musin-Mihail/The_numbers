@@ -42,6 +42,7 @@ namespace Core.Events
         public PairScoreEvent onPairScoreUndone;
         public LineScoreEvent onLineScoreUndone;
         public StatisticsChangedEvent onStatisticsChanged;
+        public VoidEvent onBoardCleared;
 
         [Header("UI")]
         public BoolEvent onToggleTopLine;
