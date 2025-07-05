@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8c8c45dc3604b2e8fa1d69023aae2ed, type: 3}
   m_Name: GameEvents
   m_EditorClassIdentifier: 
+  onYandexSDKInitialized: {fileID: 11400000, guid: eca581211cf1a4f4d8d4615b728db5da, type: 2}
   onRequestNewGame: {fileID: 11400000, guid: 21b6a8a81ce78194c8effeca177d2c2f, type: 2}
   onNewGameStarted: {fileID: 11400000, guid: 83a282d04823d7f4f9c7b4b8092fcc16, type: 2}
   onCellAdded: {fileID: 11400000, guid: 02a53295763631c4788abadccbc1e9e6, type: 2}

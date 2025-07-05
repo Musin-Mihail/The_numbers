@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Core.Events;
+using Core.Shop;
 using Gameplay;
 using Model;
 using PlayablesStudio.Plugins.YandexGamesSDK.Runtime;
@@ -19,8 +20,9 @@ namespace Core
         private StatisticsModel _statisticsModel;
         private GameEvents _gameEvents;
         private GameManager _gameManager;
-        private const int InitialQuantityByHeight = 5;
+        private IPurchaseHandler _purchaseHandler;
 
+        private const int InitialQuantityByHeight = 5;
         private const string DisableCountersProductId = "disable_counters_product_id";
 
         public GameController()
@@ -37,6 +39,7 @@ namespace Core
             _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
             _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
             _gameManager = ServiceProvider.GetService<GameManager>();
+            _purchaseHandler = ServiceProvider.GetService<IPurchaseHandler>();
             SubscribeToInputEvents();
         }
 
@@ -98,28 +101,14 @@ namespace Core
 
         private void HandleDisableCountersConfirmed()
         {
-            var sdk = YandexGamesSDK.Instance;
-            if (sdk == null || sdk.Purchases == null)
+            _purchaseHandler.PurchaseProduct(DisableCountersProductId, success =>
             {
-#if UNITY_EDITOR
+                if (!success) return;
                 _actionCountersModel.DisableCounters();
                 RaiseCountersChangedEvent();
                 _gameManager?.RequestSave();
-#endif
-                return;
-            }
-
-            sdk.Purchases.PurchaseProduct(DisableCountersProductId, (success, purchaseData, error) =>
-            {
-                if (success && purchaseData != null)
-                {
-                    _actionCountersModel.DisableCounters();
-                    RaiseCountersChangedEvent();
-                    _gameManager?.RequestSave();
-                }
             });
         }
-
 
         private void FindAndShowHint()
         {

@@ -1,14 +1,12 @@
 ﻿using System.Collections;
-using System.Linq;
 using Core.Events;
-using PlayablesStudio.Plugins.YandexGamesSDK.Runtime;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using YandexGames.Types.IAP;
 
-namespace Core
+namespace Core.Shop
 {
     public class ShopManager : MonoBehaviour
     {
@@ -23,86 +21,61 @@ namespace Core
         [Header("Event Channels")]
         [SerializeField] private GameEvents gameEvents;
 
-        private YandexGamesSDK _sdk;
-        private YGProduct _productInfo;
+        private IShopDataProvider _dataProvider;
+        private bool _isShopInitialized;
         private bool _isPurchased;
+        private YGProduct _productInfo;
 
         private void OnEnable()
         {
-            if (gameEvents)
-            {
-                gameEvents.onCountersChanged.AddListener(HandleCountersChanged);
-            }
+            if (!gameEvents) return;
+            gameEvents.onCountersChanged.AddListener(HandleCountersChanged);
+            gameEvents.onYandexSDKInitialized.AddListener(Initialize);
         }
 
         private void OnDisable()
         {
-            if (gameEvents)
-            {
-                gameEvents.onCountersChanged.RemoveListener(HandleCountersChanged);
-            }
+            if (!gameEvents) return;
+            gameEvents.onCountersChanged.RemoveListener(HandleCountersChanged);
+            gameEvents.onYandexSDKInitialized.RemoveListener(Initialize);
         }
 
-        private IEnumerator Start()
+        private void Initialize()
         {
+            if (_isShopInitialized) return;
+            _isShopInitialized = true;
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+            _dataProvider = new YandexShopDataProvider(this);
+#else
+            _dataProvider = new EditorMockShopDataProvider();
+#endif
+
             purchaseButton.interactable = false;
             priceText.text = "Загрузка...";
-            while (!YandexGamesSDK.IsInitialized)
+            _dataProvider.FetchShopData(productIdToDisplay, OnShopDataFetched);
+        }
+
+        private void OnShopDataFetched(ShopDataResult result)
+        {
+            if (result.IsError)
             {
-                yield return null;
+                priceText.text = result.ErrorMessage;
+                Debug.LogError($"ShopManager Error: {result.ErrorMessage}");
+                return;
             }
 
-            _sdk = YandexGamesSDK.Instance;
-            if (!gameEvents)
-            {
-                priceText.text = "Ошибка";
-                yield break;
-            }
+            _isPurchased = result.IsPurchased;
+            _productInfo = result.ProductInfo;
 
-            if (_sdk.Purchases != null)
+            if (_isPurchased)
             {
-                CheckForPreviousPurchases();
+                SetProductAsPurchased();
             }
             else
             {
-                priceText.text = "N/A";
+                UpdateProductUI();
             }
-        }
-
-        private void CheckForPreviousPurchases()
-        {
-            _sdk.Purchases.GetPurchasedProducts((success, purchasedProductsResponse, error) =>
-            {
-                if (success && purchasedProductsResponse?.purchasedProducts != null)
-                {
-                    if (purchasedProductsResponse.purchasedProducts.Any(p => p.productID == productIdToDisplay))
-                    {
-                        _isPurchased = true;
-                        SetProductAsPurchased();
-                        return;
-                    }
-                }
-
-                if (!_isPurchased)
-                {
-                    LoadProductCatalog();
-                }
-            });
-        }
-
-        private void LoadProductCatalog()
-        {
-            _sdk.Purchases.GetProductCatalog((success, response, error) =>
-            {
-                if (!success || response?.products == null) return;
-                foreach (var product in response.products)
-                {
-                    if (product.id != productIdToDisplay) continue;
-                    _productInfo = product;
-                    UpdateProductUI();
-                    break;
-                }
-            });
         }
 
         private void UpdateProductUI()
@@ -110,7 +83,6 @@ namespace Core
             if (_isPurchased || _productInfo == null) return;
 
             priceText.text = _productInfo.price;
-
             if (currencyIcon && !string.IsNullOrEmpty(_productInfo.priceCurrencyImage))
             {
                 currencyIcon.gameObject.SetActive(true);
@@ -142,7 +114,12 @@ namespace Core
         {
             using var webRequest = UnityWebRequestTexture.GetTexture(url);
             yield return webRequest.SendWebRequest();
-            if (webRequest.result != UnityWebRequest.Result.Success) yield break;
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Не удалось загрузить изображение валюты: {webRequest.error}");
+                yield break;
+            }
+
             var texture = DownloadHandlerTexture.GetContent(webRequest);
             var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
             targetImage.sprite = sprite;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using Core.Events;
+using Core.Shop;
 using DataProviders;
 using Gameplay;
 using Model;
@@ -19,6 +20,7 @@ namespace Core
         [SerializeField] private HeaderNumberDisplay headerNumberDisplay;
         [SerializeField] private ConfirmationDialog confirmationDialog;
         [SerializeField] private Toggle topLineToggle;
+
         [Header("Event Channels")]
         [SerializeField] private GameEvents gameEvents;
 
@@ -27,15 +29,25 @@ namespace Core
 
         private void Awake()
         {
+            if (gameEvents && gameEvents.onYandexSDKInitialized)
+            {
+                gameEvents.onYandexSDKInitialized.Reset();
+            }
+
             if (!gameEvents)
             {
-                Debug.LogError("ОШИБКА: 'GameEvents' не назначен в инспекторе для объекта " + gameObject.name + "! Пожалуйста, назначьте ScriptableObject 'GameEvents'.", this);
+                Debug.LogError("ОШИБКА: 'GameEvents' не назначен в инспекторе!", this);
                 return;
             }
 
             ServiceProvider.Clear();
-
             ServiceProvider.Register(gameEvents);
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+            ServiceProvider.Register<IPurchaseHandler>(new YandexPurchaseHandler());
+#else
+            ServiceProvider.Register<IPurchaseHandler>(new EditorMockPurchaseHandler());
+#endif
             var gridModel = new GridModel();
             ServiceProvider.Register(gridModel);
             var statisticsModel = new StatisticsModel();
@@ -48,10 +60,8 @@ namespace Core
             ServiceProvider.Register<IGridDataProvider>(gridDataProvider);
             var matchValidator = new MatchValidator(gridDataProvider);
             ServiceProvider.Register(matchValidator);
-
             ServiceProvider.Register(view);
             ServiceProvider.Register(headerNumberDisplay);
-
             _gameManager = gameObject.AddComponent<GameManager>();
             ServiceProvider.Register(_gameManager);
             var gameController = new GameController();
@@ -68,10 +78,9 @@ namespace Core
                 yield break;
             }
 
+            gameEvents.onYandexSDKInitialized.Raise();
             if (!_gameManager) yield break;
-
             SetupListeners();
-
             _gameManager.LoadGame(loadSuccess =>
             {
                 if (loadSuccess) return;

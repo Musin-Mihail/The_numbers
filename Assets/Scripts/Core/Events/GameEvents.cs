@@ -5,6 +5,9 @@ namespace Core.Events
     [CreateAssetMenu(fileName = "GameEvents", menuName = "Events/Game Events Container")]
     public class GameEvents : ScriptableObject
     {
+        [Header("Инициализация")]
+        public StatefulVoidEvent onYandexSDKInitialized;
+
         [Header("Игровой процесс")]
         public VoidEvent onRequestNewGame;
         public VoidEvent onNewGameStarted;
