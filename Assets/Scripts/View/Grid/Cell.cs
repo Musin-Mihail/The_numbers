@@ -26,7 +26,9 @@ namespace View.Grid
         public int Column { get; private set; }
         private bool IsActive { get; set; }
         public int Number { get; private set; }
+
         private bool _selected;
+        private bool _isHighlighted;
 
         public void UpdateFromData(CellData data)
         {
@@ -48,32 +50,43 @@ namespace View.Grid
         public void ResetForPooling()
         {
             OnClickedCallback = null;
+            _isHighlighted = false;
             SetSelected(false);
-            SetHighlight(false);
         }
 
         public void SetSelected(bool isSelected)
         {
             if (_selected == isSelected) return;
             _selected = isSelected;
-            backgroundImage.color = _selected ? selectColor : originalColor;
+
+            if (!backgroundImage) return;
+
+            if (_selected)
+            {
+                backgroundImage.color = selectColor;
+            }
+            else
+            {
+                backgroundImage.color = _isHighlighted ? hintColor : originalColor;
+            }
         }
 
         public void SetHighlight(bool show)
         {
-            if (backgroundImage)
+            _isHighlighted = show;
+
+            if (!_selected && backgroundImage)
             {
-                backgroundImage.color = show ? hintColor : originalColor;
+                backgroundImage.color = _isHighlighted ? hintColor : originalColor;
             }
         }
 
         public void SetVisualState(bool isActive)
         {
             text.enabled = isActive;
-            if (!isActive)
-            {
-                SetHighlight(false);
-            }
+            if (isActive) return;
+            SetHighlight(false);
+            SetSelected(false);
         }
     }
 }

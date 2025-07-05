@@ -212,7 +212,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: {fileID: 4633507960198524735}
   activeSprite: {fileID: 21300000, guid: fba1469d145038045921fa7dd97ec84e, type: 3}
-  disabledSprite: {fileID: 21300000, guid: bf36a197a1bd43d42b2d3779c5ad0163, type: 3}
   originalColor: {r: 0.53333336, g: 0.7019608, b: 0.85882354, a: 0.5019608}
   hintColor: {r: 0.6, g: 1, b: 0.6, a: 1}
   selectColor: {r: 0.53333336, g: 0.7019608, b: 0.85882354, a: 1}
@@ -232,7 +231,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.53333336, g: 0.7019608, b: 0.85882354, a: 1}
+  m_Color: {r: 0.53333336, g: 0.7019608, b: 0.85882354, a: 0.5019608}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
