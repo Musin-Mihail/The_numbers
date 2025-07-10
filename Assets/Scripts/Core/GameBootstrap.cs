@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections;
 using Core.Events;
 using Core.Shop;
 using DataProviders;
 using Gameplay;
 using Model;
-using PlayablesStudio.Plugins.YandexGamesSDK.Runtime;
 using UnityEngine;
 using UnityEngine.UI;
 using View.Grid;
 using View.UI;
+using YG;
 
 namespace Core
 {
@@ -68,18 +67,20 @@ namespace Core
             ServiceProvider.Register(gameController);
         }
 
-        private IEnumerator Start()
+        private void OnEnable()
         {
-            yield return YandexGamesSDK.Instance.Initialize();
+            YG2.onGetSDKData += OnYandexSDKInitialized;
+        }
 
-            if (!YandexGamesSDK.IsInitialized)
-            {
-                Debug.LogError("Yandex Games SDK failed to initialize.");
-                yield break;
-            }
+        private void OnDisable()
+        {
+            YG2.onGetSDKData -= OnYandexSDKInitialized;
+        }
 
+        private void OnYandexSDKInitialized()
+        {
             gameEvents.onYandexSDKInitialized.Raise();
-            if (!_gameManager) yield break;
+            if (!_gameManager) return;
             SetupListeners();
             _gameManager.LoadGame(loadSuccess =>
             {

@@ -3,9 +3,9 @@ using System.Collections;
 using System.Linq;
 using Core.Events;
 using Model;
-using PlayablesStudio.Plugins.YandexGamesSDK.Runtime;
 using UnityEngine;
 using View.Grid;
+using YG;
 
 namespace Core
 {
@@ -15,11 +15,7 @@ namespace Core
         private StatisticsModel _statisticsModel;
         private ActionCountersModel _actionCountersModel;
         private GameEvents _gameEvents;
-
-        private bool _isTopLineVisible = true;
         private bool _isLoading;
-        private const string GameDataKey = "GameData";
-
         private const float SaveCooldown = 5.0f;
         private float _timeSinceLastSave = 5.0f;
         private bool _savePending;
@@ -43,7 +39,7 @@ namespace Core
 
             if (_savePending && _timeSinceLastSave >= SaveCooldown && !_isSaving)
             {
-                SaveGame(true);
+                SaveGame();
             }
         }
 
@@ -56,13 +52,13 @@ namespace Core
         {
             if (pauseStatus)
             {
-                SaveGame(true);
+                SaveGame();
             }
         }
 
         private void OnApplicationQuit()
         {
-            SaveGame(false);
+            SaveGame();
         }
 
         private void SubscribeToEvents()
@@ -94,8 +90,8 @@ namespace Core
 
         private void SetTopLineVisibilityAndSave(bool isVisible)
         {
-            if (_isTopLineVisible == isVisible) return;
-            _isTopLineVisible = isVisible;
+            if (YG2.saves.isTopLineVisible == isVisible) return;
+            YG2.saves.isTopLineVisible = isVisible;
             RequestSave();
         }
 
@@ -105,7 +101,7 @@ namespace Core
 
             if (_timeSinceLastSave >= SaveCooldown)
             {
-                SaveGame(true);
+                SaveGame();
             }
             else
             {
@@ -113,7 +109,7 @@ namespace Core
             }
         }
 
-        private void SaveGame(bool flushToCloud)
+        private void SaveGame()
         {
             if (_isLoading || _isSaving) return;
 
@@ -121,70 +117,59 @@ namespace Core
             _savePending = false;
             _timeSinceLastSave = 0f;
 
-            var gameData = new GameData
-            {
-                gridCells = _gridModel.GetAllCellData().Select(c => new CellDataSerializable(c)).ToList(),
-                statistics = new StatisticsModelSerializable(_statisticsModel),
-                actionCounters = new ActionCountersModelSerializable(_actionCountersModel),
-                isTopLineVisible = _isTopLineVisible
-            };
+            YG2.saves.gridCells = _gridModel.GetAllCellData().Select(c => new CellDataSerializable(c)).ToList();
+            YG2.saves.statistics = new StatisticsModelSerializable(_statisticsModel);
+            YG2.saves.actionCounters = new ActionCountersModelSerializable(_actionCountersModel);
 
-            YandexGamesSDK.Instance.CloudStorage.Save(GameDataKey, gameData, (success, error) =>
-            {
-                if (!success || !flushToCloud)
-                {
-                    _isSaving = false;
-                    return;
-                }
+            YG2.saves.isGameEverSaved = true;
 
-                YandexGamesSDK.Instance.CloudStorage.FlushData((flushSuccess, flushError) => { _isSaving = false; });
-            });
+            YG2.SaveProgress();
+
+            _isSaving = false;
+            Debug.Log("Game data save requested via PluginYG2.");
         }
 
         public void LoadGame(Action<bool> onComplete)
         {
             _isLoading = true;
 
-            YandexGamesSDK.Instance.CloudStorage.Load<GameData>(GameDataKey, (success, data, error) =>
+            if (YG2.saves.isGameEverSaved)
             {
-                if (success && data != null)
-                {
-                    _gridModel.RestoreState(data.gridCells);
-                    _statisticsModel.SetState(data.statistics.score, data.statistics.multiplier);
-                    _actionCountersModel.RestoreState(data.actionCounters);
-                    _isTopLineVisible = data.isTopLineVisible;
+                _gridModel.RestoreState(YG2.saves.gridCells);
+                _statisticsModel.SetState(YG2.saves.statistics.score, YG2.saves.statistics.multiplier);
+                _actionCountersModel.RestoreState(YG2.saves.actionCounters);
 
-                    var gridView = ServiceProvider.GetService<GridView>();
-                    if (gridView)
+                var gridView = ServiceProvider.GetService<GridView>();
+                if (gridView)
+                {
+                    gridView.FullRedraw();
+                }
+
+                if (_gameEvents)
+                {
+                    _gameEvents.onToggleTopLine?.Raise(YG2.saves.isTopLineVisible);
+                    if (YG2.saves.actionCounters.areCountersDisabled)
                     {
-                        gridView.FullRedraw();
+                        _gameEvents.onCountersChanged?.Raise((-1, -1, -1));
+                    }
+                    else
+                    {
+                        _gameEvents.onCountersChanged?.Raise((YG2.saves.actionCounters.undoCount, YG2.saves.actionCounters.addNumbersCount, YG2.saves.actionCounters.hintCount));
                     }
 
-                    if (_gameEvents)
-                    {
-                        _gameEvents.onToggleTopLine?.Raise(_isTopLineVisible);
-                        if (data.actionCounters.areCountersDisabled)
-                        {
-                            _gameEvents.onCountersChanged?.Raise((-1, -1, -1));
-                        }
-                        else
-                        {
-                            _gameEvents.onCountersChanged?.Raise((data.actionCounters.undoCount, data.actionCounters.addNumbersCount, data.actionCounters.hintCount));
-                        }
-
-                        _gameEvents.onStatisticsChanged?.Raise((data.statistics.score, data.statistics.multiplier));
-                    }
-
-                    _isLoading = false;
-                    onComplete?.Invoke(true);
+                    _gameEvents.onStatisticsChanged?.Raise((YG2.saves.statistics.score, YG2.saves.statistics.multiplier));
                 }
-                else
-                {
-                    Debug.LogWarning($"Failed to load data from cloud: {error}. A new game will be started.");
-                    _isLoading = false;
-                    onComplete?.Invoke(false);
-                }
-            });
+
+                Debug.Log("Game data loaded successfully from YG2.saves.");
+                _isLoading = false;
+                onComplete?.Invoke(true);
+            }
+            else
+            {
+                Debug.LogWarning("No save data found in YG2.saves. A new game will be started.");
+                _isLoading = false;
+                onComplete?.Invoke(false);
+            }
         }
     }
 }

@@ -5,9 +5,8 @@ using Core.Events;
 using Core.Shop;
 using Gameplay;
 using Model;
-using PlayablesStudio.Plugins.YandexGamesSDK.Runtime;
-using PlayablesStudio.Plugins.YandexGamesSDK.Runtime.Modules.Advertisement;
 using UnityEngine;
+using YG;
 
 namespace Core
 {
@@ -24,6 +23,7 @@ namespace Core
 
         private const int InitialQuantityByHeight = 5;
         private const string DisableCountersProductId = "disable_counters_product_id";
+        private const string RefillCountersRewardId = "refillCounters";
 
         public GameController()
         {
@@ -65,32 +65,12 @@ namespace Core
 
         private void HandleShowRewardedAdForRefill()
         {
-            var sdk = YandexGamesSDK.Instance;
-            if (!sdk || sdk.Advertisement == null)
+            YG2.RewardedAdvShow(RefillCountersRewardId, () =>
             {
-                Debug.LogWarning("YandexGamesSDK или модуль Advertisement не доступен. Это ожидаемое поведение в редакторе Unity. Симуляция награды для тестирования.");
-#if UNITY_EDITOR
                 _actionCountersModel.ResetCounters();
                 RaiseCountersChangedEvent();
                 _gameManager?.RequestSave();
-                Debug.Log("Счетчики пополнены (симуляция в редакторе).");
-#endif
-                return;
-            }
-
-            sdk.Advertisement.ShowRewardedAd((success, response, error) =>
-            {
-                if (success && response == YGAdResponse.AdRewarded)
-                {
-                    _actionCountersModel.ResetCounters();
-                    RaiseCountersChangedEvent();
-                    _gameManager?.RequestSave();
-                    Debug.Log("Счетчики пополнены после просмотра рекламы.");
-                }
-                else
-                {
-                    Debug.Log($"Реклама с вознаграждением не была завершена. Ответ: {response}, Ошибка: {error}");
-                }
+                Debug.Log("Счетчики пополнены после просмотра рекламы.");
             });
         }
 
