@@ -40,7 +40,9 @@ namespace Core
             _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
             _gameManager = ServiceProvider.GetService<GameManager>();
             _purchaseHandler = ServiceProvider.GetService<IPurchaseHandler>();
+
             SubscribeToInputEvents();
+            SubscribeToYgEvents();
         }
 
         private void SubscribeToInputEvents()
@@ -53,6 +55,13 @@ namespace Core
             _gameEvents.onShowRewardedAdForRefill.AddListener(HandleShowRewardedAdForRefill);
         }
 
+        private void SubscribeToYgEvents()
+        {
+            YG2.onPurchaseSuccess += OnPurchaseSuccess;
+            YG2.onPurchaseFailed += OnPurchaseFailed;
+            YG2.onRewardAdv += OnRewardVideo;
+        }
+
         private void UnsubscribeFromInputEvents()
         {
             _gameEvents.onAttemptMatch.RemoveListener(AttemptMatch);
@@ -63,15 +72,43 @@ namespace Core
             _gameEvents.onShowRewardedAdForRefill.RemoveListener(HandleShowRewardedAdForRefill);
         }
 
-        private void HandleShowRewardedAdForRefill()
+        private void UnsubscribeFromYgEvents()
         {
-            YG2.RewardedAdvShow(RefillCountersRewardId, () =>
+            YG2.onPurchaseSuccess -= OnPurchaseSuccess;
+            YG2.onPurchaseFailed -= OnPurchaseFailed;
+            YG2.onRewardAdv -= OnRewardVideo;
+        }
+
+        private void OnPurchaseSuccess(string purchasedId)
+        {
+            if (purchasedId == DisableCountersProductId)
+            {
+                Debug.Log($"Покупка '{purchasedId}' прошла успешно!");
+                _actionCountersModel.DisableCounters();
+                RaiseCountersChangedEvent();
+                _gameManager?.RequestSave();
+            }
+        }
+
+        private void OnPurchaseFailed(string failedId)
+        {
+            Debug.LogError($"Ошибка при покупке товара '{failedId}'");
+        }
+
+        private void OnRewardVideo(string rewardId)
+        {
+            if (rewardId == RefillCountersRewardId)
             {
                 _actionCountersModel.ResetCounters();
                 RaiseCountersChangedEvent();
                 _gameManager?.RequestSave();
                 Debug.Log("Счетчики пополнены после просмотра рекламы.");
-            });
+            }
+        }
+
+        private void HandleShowRewardedAdForRefill()
+        {
+            YG2.RewardedAdvShow(RefillCountersRewardId);
         }
 
         private void RaiseCountersChangedEvent()
@@ -81,13 +118,7 @@ namespace Core
 
         private void HandleDisableCountersConfirmed()
         {
-            _purchaseHandler.PurchaseProduct(DisableCountersProductId, success =>
-            {
-                if (!success) return;
-                _actionCountersModel.DisableCounters();
-                RaiseCountersChangedEvent();
-                _gameManager?.RequestSave();
-            });
+            _purchaseHandler.PurchaseProduct(DisableCountersProductId, null);
         }
 
         private void FindAndShowHint()
@@ -260,6 +291,7 @@ namespace Core
         ~GameController()
         {
             UnsubscribeFromInputEvents();
+            UnsubscribeFromYgEvents();
         }
     }
 }

@@ -1,12 +1,12 @@
 ﻿using System;
-using YandexGames.Types.IAP;
+using YG.Utils.Pay;
 
 namespace Core.Shop
 {
     public class ShopDataResult
     {
         public bool IsPurchased;
-        public YGProduct ProductInfo;
+        public Purchase ProductInfo;
         public bool IsError;
         public string ErrorMessage;
     }
