@@ -25,6 +25,7 @@ namespace Core
 
         private Action _requestNewGameAction;
         private GameManager _gameManager;
+        private LeaderboardManager _leaderboardManager;
 
         private void Awake()
         {
@@ -63,6 +64,8 @@ namespace Core
             ServiceProvider.Register(headerNumberDisplay);
             _gameManager = gameObject.AddComponent<GameManager>();
             ServiceProvider.Register(_gameManager);
+            _leaderboardManager = gameObject.AddComponent<LeaderboardManager>();
+            ServiceProvider.Register(_leaderboardManager);
             var gameController = new GameController();
             ServiceProvider.Register(gameController);
         }

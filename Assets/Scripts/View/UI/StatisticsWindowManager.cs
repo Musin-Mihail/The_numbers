@@ -1,11 +1,15 @@
 ﻿using Core.Events;
 using UnityEngine;
+using YG;
 
 namespace View.UI
 {
     public class StatisticsWindowManager : MonoBehaviour
     {
         [SerializeField] private GameObject statisticsWindow;
+
+        [Header("Leaderboard")]
+        [SerializeField] private LeaderboardYG leaderboardYG;
 
         [Header("Event Listening")]
         [SerializeField] private GameEvents gameEvents;
@@ -34,9 +38,11 @@ namespace View.UI
 
         private void ShowStatisticsWindow()
         {
-            if (statisticsWindow)
+            if (!statisticsWindow) return;
+            statisticsWindow.SetActive(true);
+            if (leaderboardYG)
             {
-                statisticsWindow.SetActive(true);
+                leaderboardYG.UpdateLB();
             }
         }
 
