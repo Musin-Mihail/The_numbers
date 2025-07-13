@@ -43,4 +43,5 @@ MonoBehaviour:
   onHideMenu: {fileID: 11400000, guid: e6df8d22085a28f499af489a67957b18, type: 2}
   onShowStatistics: {fileID: 11400000, guid: e7de97d3d18b61547bbe9014b507dcf4, type: 2}
   onHideStatistics: {fileID: 11400000, guid: b7cbc2599a773d043a474efaa5f656dc, type: 2}
-  onLeaderboardUpdate: {fileID: 11400000, guid: 227378eae0f673448a73f1c6369d77ac, type: 2}
+  onShowRules: {fileID: 11400000, guid: 0e19d066ba9cd8549b6ebfda319eb5fb, type: 2}
+  onHideRules: {fileID: 11400000, guid: 9486733ce494cef40a5c8b85cca9d93f, type: 2}

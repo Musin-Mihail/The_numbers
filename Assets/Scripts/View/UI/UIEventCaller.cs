@@ -52,5 +52,15 @@ namespace View.UI
         {
             if (gameEvents) gameEvents.onHideStatistics.Raise();
         }
+
+        public void RaiseShowRules()
+        {
+            if (gameEvents) gameEvents.onShowRules.Raise();
+        }
+
+        public void RaiseHideRules()
+        {
+            if (gameEvents) gameEvents.onHideRules.Raise();
+        }
     }
 }
