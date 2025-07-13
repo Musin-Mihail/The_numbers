@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Core.Events;
 using Core.Platform;
 using DataProviders;
@@ -9,6 +10,7 @@ using UnityEngine.UI;
 using View.Grid;
 using View.UI;
 using YG;
+// Добавлено для использования корутин
 
 namespace Core
 {
@@ -30,6 +32,10 @@ namespace Core
 
         [Header("Leaderboard Settings")]
         [SerializeField] private string leaderboardName = "TotalScore";
+
+        // Новые константы для повторных попыток загрузки
+        private const int MaxLoadAttempts = 3;
+        private const float LoadAttemptDelay = 2.0f;
 
         private Action _requestNewGameAction;
         private GameManager _gameManager;
@@ -161,23 +167,79 @@ namespace Core
         }
 
         /// <summary>
-        /// Вызывается после успешной инициализации Yandex SDK. Загружает игру или начинает новую.
+        /// Вызывается после успешной инициализации Yandex SDK. Запускает загрузку с повторными попытками.
         /// </summary>
         private void OnYandexSDKInitialized()
         {
             gameEvents.onYandexSDKInitialized.Raise();
             if (!_gameManager) return;
             SetupListeners();
+            StartCoroutine(LoadGameWithRetries());
+        }
+
+        /// <summary>
+        /// Корутина для загрузки игры с несколькими попытками.
+        /// </summary>
+        private IEnumerator LoadGameWithRetries()
+        {
             var saveLoadService = ServiceProvider.GetService<ISaveLoadService>();
-            saveLoadService.LoadGame(loadSuccess =>
+            var attempts = 0;
+            var loadSuccess = false;
+
+            while (attempts < MaxLoadAttempts && !loadSuccess)
             {
-                if (loadSuccess) return;
-                _gameController.StartNewGame(true);
-                if (topLineToggle)
+                attempts++;
+                Debug.Log($"Попытка загрузки данных #{attempts}");
+
+                var loadFinished = false;
+                saveLoadService.LoadGame(success =>
                 {
-                    gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
+                    loadSuccess = success;
+                    loadFinished = true;
+                });
+
+                // Ждем завершения асинхронной операции загрузки
+                yield return new WaitUntil(() => loadFinished);
+
+                if (!loadSuccess && attempts < MaxLoadAttempts)
+                {
+                    Debug.LogWarning($"Загрузка не удалась. Повторная попытка через {LoadAttemptDelay} сек.");
+                    yield return new WaitForSeconds(LoadAttemptDelay);
                 }
-            });
+            }
+
+            if (loadSuccess)
+            {
+                Debug.Log("Данные успешно загружены.");
+            }
+            else
+            {
+                Debug.LogError($"Не удалось загрузить данные после {MaxLoadAttempts} попыток.");
+
+                if (confirmationDialog)
+                {
+                    confirmationDialog.Show(
+                        $"Не удалось загрузить данные. Начать новую игру? \n\n<color=red>ВНИМАНИЕ: Ваш текущий прогресс будет сброшен!</color>",
+                        () =>
+                        {
+                            Debug.Log("Игрок согласился начать новую игру после сбоя загрузки.");
+                            _gameController.StartNewGame(true);
+                            if (topLineToggle)
+                            {
+                                gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
+                            }
+                        }
+                    );
+                }
+                else
+                {
+                    _gameController.StartNewGame(true);
+                    if (topLineToggle)
+                    {
+                        gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
+                    }
+                }
+            }
         }
 
         /// <summary>
