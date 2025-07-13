@@ -13,7 +13,6 @@ namespace View.Grid
     public class GridView : MonoBehaviour
     {
         [Header("Scene Dependencies")]
-        [SerializeField] private CanvasScaler canvasScaler;
         [SerializeField] private GameObject cellPrefab;
         [SerializeField] private RectTransform contentContainer;
         [SerializeField] private ScrollRect scrollRect;
@@ -47,22 +46,18 @@ namespace View.Grid
             _headerNumberDisplay = ServiceProvider.GetService<HeaderNumberDisplay>();
             SubscribeToEvents();
 
-            if (!canvasScaler)
+            if (!cellPrefab)
             {
-                Debug.LogError("Ошибка: CanvasScaler не назначен в инспекторе!", this);
+                Debug.LogError("Ошибка: cellPrefab не назначен в инспекторе!", this);
                 enabled = false;
                 return;
             }
 
-            var referenceWidth = canvasScaler.referenceResolution.x;
-            _cellSize = (referenceWidth - GameConstants.Indent) / GameConstants.QuantityByWidth;
-            _topPaddingValue = _cellSize * 1.1f;
-            if (cellPrefab)
-            {
-                cellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(_cellSize, _cellSize);
-            }
+            _cellSize = cellPrefab.GetComponent<RectTransform>().sizeDelta.x;
 
+            _topPaddingValue = _cellSize * 1.1f;
             _scrollLoggingThreshold = _cellSize / 2f;
+
             if (!scrollRect) return;
             _lastLoggedScrollPosition = scrollRect.content.anchoredPosition.y;
             scrollRect.onValueChanged.AddListener(OnScrollValueChanged);

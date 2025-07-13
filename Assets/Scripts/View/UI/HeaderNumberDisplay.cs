@@ -2,7 +2,6 @@
 using Core.Events;
 using Model;
 using UnityEngine;
-using UnityEngine.UI;
 using View.Grid;
 
 namespace View.UI
@@ -10,7 +9,6 @@ namespace View.UI
     public class HeaderNumberDisplay : MonoBehaviour
     {
         [Header("Scene Dependencies")]
-        [SerializeField] private CanvasScaler canvasScaler;
         [SerializeField] private GameObject cellPrefab;
         [SerializeField] private RectTransform container;
 
@@ -30,15 +28,14 @@ namespace View.UI
 
         private void Start()
         {
-            if (!canvasScaler)
+            if (!cellPrefab)
             {
-                Debug.LogError("Ошибка: CanvasScaler не назначен в инспекторе!", this);
+                Debug.LogError("Ошибка: 'cellPrefab' не назначен в инспекторе!", this);
                 enabled = false;
                 return;
             }
 
-            var referenceWidth = canvasScaler.referenceResolution.x;
-            _cellSize = (referenceWidth - GameConstants.Indent) / GameConstants.QuantityByWidth;
+            _cellSize = cellPrefab.GetComponent<RectTransform>().sizeDelta.x;
 
             CreateLineDisplay();
         }
@@ -77,7 +74,6 @@ namespace View.UI
                 _topLineCells.Add(cell);
                 cellGo.SetActive(true);
                 var rectTransform = cell.TargetRectTransform;
-                rectTransform.sizeDelta = new Vector2(_cellSize, _cellSize);
                 rectTransform.anchoredPosition = new Vector2(_cellSize * i + GameConstants.Indent / 2f, -GameConstants.Indent / 2f);
             }
         }
