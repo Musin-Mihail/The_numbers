@@ -23,21 +23,26 @@ namespace Core.Shop
         [SerializeField] private GameEvents gameEvents;
 
         private bool _isShopInitialized;
-        private bool _isPurchased;
         private Purchase _productInfo;
 
         private void OnEnable()
         {
-            if (!gameEvents) return;
-            gameEvents.onCountersChanged.AddListener(HandleCountersChanged);
-            gameEvents.onYandexSDKInitialized.AddListener(Initialize);
+            if (gameEvents)
+            {
+                gameEvents.onYandexSDKInitialized.AddListener(Initialize);
+            }
+
+            YG2.onPurchaseSuccess += HandlePurchaseSuccess;
         }
 
         private void OnDisable()
         {
-            if (!gameEvents) return;
-            gameEvents.onCountersChanged.RemoveListener(HandleCountersChanged);
-            gameEvents.onYandexSDKInitialized.RemoveListener(Initialize);
+            if (gameEvents)
+            {
+                gameEvents.onYandexSDKInitialized.RemoveListener(Initialize);
+            }
+
+            YG2.onPurchaseSuccess -= HandlePurchaseSuccess;
         }
 
         /// <summary>
@@ -67,27 +72,43 @@ namespace Core.Shop
         }
 
         /// <summary>
-        /// Обновляет UI товара (цена, доступность кнопки).
+        /// Обновляет UI товара, проверяя статус покупки.
         /// </summary>
         private void UpdateProductUI()
         {
-            if (_isPurchased || _productInfo == null) return;
+            if (_productInfo == null) return;
+            if (_productInfo.consumed)
+            {
+                SetProductAsPurchased();
+            }
+            else
+            {
+                SetProductAsAvailable();
+            }
+        }
 
+        /// <summary>
+        /// Обрабатывает событие успешной покупки.
+        /// </summary>
+        /// <param name="purchasedId">ID купленного товара.</param>
+        private void HandlePurchaseSuccess(string purchasedId)
+        {
+            if (purchasedId == productIdToDisplay)
+            {
+                UpdateProductUI();
+            }
+        }
+
+        /// <summary>
+        /// Обновляет UI, чтобы показать товар как доступный для покупки.
+        /// </summary>
+        private void SetProductAsAvailable()
+        {
             if (priceText)
                 priceText.text = _productInfo.price;
 
             if (purchaseButton)
                 purchaseButton.interactable = true;
-        }
-
-        /// <summary>
-        /// Обрабатывает изменение счетчиков, чтобы определить, был ли куплен товар.
-        /// </summary>
-        private void HandleCountersChanged((int undo, int add, int hint) data)
-        {
-            if (data.undo != -1 || _isPurchased) return;
-            _isPurchased = true;
-            SetProductAsPurchased();
         }
 
         /// <summary>
@@ -99,7 +120,9 @@ namespace Core.Shop
                 priceText.text = "Куплен";
 
             if (purchaseButton)
+            {
                 purchaseButton.interactable = false;
+            }
         }
     }
 }
