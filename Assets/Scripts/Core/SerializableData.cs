@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using Model;
 
 namespace Core
 {
-    [Serializable]
-    public class GameData
-    {
-        public List<CellDataSerializable> gridCells;
-        public StatisticsModelSerializable statistics;
-        public ActionCountersModelSerializable actionCounters;
-        public bool isTopLineVisible;
-    }
-
     [Serializable]
     public class CellDataSerializable
     {

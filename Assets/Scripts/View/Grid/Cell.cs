@@ -10,7 +10,6 @@ namespace View.Grid
     public class Cell : MonoBehaviour
     {
         public TextMeshProUGUI text;
-        [SerializeField] private Sprite activeSprite;
         [SerializeField] private Color originalColor;
         [SerializeField] private Color hintColor;
         [SerializeField] private Color selectColor;
