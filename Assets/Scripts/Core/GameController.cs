@@ -6,7 +6,6 @@ using Gameplay;
 using Model;
 using UnityEngine;
 using View.Grid;
-using YG;
 
 namespace Core
 {
@@ -20,6 +19,7 @@ namespace Core
         private GameEvents _gameEvents;
         private GameManager _gameManager;
         private GridView _gridView;
+        private IPlatformServices _platformServices;
 
         private const int InitialQuantityByHeight = 5;
         private const string DisableCountersProductId = "disable_counters_product_id";
@@ -40,9 +40,10 @@ namespace Core
             _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
             _gameManager = ServiceProvider.GetService<GameManager>();
             _gridView = ServiceProvider.GetService<GridView>();
+            _platformServices = ServiceProvider.GetService<IPlatformServices>();
 
             SubscribeToInputEvents();
-            SubscribeToYgEvents();
+            SubscribeToPlatformEvents();
         }
 
         private void SubscribeToInputEvents()
@@ -55,11 +56,12 @@ namespace Core
             _gameEvents.onShowRewardedAdForRefill.AddListener(HandleShowRewardedAdForRefill);
         }
 
-        private void SubscribeToYgEvents()
+        private void SubscribeToPlatformEvents()
         {
-            YG2.onPurchaseSuccess += OnPurchaseSuccess;
-            YG2.onPurchaseFailed += OnPurchaseFailed;
-            YG2.onRewardAdv += OnRewardVideo;
+            if (_platformServices == null) return;
+            _platformServices.OnPurchaseSuccess += OnPurchaseSuccess;
+            _platformServices.OnPurchaseFailed += OnPurchaseFailed;
+            _platformServices.OnRewardVideoSuccess += OnRewardVideo;
         }
 
         private void UnsubscribeFromInputEvents()
@@ -72,22 +74,21 @@ namespace Core
             _gameEvents.onShowRewardedAdForRefill.RemoveListener(HandleShowRewardedAdForRefill);
         }
 
-        private void UnsubscribeFromYgEvents()
+        private void UnsubscribeFromPlatformEvents()
         {
-            YG2.onPurchaseSuccess -= OnPurchaseSuccess;
-            YG2.onPurchaseFailed -= OnPurchaseFailed;
-            YG2.onRewardAdv -= OnRewardVideo;
+            if (_platformServices == null) return;
+            _platformServices.OnPurchaseSuccess -= OnPurchaseSuccess;
+            _platformServices.OnPurchaseFailed -= OnPurchaseFailed;
+            _platformServices.OnRewardVideoSuccess -= OnRewardVideo;
         }
 
         private void OnPurchaseSuccess(string purchasedId)
         {
-            if (purchasedId == DisableCountersProductId)
-            {
-                Debug.Log($"Покупка '{purchasedId}' прошла успешно!");
-                _actionCountersModel.DisableCounters();
-                RaiseCountersChangedEvent();
-                _gameManager?.RequestSave();
-            }
+            if (purchasedId != DisableCountersProductId) return;
+            Debug.Log($"Покупка '{purchasedId}' прошла успешно!");
+            _actionCountersModel.DisableCounters();
+            RaiseCountersChangedEvent();
+            _gameManager?.RequestSave();
         }
 
         private void OnPurchaseFailed(string failedId)
@@ -97,18 +98,16 @@ namespace Core
 
         private void OnRewardVideo(string rewardId)
         {
-            if (rewardId == RefillCountersRewardId)
-            {
-                _actionCountersModel.ResetCounters();
-                RaiseCountersChangedEvent();
-                _gameManager?.RequestSave();
-                Debug.Log("Счетчики пополнены после просмотра рекламы.");
-            }
+            if (rewardId != RefillCountersRewardId) return;
+            _actionCountersModel.ResetCounters();
+            RaiseCountersChangedEvent();
+            _gameManager?.RequestSave();
+            Debug.Log("Счетчики пополнены после просмотра рекламы.");
         }
 
         private void HandleShowRewardedAdForRefill()
         {
-            YG2.RewardedAdvShow(RefillCountersRewardId);
+            _platformServices?.ShowRewardedAd(RefillCountersRewardId);
         }
 
         private void RaiseCountersChangedEvent()
@@ -118,7 +117,7 @@ namespace Core
 
         private void HandleDisableCountersConfirmed()
         {
-            YG2.BuyPayments(DisableCountersProductId);
+            _platformServices?.Purchase(DisableCountersProductId);
         }
 
         private void FindAndShowHint()
@@ -297,7 +296,7 @@ namespace Core
         ~GameController()
         {
             UnsubscribeFromInputEvents();
-            UnsubscribeFromYgEvents();
+            UnsubscribeFromPlatformEvents();
         }
     }
 }

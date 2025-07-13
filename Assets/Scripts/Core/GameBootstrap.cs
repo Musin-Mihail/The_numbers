@@ -1,5 +1,6 @@
 ﻿using System;
 using Core.Events;
+using Core.Platform;
 using DataProviders;
 using Gameplay;
 using Model;
@@ -22,9 +23,11 @@ namespace Core
         [Header("Event Channels")]
         [SerializeField] private GameEvents gameEvents;
 
+        [Header("Leaderboard Settings")]
+        [SerializeField] private string leaderboardName = "TotalScore";
+
         private Action _requestNewGameAction;
         private GameManager _gameManager;
-        private LeaderboardManager _leaderboardManager;
 
         private void Awake()
         {
@@ -55,10 +58,18 @@ namespace Core
             ServiceProvider.Register(matchValidator);
             ServiceProvider.Register(view);
             ServiceProvider.Register(headerNumberDisplay);
+
+            var yandexPlatformService = new YandexPlatformService();
+            ServiceProvider.Register<IPlatformServices>(yandexPlatformService);
+            var yandexSaveLoadService = new YandexSaveLoadService();
+            ServiceProvider.Register<ISaveLoadService>(yandexSaveLoadService);
+            var yandexLeaderboardService = new YandexLeaderboardService(leaderboardName);
+            ServiceProvider.Register<ILeaderboardService>(yandexLeaderboardService);
+
             _gameManager = gameObject.AddComponent<GameManager>();
             ServiceProvider.Register(_gameManager);
-            _leaderboardManager = gameObject.AddComponent<LeaderboardManager>();
-            ServiceProvider.Register(_leaderboardManager);
+            gameObject.AddComponent<LeaderboardUpdater>();
+            ServiceProvider.Register(gameObject.AddComponent<LeaderboardUpdater>());
             var gameController = new GameController();
             ServiceProvider.Register(gameController);
         }
@@ -78,7 +89,8 @@ namespace Core
             gameEvents.onYandexSDKInitialized.Raise();
             if (!_gameManager) return;
             SetupListeners();
-            _gameManager.LoadGame(loadSuccess =>
+            var saveLoadService = ServiceProvider.GetService<ISaveLoadService>();
+            saveLoadService.LoadGame(loadSuccess =>
             {
                 if (loadSuccess) return;
                 var gameController = ServiceProvider.GetService<GameController>();

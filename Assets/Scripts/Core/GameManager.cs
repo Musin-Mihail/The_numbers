@@ -1,21 +1,16 @@
-﻿using System;
+﻿// --- Измененный файл: Assets/Scripts/Core/GameManager.cs ---
+
 using System.Collections;
-using System.Linq;
 using Core.Events;
-using Model;
 using UnityEngine;
-using View.Grid;
-using YG;
 
 namespace Core
 {
     public class GameManager : MonoBehaviour
     {
-        private GridModel _gridModel;
-        private StatisticsModel _statisticsModel;
-        private ActionCountersModel _actionCountersModel;
         private GameEvents _gameEvents;
-        private bool _isLoading;
+        private ISaveLoadService _saveLoadService;
+
         private const float SaveCooldown = 5.0f;
         private float _timeSinceLastSave = 5.0f;
         private bool _savePending;
@@ -23,10 +18,8 @@ namespace Core
 
         private void Awake()
         {
-            _gridModel = ServiceProvider.GetService<GridModel>();
-            _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
-            _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
             _gameEvents = ServiceProvider.GetService<GameEvents>();
+            _saveLoadService = ServiceProvider.GetService<ISaveLoadService>();
             SubscribeToEvents();
         }
 
@@ -39,7 +32,7 @@ namespace Core
 
             if (_savePending && _timeSinceLastSave >= SaveCooldown && !_isSaving)
             {
-                SaveGame();
+                StartCoroutine(SaveGameCoroutine());
             }
         }
 
@@ -52,13 +45,13 @@ namespace Core
         {
             if (pauseStatus)
             {
-                SaveGame();
+                StartCoroutine(SaveGameCoroutine(true));
             }
         }
 
         private void OnApplicationQuit()
         {
-            SaveGame();
+            StartCoroutine(SaveGameCoroutine(true));
         }
 
         private void SubscribeToEvents()
@@ -90,9 +83,7 @@ namespace Core
 
         private void SetTopLineVisibilityAndSave(bool isVisible)
         {
-            if (YG2.saves.isTopLineVisible == isVisible) return;
-            YG2.saves.isTopLineVisible = isVisible;
-            RequestSave();
+            _saveLoadService?.SetTopLineVisibility(isVisible);
         }
 
         public void RequestSave()
@@ -101,7 +92,7 @@ namespace Core
 
             if (_timeSinceLastSave >= SaveCooldown)
             {
-                SaveGame();
+                StartCoroutine(SaveGameCoroutine());
             }
             else
             {
@@ -109,67 +100,19 @@ namespace Core
             }
         }
 
-        private void SaveGame()
+        private IEnumerator SaveGameCoroutine(bool force = false)
         {
-            if (_isLoading || _isSaving) return;
+            if (_isSaving && !force) yield break;
 
             _isSaving = true;
             _savePending = false;
             _timeSinceLastSave = 0f;
 
-            YG2.saves.gridCells = _gridModel.GetAllCellData().Select(c => new CellDataSerializable(c)).ToList();
-            YG2.saves.statistics = new StatisticsModelSerializable(_statisticsModel);
-            YG2.saves.actionCounters = new ActionCountersModelSerializable(_actionCountersModel);
+            _saveLoadService?.RequestSave();
 
-            YG2.saves.isGameEverSaved = true;
-
-            YG2.SaveProgress();
+            yield return new WaitForSeconds(0.1f);
 
             _isSaving = false;
-            Debug.Log("Game data save requested via PluginYG2.");
-        }
-
-        public void LoadGame(Action<bool> onComplete)
-        {
-            _isLoading = true;
-
-            if (YG2.saves.isGameEverSaved)
-            {
-                _gridModel.RestoreState(YG2.saves.gridCells);
-                _statisticsModel.SetState(YG2.saves.statistics.score, YG2.saves.statistics.multiplier);
-                _actionCountersModel.RestoreState(YG2.saves.actionCounters);
-
-                var gridView = ServiceProvider.GetService<GridView>();
-                if (gridView)
-                {
-                    gridView.FullRedraw();
-                }
-
-                if (_gameEvents)
-                {
-                    _gameEvents.onToggleTopLine?.Raise(YG2.saves.isTopLineVisible);
-                    if (YG2.saves.actionCounters.areCountersDisabled)
-                    {
-                        _gameEvents.onCountersChanged?.Raise((-1, -1, -1));
-                    }
-                    else
-                    {
-                        _gameEvents.onCountersChanged?.Raise((YG2.saves.actionCounters.undoCount, YG2.saves.actionCounters.addNumbersCount, YG2.saves.actionCounters.hintCount));
-                    }
-
-                    _gameEvents.onStatisticsChanged?.Raise((YG2.saves.statistics.score, YG2.saves.statistics.multiplier));
-                }
-
-                Debug.Log("Game data loaded successfully from YG2.saves.");
-                _isLoading = false;
-                onComplete?.Invoke(true);
-            }
-            else
-            {
-                Debug.LogWarning("No save data found in YG2.saves. A new game will be started.");
-                _isLoading = false;
-                onComplete?.Invoke(false);
-            }
         }
     }
 }

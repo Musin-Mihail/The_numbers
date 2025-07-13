@@ -1810,9 +1810,9 @@ GameObject:
   - component: {fileID: 382419728}
   - component: {fileID: 382419729}
   - component: {fileID: 382419730}
-  - component: {fileID: 382419731}
   - component: {fileID: 382419732}
   - component: {fileID: 382419733}
+  - component: {fileID: 382419734}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1885,6 +1885,7 @@ MonoBehaviour:
   confirmationDialog: {fileID: 196455909}
   topLineToggle: {fileID: 1346984341}
   gameEvents: {fileID: 11400000, guid: f4c0432a5dafe5b4c97ce2400b9a7313, type: 2}
+  leaderboardName: TotalScore
 --- !u!114 &382419723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2005,19 +2006,6 @@ MonoBehaviour:
   priceText: {fileID: 2103842178}
   productIdToDisplay: disable_counters_product_id
   gameEvents: {fileID: 11400000, guid: f4c0432a5dafe5b4c97ce2400b9a7313, type: 2}
---- !u!114 &382419731
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 382419716}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3577ac9dec1c440aa11d08bcab006c0f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  leaderboardName: TotalScore
 --- !u!114 &382419732
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2051,6 +2039,18 @@ MonoBehaviour:
   sumIsTenColor: {r: 0, g: 1, b: 1, a: 1}
   lineWrapColor: {r: 1, g: 0, b: 1, a: 1}
   firstAndLastColor: {r: 0, g: 1, b: 0, a: 1}
+--- !u!114 &382419734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 382419716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54c2acbc3b9a4db5ad9c74aa55b5aa42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &489982509
 GameObject:
   m_ObjectHideFlags: 0
@@ -2900,7 +2900,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -80, y: 1450}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &635026136
 MonoBehaviour:
@@ -4595,7 +4595,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1366017713
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5713,7 +5713,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1572926992
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6607,7 +6607,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -180, y: 1850}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1785005692
 MonoBehaviour:
