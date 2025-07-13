@@ -13,6 +13,7 @@ namespace View.UI
         [SerializeField] private TextMeshProUGUI messageText;
         [SerializeField] private Button yesButton;
         [SerializeField] private Button noButton;
+        [SerializeField] private RectTransform panel;
 
         private Action _onYesAction;
 
@@ -27,8 +28,10 @@ namespace View.UI
         /// </summary>
         /// <param name="message">Сообщение для пользователя.</param>
         /// <param name="onYes">Действие, выполняемое при нажатии "Да".</param>
-        public void Show(string message, Action onYes)
+        /// <param name="newSize">Размер окна</param>
+        public void Show(string message, Action onYes, Vector2 newSize)
         {
+            panel.sizeDelta = newSize;
             messageText.text = message;
             _onYesAction = onYes;
             gameObject.SetActive(true);

@@ -1,5 +1,5 @@
 {
-    "idSave": 226,
+    "idSave": 236,
     "isTopLineVisible": false,
     "gridCells": [
         {
@@ -996,7 +996,7 @@
             "number": 5,
             "line": 16,
             "column": 5,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 9,
@@ -1056,7 +1056,7 @@
             "number": 5,
             "line": 17,
             "column": 5,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 2,
@@ -1204,7 +1204,7 @@
         }
     ],
     "statistics": {
-        "score": 384,
+        "score": 385,
         "multiplier": 1
     },
     "actionCounters": {

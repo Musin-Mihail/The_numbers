@@ -228,7 +228,7 @@ namespace Core
                             {
                                 gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
                             }
-                        }
+                        }, new Vector2(0, 550)
                     );
                 }
                 else
@@ -255,7 +255,7 @@ namespace Core
 
             if (confirmationDialog)
             {
-                _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal);
+                _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal, new Vector2(0, 350));
                 gameEvents.onRequestNewGame.AddListener(_requestNewGameAction);
                 gameEvents.onRequestRefillCounters.AddListener(HandleRequestRefillCounters);
                 gameEvents.onRequestDisableCounters.AddListener(HandleRequestDisableCounters);
@@ -283,7 +283,7 @@ namespace Core
         /// </summary>
         private void HandleRequestDisableCounters()
         {
-            confirmationDialog.Show("Отключить ограничения за плату?", () => { gameEvents.onDisableCountersConfirmed.Raise(); });
+            confirmationDialog.Show("Отключить ограничения за плату?", () => { gameEvents.onDisableCountersConfirmed.Raise(); }, new Vector2(0, 350));
         }
 
         /// <summary>
@@ -291,7 +291,7 @@ namespace Core
         /// </summary>
         private void HandleRequestRefillCounters()
         {
-            confirmationDialog.Show("Посмотреть рекламу, чтобы пополнить счетчики?", () => { gameEvents.onShowRewardedAdForRefill.Raise(); });
+            confirmationDialog.Show("Посмотреть рекламу, чтобы пополнить счетчики?", () => { gameEvents.onShowRewardedAdForRefill.Raise(); }, new Vector2(0, 350));
         }
 
         /// <summary>
