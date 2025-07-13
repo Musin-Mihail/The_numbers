@@ -9,6 +9,10 @@ using View.UI;
 
 namespace View.Grid
 {
+    /// <summary>
+    /// Основной компонент представления, отвечающий за отображение игровой сетки.
+    /// Управляет созданием, удалением и обновлением визуальных представлений ячеек (Cell).
+    /// </summary>
     [RequireComponent(typeof(CellPool))]
     public class GridView : MonoBehaviour
     {
@@ -36,6 +40,9 @@ namespace View.Grid
         private float _topPaddingValue;
         private readonly List<Guid> _hintedCellIds = new();
 
+        /// <summary>
+        /// Указывает, есть ли в данный момент активные (подсвеченные) подсказки.
+        /// </summary>
         public bool HasActiveHints => _hintedCellIds.Count > 0;
 
         private void Awake()
@@ -105,6 +112,9 @@ namespace View.Grid
             _gameEvents.onBoardCleared?.RemoveListener(HandleBoardCleared);
         }
 
+        /// <summary>
+        /// Сбрасывает выделение ячеек и визуальные эффекты подсказок.
+        /// </summary>
         public void ResetSelectionAndHints()
         {
             ClearHintVisuals();
@@ -118,6 +128,9 @@ namespace View.Grid
             _firstSelectedCellId = null;
         }
 
+        /// <summary>
+        /// Обрабатывает событие очистки доски, показывая уведомление о множителе.
+        /// </summary>
         private void HandleBoardCleared()
         {
             if (floatingScorePool == null) return;
@@ -128,6 +141,9 @@ namespace View.Grid
             scoreTextInstance.Show("Множитель +1", positiveScoreColor, adjustedPosition, size, floatingScorePool.ReturnScore);
         }
 
+        /// <summary>
+        /// Полностью перерисовывает сетку на основе текущего состояния GridModel.
+        /// </summary>
         public void FullRedraw()
         {
             HandleGridCleared();
@@ -140,7 +156,6 @@ namespace View.Grid
             UpdateContentSize();
             RefreshTopLine();
         }
-
 
         private void HandleHintFound((Guid firstId, Guid secondId) data)
         {
@@ -210,6 +225,7 @@ namespace View.Grid
 
         private void HandleGameStarted()
         {
+            // Логика, которая должна выполняться при старте новой игры
         }
 
         private void HandleCellClicked(Guid clickedCellId)

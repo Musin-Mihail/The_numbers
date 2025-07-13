@@ -12,6 +12,10 @@ using YG;
 
 namespace Core
 {
+    /// <summary>
+    /// Основной класс для инициализации игры. Отвечает за создание и регистрацию всех
+    /// основных сервисов, моделей и контроллеров при запуске сцены.
+    /// </summary>
     [RequireComponent(typeof(GameManager))]
     public class GameBootstrap : MonoBehaviour
     {
@@ -31,10 +35,13 @@ namespace Core
         private GameManager _gameManager;
         private GameController _gameController;
 
+        /// <summary>
+        /// Вызывается при запуске. Инициализирует все системы игры.
+        /// </summary>
         private void Awake()
         {
             _gameManager = GetComponent<GameManager>();
-            if (gameEvents && gameEvents.onYandexSDKInitialized)
+            if (gameEvents && gameEvents.onYandexSDKInitialized != null)
             {
                 gameEvents.onYandexSDKInitialized.Reset();
             }
@@ -56,6 +63,9 @@ namespace Core
             _gameController = RegisterGameController(platformServices, gameplayLogic.matchValidator);
         }
 
+        /// <summary>
+        /// Регистрирует модели данных и историю действий.
+        /// </summary>
         private void RegisterModelsAndHistory()
         {
             ServiceProvider.Register(new GridModel());
@@ -64,6 +74,10 @@ namespace Core
             ServiceProvider.Register(new ActionHistory());
         }
 
+        /// <summary>
+        /// Регистрирует сервисы для взаимодействия с платформой (Yandex Games).
+        /// </summary>
+        /// <returns>Интерфейс платформенных сервисов.</returns>
         private IPlatformServices RegisterPlatformServices()
         {
             var gridModel = ServiceProvider.GetService<GridModel>();
@@ -82,6 +96,10 @@ namespace Core
             return yandexPlatformService;
         }
 
+        /// <summary>
+        /// Регистрирует основную игровую логику, такую как провайдер данных сетки и валидатор совпадений.
+        /// </summary>
+        /// <returns>Кортеж с провайдером данных и валидатором.</returns>
         private (IGridDataProvider gridDataProvider, MatchValidator matchValidator) RegisterGameplayLogic()
         {
             var gridModel = ServiceProvider.GetService<GridModel>();
@@ -94,12 +112,21 @@ namespace Core
             return (gridDataProvider, matchValidator);
         }
 
+        /// <summary>
+        /// Регистрирует компоненты представления (View).
+        /// </summary>
         private void RegisterViews()
         {
             ServiceProvider.Register(view);
             ServiceProvider.Register(headerNumberDisplay);
         }
 
+        /// <summary>
+        /// Создает и регистрирует главный игровой контроллер.
+        /// </summary>
+        /// <param name="platformServices">Сервисы платформы.</param>
+        /// <param name="matchValidator">Валидатор совпадений.</param>
+        /// <returns>Созданный игровой контроллер.</returns>
         private GameController RegisterGameController(IPlatformServices platformServices, MatchValidator matchValidator)
         {
             var gameController = new GameController(
@@ -117,16 +144,25 @@ namespace Core
             return gameController;
         }
 
+        /// <summary>
+        /// Подписывается на событие инициализации Yandex SDK.
+        /// </summary>
         private void OnEnable()
         {
             YG2.onGetSDKData += OnYandexSDKInitialized;
         }
 
+        /// <summary>
+        /// Отписывается от события инициализации Yandex SDK.
+        /// </summary>
         private void OnDisable()
         {
             YG2.onGetSDKData -= OnYandexSDKInitialized;
         }
 
+        /// <summary>
+        /// Вызывается после успешной инициализации Yandex SDK. Загружает игру или начинает новую.
+        /// </summary>
         private void OnYandexSDKInitialized()
         {
             gameEvents.onYandexSDKInitialized.Raise();
@@ -144,6 +180,9 @@ namespace Core
             });
         }
 
+        /// <summary>
+        /// Настраивает прослушиватели событий для UI элементов.
+        /// </summary>
         private void SetupListeners()
         {
             if (topLineToggle)
@@ -165,6 +204,10 @@ namespace Core
             }
         }
 
+        /// <summary>
+        /// Обновляет состояние переключателя верхней строки.
+        /// </summary>
+        /// <param name="isVisible">Новое состояние видимости.</param>
         private void UpdateTopLineToggleState(bool isVisible)
         {
             if (topLineToggle)
@@ -173,16 +216,25 @@ namespace Core
             }
         }
 
+        /// <summary>
+        /// Обрабатывает запрос на отключение счетчиков, показывая диалог подтверждения.
+        /// </summary>
         private void HandleRequestDisableCounters()
         {
             confirmationDialog.Show("Отключить ограничения за плату?", () => { gameEvents.onDisableCountersConfirmed.Raise(); });
         }
 
+        /// <summary>
+        /// Обрабатывает запрос на пополнение счетчиков, показывая диалог подтверждения.
+        /// </summary>
         private void HandleRequestRefillCounters()
         {
             confirmationDialog.Show("Посмотреть рекламу, чтобы пополнить счетчики?", () => { gameEvents.onShowRewardedAdForRefill.Raise(); });
         }
 
+        /// <summary>
+        /// Вызывается при уничтожении объекта. Отписывается от всех событий.
+        /// </summary>
         private void OnDestroy()
         {
             if (!gameEvents) return;
@@ -211,6 +263,9 @@ namespace Core
             ServiceProvider.Clear();
         }
 
+        /// <summary>
+        /// Внутренний метод для запуска новой игры.
+        /// </summary>
         private void StartNewGameInternal()
         {
             _gameController.StartNewGame(false);

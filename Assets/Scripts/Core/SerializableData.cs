@@ -3,6 +3,9 @@ using Model;
 
 namespace Core
 {
+    /// <summary>
+    /// Сериализуемая версия данных ячейки для сохранения.
+    /// </summary>
     [Serializable]
     public class CellDataSerializable
     {
@@ -24,6 +27,9 @@ namespace Core
         }
     }
 
+    /// <summary>
+    /// Сериализуемая версия модели статистики для сохранения.
+    /// </summary>
     [Serializable]
     public class StatisticsModelSerializable
     {
@@ -41,6 +47,9 @@ namespace Core
         }
     }
 
+    /// <summary>
+    /// Сериализуемая версия модели счетчиков действий для сохранения.
+    /// </summary>
     [Serializable]
     public class ActionCountersModelSerializable
     {

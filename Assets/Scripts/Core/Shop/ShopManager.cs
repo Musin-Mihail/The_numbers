@@ -7,6 +7,9 @@ using YG.Utils.Pay;
 
 namespace Core.Shop
 {
+    /// <summary>
+    /// Управляет UI элементами магазина, отображая информацию о товарах и их статусе.
+    /// </summary>
     public class ShopManager : MonoBehaviour
     {
         [Header("UI Элементы")]
@@ -37,6 +40,9 @@ namespace Core.Shop
             gameEvents.onYandexSDKInitialized.RemoveListener(Initialize);
         }
 
+        /// <summary>
+        /// Инициализирует магазин после загрузки Yandex SDK.
+        /// </summary>
         private void Initialize()
         {
             if (_isShopInitialized) return;
@@ -60,6 +66,9 @@ namespace Core.Shop
             UpdateProductUI();
         }
 
+        /// <summary>
+        /// Обновляет UI товара (цена, доступность кнопки).
+        /// </summary>
         private void UpdateProductUI()
         {
             if (_isPurchased || _productInfo == null) return;
@@ -71,6 +80,9 @@ namespace Core.Shop
                 purchaseButton.interactable = true;
         }
 
+        /// <summary>
+        /// Обрабатывает изменение счетчиков, чтобы определить, был ли куплен товар.
+        /// </summary>
         private void HandleCountersChanged((int undo, int add, int hint) data)
         {
             if (data.undo != -1 || _isPurchased) return;
@@ -78,6 +90,9 @@ namespace Core.Shop
             SetProductAsPurchased();
         }
 
+        /// <summary>
+        /// Обновляет UI, чтобы показать товар как купленный.
+        /// </summary>
         private void SetProductAsPurchased()
         {
             if (priceText)

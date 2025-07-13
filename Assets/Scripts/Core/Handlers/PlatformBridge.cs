@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
+    /// <summary>
+    /// Мост между игровыми событиями и сервисами платформы (покупки, реклама).
+    /// </summary>
     public class PlatformBridge : IDisposable
     {
         private readonly IPlatformServices _platformServices;
@@ -27,6 +30,9 @@ namespace Core.Handlers
             SubscribeToPlatformEvents();
         }
 
+        /// <summary>
+        /// Отписывается от всех событий.
+        /// </summary>
         public void Dispose()
         {
             UnsubscribeFromGameEvents();
@@ -61,16 +67,25 @@ namespace Core.Handlers
             _platformServices.OnRewardVideoSuccess -= OnRewardVideoSuccess;
         }
 
+        /// <summary>
+        /// Обрабатывает подтверждение покупки отключения счетчиков.
+        /// </summary>
         private void HandleDisableCountersConfirmed()
         {
             _platformServices?.Purchase(Constants.DisableCountersProductId);
         }
 
+        /// <summary>
+        /// Обрабатывает запрос на показ рекламы для пополнения счетчиков.
+        /// </summary>
         private void HandleShowRewardedAdForRefill()
         {
             _platformServices?.ShowRewardedAd(Constants.RefillCountersRewardId);
         }
 
+        /// <summary>
+        /// Вызывается при успешной покупке на платформе.
+        /// </summary>
         private void OnPurchaseSuccess(string purchasedId)
         {
             if (purchasedId != Constants.DisableCountersProductId) return;
@@ -81,11 +96,17 @@ namespace Core.Handlers
             _gameManager?.RequestSave();
         }
 
+        /// <summary>
+        /// Вызывается при ошибке покупки на платформе.
+        /// </summary>
         private void OnPurchaseFailed(string failedId)
         {
             Debug.LogError($"Ошибка при покупке товара '{failedId}'");
         }
 
+        /// <summary>
+        /// Вызывается при успешном просмотре рекламы с вознаграждением.
+        /// </summary>
         private void OnRewardVideoSuccess(string rewardId)
         {
             if (rewardId != Constants.RefillCountersRewardId) return;

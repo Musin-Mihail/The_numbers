@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Представляет собой "всплывающий" текст (например, очки), который появляется и исчезает.
+    /// </summary>
     public class FloatingScore : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI scoreText;
@@ -19,6 +22,14 @@ namespace View.UI
             _rectTransform = GetComponent<RectTransform>();
         }
 
+        /// <summary>
+        /// Показывает и анимирует всплывающий текст.
+        /// </summary>
+        /// <param name="text">Отображаемый текст.</param>
+        /// <param name="color">Цвет текста.</param>
+        /// <param name="centerPosition">Позиция центра текста.</param>
+        /// <param name="size">Размер RectTransform.</param>
+        /// <param name="onComplete">Callback, вызываемый по завершении анимации.</param>
         public void Show(string text, Color color, Vector2 centerPosition, Vector2 size, Action<FloatingScore> onComplete)
         {
             _onComplete = onComplete;

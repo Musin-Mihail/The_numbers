@@ -3,64 +3,25 @@ using UnityEngine;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Компонент-посредник, который вызывается из UnityEvents (например, с кнопок в инспекторе)
+    /// и транслирует эти вызовы в систему игровых событий (ScriptableObject Events).
+    /// </summary>
     public class UIEventCaller : MonoBehaviour
     {
         [Header("Event Raising")]
         [SerializeField] private GameEvents gameEvents;
 
-        public void RaiseRequestNewGame()
-        {
-            if (gameEvents) gameEvents.onRequestNewGame.Raise();
-        }
-
-        public void RaiseUndoLastAction()
-        {
-            if (gameEvents) gameEvents.onUndoLastAction.Raise();
-        }
-
-        public void RaiseAddExistingNumbers()
-        {
-            if (gameEvents) gameEvents.onAddExistingNumbers.Raise();
-        }
-
-        public void RaiseShowMenu()
-        {
-            if (gameEvents) gameEvents.onShowMenu.Raise();
-        }
-
-        public void RaiseHideMenu()
-        {
-            if (gameEvents) gameEvents.onHideMenu.Raise();
-        }
-
-        public void RaiseRequestHint()
-        {
-            if (gameEvents) gameEvents.onRequestHint.Raise();
-        }
-
-        public void RaiseRequestDisableCounters()
-        {
-            if (gameEvents) gameEvents.onRequestDisableCounters.Raise();
-        }
-
-        public void RaiseShowStatistics()
-        {
-            if (gameEvents) gameEvents.onShowStatistics.Raise();
-        }
-
-        public void RaiseHideStatistics()
-        {
-            if (gameEvents) gameEvents.onHideStatistics.Raise();
-        }
-
-        public void RaiseShowRules()
-        {
-            if (gameEvents) gameEvents.onShowRules.Raise();
-        }
-
-        public void RaiseHideRules()
-        {
-            if (gameEvents) gameEvents.onHideRules.Raise();
-        }
+        public void RaiseRequestNewGame() => gameEvents?.onRequestNewGame.Raise();
+        public void RaiseUndoLastAction() => gameEvents?.onUndoLastAction.Raise();
+        public void RaiseAddExistingNumbers() => gameEvents?.onAddExistingNumbers.Raise();
+        public void RaiseShowMenu() => gameEvents?.onShowMenu.Raise();
+        public void RaiseHideMenu() => gameEvents?.onHideMenu.Raise();
+        public void RaiseRequestHint() => gameEvents?.onRequestHint.Raise();
+        public void RaiseRequestDisableCounters() => gameEvents?.onRequestDisableCounters.Raise();
+        public void RaiseShowStatistics() => gameEvents?.onShowStatistics.Raise();
+        public void RaiseHideStatistics() => gameEvents?.onHideStatistics.Raise();
+        public void RaiseShowRules() => gameEvents?.onShowRules.Raise();
+        public void RaiseHideRules() => gameEvents?.onHideRules.Raise();
     }
 }

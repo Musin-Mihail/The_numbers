@@ -4,6 +4,10 @@ using View.Grid;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Генерирует и отображает демонстрационную сетку в окне правил,
+    /// подсвечивая примеры допустимых пар.
+    /// </summary>
     public class RulesGrid : MonoBehaviour
     {
         [Header("Grid Settings")]
@@ -20,6 +24,9 @@ namespace View.UI
         private Cell[,] _cells;
         private int[,] _gridNumbers;
 
+        /// <summary>
+        /// Генерирует демонстрационную сетку с предопределенными числами.
+        /// </summary>
         public void GenerateGrid()
         {
             ClearGrid();

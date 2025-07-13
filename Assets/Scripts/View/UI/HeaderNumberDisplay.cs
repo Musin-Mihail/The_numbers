@@ -6,6 +6,9 @@ using View.Grid;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Управляет отображением верхней строки с числами, дублирующими числа на сетке.
+    /// </summary>
     public class HeaderNumberDisplay : MonoBehaviour
     {
         [Header("Scene Dependencies")]
@@ -78,6 +81,10 @@ namespace View.UI
             }
         }
 
+        /// <summary>
+        /// Обновляет отображаемые числа в верхней строке.
+        /// </summary>
+        /// <param name="numbers">Список чисел для отображения.</param>
         public void UpdateDisplayedNumbers(List<int> numbers)
         {
             for (var i = 0; i < _topLineCells.Count; i++)

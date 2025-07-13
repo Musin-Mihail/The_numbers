@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Пул объектов для всплывающих текстов (FloatingScore).
+    /// </summary>
     public class FloatingScorePool : MonoBehaviour
     {
         [SerializeField] private GameObject floatingScorePrefab;
@@ -29,6 +32,9 @@ namespace View.UI
             return floatingScore;
         }
 
+        /// <summary>
+        /// Получает экземпляр FloatingScore из пула.
+        /// </summary>
         public FloatingScore GetScore()
         {
             if (_pool.Count <= 0) return CreateNewInstance();
@@ -37,6 +43,9 @@ namespace View.UI
             return scoreInstance;
         }
 
+        /// <summary>
+        /// Возвращает экземпляр FloatingScore в пул.
+        /// </summary>
         public void ReturnScore(FloatingScore scoreInstance)
         {
             scoreInstance.gameObject.SetActive(false);

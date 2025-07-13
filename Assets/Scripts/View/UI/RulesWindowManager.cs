@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Управляет видимостью окна с правилами игры.
+    /// </summary>
     public class RulesWindowManager : MonoBehaviour
     {
         [SerializeField] private GameObject rulesWindow;
@@ -33,6 +36,9 @@ namespace View.UI
             gameEvents.onHideRules.RemoveListener(HideRulesWindow);
         }
 
+        /// <summary>
+        /// Показывает окно правил и генерирует демонстрационную сетку.
+        /// </summary>
         private void ShowRulesWindow()
         {
             if (!rulesWindow) return;
@@ -47,6 +53,9 @@ namespace View.UI
             }
         }
 
+        /// <summary>
+        /// Скрывает окно правил.
+        /// </summary>
         private void HideRulesWindow()
         {
             if (rulesWindow)

@@ -6,11 +6,20 @@ using Model;
 
 namespace Core
 {
+    /// <summary>
+    /// Интерфейс для действий, которые можно отменить.
+    /// </summary>
     public interface IUndoableAction
     {
+        /// <summary>
+        /// Отменяет действие, восстанавливая предыдущее состояние.
+        /// </summary>
         void Undo();
     }
 
+    /// <summary>
+    /// Представляет собой действие совпадения пары чисел, которое можно отменить.
+    /// </summary>
     public class MatchAction : IUndoableAction
     {
         private readonly Guid _cell1Id;
@@ -40,6 +49,9 @@ namespace Core
             _gameEvents = gameEvents;
         }
 
+        /// <summary>
+        /// Отменяет совпадение, восстанавливая ячейки, линии и статистику.
+        /// </summary>
         public void Undo()
         {
             if (_removedLines is { Count: > 0 })
@@ -69,6 +81,9 @@ namespace Core
         }
     }
 
+    /// <summary>
+    /// Управляет историей действий, которые можно отменить.
+    /// </summary>
     public class ActionHistory
     {
         private readonly Stack<IUndoableAction> _actions = new();
@@ -77,11 +92,18 @@ namespace Core
         {
         }
 
+        /// <summary>
+        /// Записывает новое действие в историю.
+        /// </summary>
+        /// <param name="action">Действие для записи.</param>
         public void Record(IUndoableAction action)
         {
             _actions.Push(action);
         }
 
+        /// <summary>
+        /// Отменяет последнее выполненное действие.
+        /// </summary>
         public void Undo()
         {
             if (_actions.Count <= 0) return;
@@ -89,11 +111,18 @@ namespace Core
             lastAction.Undo();
         }
 
+        /// <summary>
+        /// Проверяет, возможно ли выполнить отмену.
+        /// </summary>
+        /// <returns>True, если есть действия для отмены.</returns>
         public bool CanUndo()
         {
             return _actions.Count > 0;
         }
 
+        /// <summary>
+        /// Очищает всю историю действий.
+        /// </summary>
         public void Clear()
         {
             _actions.Clear();

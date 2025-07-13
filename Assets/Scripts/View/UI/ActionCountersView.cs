@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Отображает количество доступных действий игрока (отмена, добавление, подсказка) в UI.
+    /// </summary>
     public class ActionCountersView : MonoBehaviour
     {
         [Header("UI Dependencies")]
@@ -30,9 +33,13 @@ namespace View.UI
             }
         }
 
+        /// <summary>
+        /// Обновляет текстовые поля с количеством действий.
+        /// </summary>
+        /// <param name="data">Кортеж с количеством отмен, добавлений и подсказок.</param>
         private void UpdateCountersUI((int undo, int add, int hint) data)
         {
-            if (data.undo == -1)
+            if (data.undo == -1) // -1 означает бесконечность
             {
                 if (undoCountText) undoCountText.text = "∞";
                 if (addNumbersCountText) addNumbersCountText.text = "∞";

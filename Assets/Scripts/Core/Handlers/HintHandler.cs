@@ -6,6 +6,9 @@ using View.Grid;
 
 namespace Core.Handlers
 {
+    /// <summary>
+    /// Обрабатывает логику, связанную с подсказками: поиск допустимой пары и отображение.
+    /// </summary>
     public class HintHandler : IDisposable
     {
         private readonly GridModel _gridModel;
@@ -33,11 +36,17 @@ namespace Core.Handlers
             _gameEvents.onRequestHint.AddListener(FindAndShowHint);
         }
 
+        /// <summary>
+        /// Отписывается от событий.
+        /// </summary>
         public void Dispose()
         {
             _gameEvents.onRequestHint.RemoveListener(FindAndShowHint);
         }
 
+        /// <summary>
+        /// Ищет и отображает подсказку (первую найденную допустимую пару).
+        /// </summary>
         private void FindAndShowHint()
         {
             if (_gridView.HasActiveHints)
@@ -75,6 +84,9 @@ namespace Core.Handlers
             _gameEvents.onNoHintFound.Raise();
         }
 
+        /// <summary>
+        /// Отображает подсказку и уменьшает счетчик.
+        /// </summary>
         private void ShowHintAndDecrementCounter(CellData cell1, CellData cell2)
         {
             if (!_actionCountersModel.AreCountersDisabled)
@@ -87,6 +99,9 @@ namespace Core.Handlers
             _gameManager?.RequestSave();
         }
 
+        /// <summary>
+        /// Вызывает событие изменения счетчиков.
+        /// </summary>
         private void RaiseCountersChangedEvent()
         {
             _gameEvents.onCountersChanged.Raise(_actionCountersModel.AreCountersDisabled

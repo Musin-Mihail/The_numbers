@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Управляет модальным окном для подтверждения действий пользователя.
+    /// </summary>
     public class ConfirmationDialog : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI messageText;
@@ -19,6 +22,11 @@ namespace View.UI
             noButton.onClick.AddListener(OnNoClicked);
         }
 
+        /// <summary>
+        /// Показывает диалоговое окно с заданным сообщением и действием при подтверждении.
+        /// </summary>
+        /// <param name="message">Сообщение для пользователя.</param>
+        /// <param name="onYes">Действие, выполняемое при нажатии "Да".</param>
         public void Show(string message, Action onYes)
         {
             messageText.text = message;

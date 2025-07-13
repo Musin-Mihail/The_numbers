@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Управляет видимостью главного меню.
+    /// </summary>
     public class MenuManager : MonoBehaviour
     {
         [SerializeField] private GameObject windowMenu;
@@ -34,7 +37,10 @@ namespace View.UI
             gameEvents.onNewGameStarted.RemoveListener(HideMenu);
         }
 
-        private void ShowMenu()
+        /// <summary>
+        /// Показывает окно меню.
+        /// </summary>
+        public void ShowMenu()
         {
             if (windowMenu)
             {
@@ -42,7 +48,10 @@ namespace View.UI
             }
         }
 
-        private void HideMenu()
+        /// <summary>
+        /// Скрывает окно меню.
+        /// </summary>
+        public void HideMenu()
         {
             if (windowMenu)
             {

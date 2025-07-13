@@ -4,6 +4,9 @@ using YG;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Управляет видимостью окна статистики и обновлением таблицы лидеров.
+    /// </summary>
     public class StatisticsWindowManager : MonoBehaviour
     {
         [SerializeField] private GameObject statisticsWindow;
@@ -36,7 +39,10 @@ namespace View.UI
             gameEvents.onHideStatistics.RemoveListener(HideStatisticsWindow);
         }
 
-        private void ShowStatisticsWindow()
+        /// <summary>
+        /// Показывает окно статистики и запрашивает обновление таблицы лидеров.
+        /// </summary>
+        public void ShowStatisticsWindow()
         {
             if (!statisticsWindow) return;
             statisticsWindow.SetActive(true);
@@ -46,7 +52,10 @@ namespace View.UI
             }
         }
 
-        private void HideStatisticsWindow()
+        /// <summary>
+        /// Скрывает окно статистики.
+        /// </summary>
+        public void HideStatisticsWindow()
         {
             if (statisticsWindow)
             {

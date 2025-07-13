@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Анимирует кнопку (масштаб, вращение, цвет) для привлечения внимания.
+    /// Управляется через игровые события.
+    /// </summary>
     [RequireComponent(typeof(RectTransform), typeof(Button))]
     public class ButtonAnimator : MonoBehaviour
     {
@@ -56,7 +60,10 @@ namespace View.UI
             }
         }
 
-        private void StartAnimation()
+        /// <summary>
+        /// Запускает корутину анимации.
+        /// </summary>
+        public void StartAnimation()
         {
             if (!enabled || !gameObject.activeInHierarchy) return;
             if (_animationCoroutine != null)
@@ -67,7 +74,10 @@ namespace View.UI
             _animationCoroutine = StartCoroutine(AnimateButton());
         }
 
-        private void StopAnimation()
+        /// <summary>
+        /// Останавливает анимацию и возвращает кнопку в исходное состояние.
+        /// </summary>
+        public void StopAnimation()
         {
             if (_animationCoroutine != null)
             {

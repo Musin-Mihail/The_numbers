@@ -8,9 +8,16 @@ using Random = UnityEngine.Random;
 
 namespace Model
 {
+    /// <summary>
+    /// Основная модель данных, представляющая игровую сетку.
+    /// Управляет состоянием всех ячеек, их добавлением, удалением и изменением.
+    /// </summary>
     public class GridModel
     {
         private readonly List<List<CellData>> _cells = new();
+        /// <summary>
+        /// Двумерный список ячеек, представляющий сетку. Только для чтения.
+        /// </summary>
         public IReadOnlyList<IReadOnlyList<CellData>> Cells => _cells;
         private readonly Dictionary<Guid, CellData> _cellDataMap = new();
         private readonly List<CellData> _activeCellsCache = new();
@@ -23,11 +30,18 @@ namespace Model
             _gameEvents = ServiceProvider.GetService<GameEvents>();
         }
 
+        /// <summary>
+        /// Возвращает список данных всех ячеек, существующих в модели.
+        /// </summary>
         public List<CellData> GetAllCellData()
         {
             return _cellDataMap.Values.ToList();
         }
 
+        /// <summary>
+        /// Восстанавливает состояние сетки из сохраненных данных.
+        /// </summary>
+        /// <param name="savedCells">Список сериализованных данных ячеек.</param>
         public void RestoreState(List<CellDataSerializable> savedCells)
         {
             ClearField();
@@ -67,7 +81,9 @@ namespace Model
             _isCacheDirty = true;
         }
 
-
+        /// <summary>
+        /// Перемешивает элементы списка.
+        /// </summary>
         private static void Shuffle<T>(IList<T> list)
         {
             var n = list.Count;
@@ -79,6 +95,9 @@ namespace Model
             }
         }
 
+        /// <summary>
+        /// Возвращает отсортированный список всех активных ячеек. Результат кэшируется.
+        /// </summary>
         public List<CellData> GetAllActiveCellData()
         {
             if (!_isCacheDirty) return _activeCellsCache;
@@ -93,12 +112,18 @@ namespace Model
             return _activeCellsCache;
         }
 
+        /// <summary>
+        /// Получает данные ячейки по ее уникальному идентификатору.
+        /// </summary>
         public CellData GetCellDataById(Guid id)
         {
             _cellDataMap.TryGetValue(id, out var data);
             return data;
         }
 
+        /// <summary>
+        /// Устанавливает состояние активности для ячейки.
+        /// </summary>
         public void SetCellActiveState(CellData data, bool isActive)
         {
             if (data.IsActive == isActive) return;
@@ -107,6 +132,9 @@ namespace Model
             _gameEvents?.onCellUpdated.Raise(data);
         }
 
+        /// <summary>
+        /// Полностью очищает игровое поле.
+        /// </summary>
         public void ClearField()
         {
             _cells.Clear();
@@ -115,6 +143,10 @@ namespace Model
             _gameEvents?.onGridCleared.Raise();
         }
 
+        /// <summary>
+        /// Создает новую линию с ячейками.
+        /// </summary>
+        /// <param name="lineIndex">Индекс новой линии.</param>
         public void CreateLine(int lineIndex)
         {
             var newLine = new List<CellData>();
@@ -130,12 +162,18 @@ namespace Model
             _isCacheDirty = true;
         }
 
+        /// <summary>
+        /// Проверяет, является ли линия пустой (все ячейки неактивны).
+        /// </summary>
         public bool IsLineEmpty(int lineIndex)
         {
             if (lineIndex < 0 || lineIndex >= _cells.Count) return false;
             return _cells[lineIndex].All(cellData => !cellData.IsActive);
         }
 
+        /// <summary>
+        /// Удаляет линию из сетки и сдвигает все последующие линии вверх.
+        /// </summary>
         public void RemoveLine(int lineIndex)
         {
             if (lineIndex < 0 || lineIndex >= _cells.Count) return;
@@ -158,6 +196,9 @@ namespace Model
             _isCacheDirty = true;
         }
 
+        /// <summary>
+        /// Восстанавливает ранее удаленную линию.
+        /// </summary>
         public void RestoreLine(int lineIndex, List<CellData> lineData)
         {
             if (lineIndex < 0 || lineIndex > _cells.Count) return;
@@ -181,6 +222,11 @@ namespace Model
             _isCacheDirty = true;
         }
 
+        /// <summary>
+        /// Получает числа для отображения в верхней строке-подсказке.
+        /// </summary>
+        /// <param name="numberLine">Индекс линии, до которой нужно искать числа.</param>
+        /// <returns>Список чисел для отображения.</returns>
         public List<int> GetNumbersForTopLine(int numberLine)
         {
             var topNumbers = new List<int>(new int[GameConstants.QuantityByWidth]);
@@ -201,6 +247,9 @@ namespace Model
             return topNumbers;
         }
 
+        /// <summary>
+        /// Добавляет все активные числа в конец сетки в виде новых линий.
+        /// </summary>
         public void AppendActiveNumbersToGrid()
         {
             var numbersToAdd = GetAllActiveCellData().Select(cell => cell.Number).ToList();

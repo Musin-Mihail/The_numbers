@@ -7,6 +7,10 @@ using View.Grid;
 
 namespace Core
 {
+    /// <summary>
+    /// Управляет основной игровой логикой, координируя взаимодействие между моделями,
+    /// представлениями и обработчиками игровых событий.
+    /// </summary>
     public class GameController : IDisposable
     {
         private readonly GridModel _gridModel;
@@ -22,6 +26,9 @@ namespace Core
         private readonly HintHandler _hintHandler;
         private readonly PlatformBridge _platformBridge;
 
+        /// <summary>
+        /// Инициализирует GameController и все его дочерние обработчики.
+        /// </summary>
         public GameController(
             GridModel gridModel,
             MatchValidator matchValidator,
@@ -47,6 +54,9 @@ namespace Core
             _platformBridge = new PlatformBridge(platformServices, gameEvents, actionCountersModel, gameManager);
         }
 
+        /// <summary>
+        /// Освобождает ресурсы, отписываясь от событий в дочерних обработчиках.
+        /// </summary>
         public void Dispose()
         {
             _matchHandler?.Dispose();
@@ -55,7 +65,11 @@ namespace Core
             _platformBridge?.Dispose();
         }
 
-        public void StartNewGame(bool resetStatisticsAndCounters = true)
+        /// <summary>
+        /// Начинает новую игру, очищая поле, историю и опционально сбрасывая статистику.
+        /// </summary>
+        /// <param name="resetStatisticsAndCounters">Если true, сбрасывает статистику и счетчики действий.</param>
+        public void StartNewGame(bool resetStatisticsAndCounters)
         {
             _gridView.ResetSelectionAndHints();
             _gridModel.ClearField();

@@ -8,6 +8,9 @@ using YG;
 
 namespace Core.Platform
 {
+    /// <summary>
+    /// Реализация сервиса сохранения и загрузки для платформы Yandex Games.
+    /// </summary>
     public class YandexSaveLoadService : ISaveLoadService
     {
         private readonly GridModel _gridModel;
@@ -26,6 +29,9 @@ namespace Core.Platform
             _gameEvents = gameEvents;
         }
 
+        /// <summary>
+        /// Запрашивает сохранение игры.
+        /// </summary>
         public void RequestSave()
         {
             SaveGame();
@@ -48,6 +54,10 @@ namespace Core.Platform
             Debug.Log("Game data save requested via YandexSaveLoadService.");
         }
 
+        /// <summary>
+        /// Загружает игру с серверов Yandex.
+        /// </summary>
+        /// <param name="onComplete">Callback, вызываемый по завершении. True при успехе.</param>
         public void LoadGame(Action<bool> onComplete)
         {
             _isLoading = true;
@@ -88,6 +98,9 @@ namespace Core.Platform
             }
         }
 
+        /// <summary>
+        /// Устанавливает видимость верхней строки и сохраняет состояние.
+        /// </summary>
         public void SetTopLineVisibility(bool isVisible)
         {
             if (YG2.saves.isTopLineVisible == isVisible) return;
@@ -96,6 +109,9 @@ namespace Core.Platform
         }
     }
 
+    /// <summary>
+    /// Реализация платформенных сервисов (покупки, реклама) для Yandex Games.
+    /// </summary>
     public class YandexPlatformService : IPlatformServices
     {
         public event Action<string> OnPurchaseSuccess;
@@ -116,11 +132,17 @@ namespace Core.Platform
             YG2.onRewardAdv -= OnYgRewardVideo;
         }
 
+        /// <summary>
+        /// Инициирует покупку через Yandex SDK.
+        /// </summary>
         public void Purchase(string productId)
         {
             YG2.BuyPayments(productId);
         }
 
+        /// <summary>
+        /// Показывает рекламу с вознаграждением через Yandex SDK.
+        /// </summary>
         public void ShowRewardedAd(string rewardId)
         {
             YG2.RewardedAdvShow(rewardId);
@@ -142,6 +164,9 @@ namespace Core.Platform
         }
     }
 
+    /// <summary>
+    /// Реализация сервиса таблицы лидеров для Yandex Games.
+    /// </summary>
     public class YandexLeaderboardService : ILeaderboardService
     {
         private readonly string _leaderboardName;
@@ -151,6 +176,9 @@ namespace Core.Platform
             _leaderboardName = leaderboardName;
         }
 
+        /// <summary>
+        /// Обновляет счет в таблице лидеров Yandex.
+        /// </summary>
         public void UpdateLeaderboard(int score)
         {
             if (YG2.player.auth)

@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Отображает статистику игрока (счет и множитель) в UI.
+    /// </summary>
     public class StatisticsView : MonoBehaviour
     {
         [Header("UI Dependencies")]
@@ -29,6 +32,10 @@ namespace View.UI
             }
         }
 
+        /// <summary>
+        /// Обновляет текстовые поля со статистикой.
+        /// </summary>
+        /// <param name="data">Кортеж со счетом и множителем.</param>
         private void UpdateStatisticsUI((long score, int multiplier) data)
         {
             if (scoreText)

@@ -2,6 +2,10 @@
 
 namespace Core.Events
 {
+    /// <summary>
+    /// ScriptableObject-контейнер для всех игровых событий.
+    /// Обеспечивает централизованный доступ к событиям из разных частей проекта.
+    /// </summary>
     [CreateAssetMenu(fileName = "GameEvents", menuName = "Events/Game Events Container")]
     public class GameEvents : ScriptableObject
     {

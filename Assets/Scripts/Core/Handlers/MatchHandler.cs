@@ -1,6 +1,4 @@
-﻿// --- Новый файл: Assets/Scripts/Core/Handlers/MatchHandler.cs ---
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Events;
@@ -9,6 +7,10 @@ using Model;
 
 namespace Core.Handlers
 {
+    /// <summary>
+    /// Обрабатывает логику совпадения пар: проверяет валидность, обновляет модели,
+    /// начисляет очки и удаляет пустые линии.
+    /// </summary>
     public class MatchHandler : IDisposable
     {
         private readonly GridModel _gridModel;
@@ -36,11 +38,17 @@ namespace Core.Handlers
             _gameEvents.onAttemptMatch.AddListener(AttemptMatch);
         }
 
+        /// <summary>
+        /// Отписывается от событий.
+        /// </summary>
         public void Dispose()
         {
             _gameEvents.onAttemptMatch.RemoveListener(AttemptMatch);
         }
 
+        /// <summary>
+        /// Обрабатывает попытку составить пару из двух ячеек.
+        /// </summary>
         private void AttemptMatch((Guid firstCellId, Guid secondCellId) data)
         {
             var firstData = _gridModel.GetCellDataById(data.firstCellId);
@@ -56,6 +64,9 @@ namespace Core.Handlers
             }
         }
 
+        /// <summary>
+        /// Обрабатывает допустимое совпадение.
+        /// </summary>
         private void ProcessValidMatch(CellData data1, CellData data2)
         {
             var removedLinesInfo = new List<Tuple<int, List<CellData>>>();
@@ -87,6 +98,9 @@ namespace Core.Handlers
             _gameManager?.RequestSave();
         }
 
+        /// <summary>
+        /// Проверяет и удаляет пустые линии.
+        /// </summary>
         private void CheckAndRemoveEmptyLines(int line1, int line2, List<Tuple<int, List<CellData>>> removedLinesInfo, Dictionary<int, int> lineScores)
         {
             var linesToRemove = new HashSet<int>();

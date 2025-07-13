@@ -5,6 +5,10 @@ using UnityEngine;
 
 namespace DataProviders
 {
+    /// <summary>
+    /// Предоставляет данные о состоянии игровой сетки для других систем,
+    /// таких как валидатор совпадений.
+    /// </summary>
     public class GridDataProvider : IGridDataProvider
     {
         private readonly GridModel _gridModel;
@@ -14,11 +18,21 @@ namespace DataProviders
             _gridModel = gridModel;
         }
 
+        /// <summary>
+        /// Возвращает список всех активных ячеек на сетке.
+        /// </summary>
+        /// <returns>Список данных активных ячеек.</returns>
         public List<CellData> GetAllActiveCellData()
         {
             return _gridModel.GetAllActiveCellData();
         }
 
+        /// <summary>
+        /// Проверяет, находятся ли две ячейки на одной линии или в одном столбце без активных ячеек между ними.
+        /// </summary>
+        /// <param name="firstCell">Первая ячейка.</param>
+        /// <param name="secondCell">Вторая ячейка.</param>
+        /// <returns>True, если между ячейками нет препятствий.</returns>
         public bool AreCellsOnSameLineOrColumnWithoutGaps(CellData firstCell, CellData secondCell)
         {
             var onSameLine = firstCell.Line == secondCell.Line;

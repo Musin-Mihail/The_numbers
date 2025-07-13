@@ -4,6 +4,9 @@ using Model;
 
 namespace Core.Handlers
 {
+    /// <summary>
+    /// Обрабатывает действия игрока, такие как отмена хода и добавление новых чисел.
+    /// </summary>
     public class PlayerActionHandler : IDisposable
     {
         private readonly ActionCountersModel _actionCountersModel;
@@ -32,12 +35,18 @@ namespace Core.Handlers
             _gameEvents.onUndoLastAction.AddListener(UndoLastAction);
         }
 
+        /// <summary>
+        /// Отписывается от событий.
+        /// </summary>
         public void Dispose()
         {
             _gameEvents.onAddExistingNumbers.RemoveListener(AddExistingNumbersAsNewLines);
             _gameEvents.onUndoLastAction.RemoveListener(UndoLastAction);
         }
 
+        /// <summary>
+        /// Добавляет существующие на поле числа в виде новых линий.
+        /// </summary>
         private void AddExistingNumbersAsNewLines()
         {
             if (!_actionCountersModel.IsAddNumbersAvailable())
@@ -57,6 +66,9 @@ namespace Core.Handlers
             _gameManager?.RequestSave();
         }
 
+        /// <summary>
+        /// Отменяет последнее действие игрока.
+        /// </summary>
         private void UndoLastAction()
         {
             if (!_actionCountersModel.IsUndoAvailable())
