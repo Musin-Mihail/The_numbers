@@ -1,8 +1,8 @@
 ﻿using Core.Events;
-using DataProviders;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using YG;
 using YG.Utils.Pay;
 
 namespace Core.Shop
@@ -19,7 +19,6 @@ namespace Core.Shop
         [Header("Event Channels")]
         [SerializeField] private GameEvents gameEvents;
 
-        private IShopDataProvider _dataProvider;
         private bool _isShopInitialized;
         private bool _isPurchased;
         private Purchase _productInfo;
@@ -43,41 +42,22 @@ namespace Core.Shop
             if (_isShopInitialized) return;
             _isShopInitialized = true;
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-            _dataProvider = new YandexShopDataProvider();
-#else
-            _dataProvider = new EditorMockShopDataProvider();
-#endif
-
             if (purchaseButton)
                 purchaseButton.interactable = false;
             if (priceText)
                 priceText.text = "Загрузка...";
 
-            _dataProvider.FetchShopData(productIdToDisplay, OnShopDataFetched);
-        }
+            _productInfo = YG2.PurchaseByID(productIdToDisplay);
 
-        private void OnShopDataFetched(ShopDataResult result)
-        {
-            if (result.IsError)
+            if (_productInfo == null)
             {
                 if (priceText)
-                    priceText.text = result.ErrorMessage;
-                Debug.LogError($"ShopManager Error: {result.ErrorMessage}");
+                    priceText.text = "Товар не найден";
+                Debug.LogError($"ShopManager Error: Товар с ID '{productIdToDisplay}' не найден. Проверьте настройки в InfoYG -> Payments.");
                 return;
             }
 
-            _productInfo = result.ProductInfo;
-            _isPurchased = result.IsPurchased;
-
-            if (_isPurchased)
-            {
-                SetProductAsPurchased();
-            }
-            else
-            {
-                UpdateProductUI();
-            }
+            UpdateProductUI();
         }
 
         private void UpdateProductUI()
@@ -86,7 +66,6 @@ namespace Core.Shop
 
             if (priceText)
                 priceText.text = _productInfo.price;
-
 
             if (purchaseButton)
                 purchaseButton.interactable = true;

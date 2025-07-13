@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Core.Events;
-using Core.Shop;
 using Gameplay;
 using Model;
 using UnityEngine;
@@ -20,7 +19,6 @@ namespace Core
         private StatisticsModel _statisticsModel;
         private GameEvents _gameEvents;
         private GameManager _gameManager;
-        private IPurchaseHandler _purchaseHandler;
         private GridView _gridView;
 
         private const int InitialQuantityByHeight = 5;
@@ -41,7 +39,6 @@ namespace Core
             _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
             _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
             _gameManager = ServiceProvider.GetService<GameManager>();
-            _purchaseHandler = ServiceProvider.GetService<IPurchaseHandler>();
             _gridView = ServiceProvider.GetService<GridView>();
 
             SubscribeToInputEvents();
@@ -121,7 +118,7 @@ namespace Core
 
         private void HandleDisableCountersConfirmed()
         {
-            _purchaseHandler.PurchaseProduct(DisableCountersProductId, null);
+            YG2.BuyPayments(DisableCountersProductId);
         }
 
         private void FindAndShowHint()

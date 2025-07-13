@@ -1,6 +1,5 @@
 ﻿using System;
 using Core.Events;
-using Core.Shop;
 using DataProviders;
 using Gameplay;
 using Model;
@@ -42,12 +41,6 @@ namespace Core
 
             ServiceProvider.Clear();
             ServiceProvider.Register(gameEvents);
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-            ServiceProvider.Register<IPurchaseHandler>(new YandexPurchaseHandler());
-#else
-            ServiceProvider.Register<IPurchaseHandler>(new EditorMockPurchaseHandler());
-#endif
             var gridModel = new GridModel();
             ServiceProvider.Register(gridModel);
             var statisticsModel = new StatisticsModel();
