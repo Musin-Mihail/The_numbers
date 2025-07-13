@@ -6,6 +6,7 @@ namespace View.UI
     public class RulesWindowManager : MonoBehaviour
     {
         [SerializeField] private GameObject rulesWindow;
+        [SerializeField] private RulesGrid rulesGrid;
 
         [Header("Event Listening")]
         [SerializeField] private GameEvents gameEvents;
@@ -34,9 +35,15 @@ namespace View.UI
 
         private void ShowRulesWindow()
         {
-            if (rulesWindow)
+            if (!rulesWindow) return;
+            rulesWindow.SetActive(true);
+            if (rulesGrid)
             {
-                rulesWindow.SetActive(true);
+                rulesGrid.GenerateGrid();
+            }
+            else
+            {
+                Debug.LogError("RulesGrid is not assigned in the inspector for RulesWindowManager.");
             }
         }
 
