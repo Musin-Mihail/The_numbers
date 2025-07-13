@@ -1,13 +1,5 @@
 {
-    "intExample": 5,
-    "strExample": "Hello!",
-    "boolExample": [
-        false,
-        false,
-        false,
-        false
-    ],
-    "idSave": 213,
+    "idSave": 221,
     "isTopLineVisible": false,
     "gridCells": [
         {
@@ -614,7 +606,7 @@
             "number": 2,
             "line": 10,
             "column": 0,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 9,
@@ -656,7 +648,7 @@
             "number": 5,
             "line": 10,
             "column": 7,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 6,
@@ -686,7 +678,7 @@
             "number": 9,
             "line": 11,
             "column": 2,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 2,
@@ -698,7 +690,7 @@
             "number": 5,
             "line": 11,
             "column": 4,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 7,
@@ -974,7 +966,7 @@
             "number": 2,
             "line": 16,
             "column": 0,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 7,
@@ -986,19 +978,19 @@
             "number": 9,
             "line": 16,
             "column": 2,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 9,
             "line": 16,
             "column": 3,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 9,
             "line": 16,
             "column": 4,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 5,
@@ -1212,13 +1204,13 @@
         }
     ],
     "statistics": {
-        "score": 380,
+        "score": 384,
         "multiplier": 1
     },
     "actionCounters": {
         "undoCount": 5,
         "addNumbersCount": 5,
-        "hintCount": 5,
+        "hintCount": 1,
         "areCountersDisabled": false
     },
     "isGameEverSaved": true

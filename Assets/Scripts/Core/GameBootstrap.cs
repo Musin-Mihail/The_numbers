@@ -12,6 +12,7 @@ using YG;
 
 namespace Core
 {
+    [RequireComponent(typeof(GameManager))]
     public class GameBootstrap : MonoBehaviour
     {
         [Header("Scene Dependencies")]
@@ -28,9 +29,11 @@ namespace Core
 
         private Action _requestNewGameAction;
         private GameManager _gameManager;
+        private GameController _gameController;
 
         private void Awake()
         {
+            _gameManager = GetComponent<GameManager>();
             if (gameEvents && gameEvents.onYandexSDKInitialized)
             {
                 gameEvents.onYandexSDKInitialized.Reset();
@@ -44,34 +47,74 @@ namespace Core
 
             ServiceProvider.Clear();
             ServiceProvider.Register(gameEvents);
-            var gridModel = new GridModel();
-            ServiceProvider.Register(gridModel);
-            var statisticsModel = new StatisticsModel();
-            ServiceProvider.Register(statisticsModel);
-            var actionCountersModel = new ActionCountersModel();
-            ServiceProvider.Register(actionCountersModel);
-            var actionHistory = new ActionHistory();
-            ServiceProvider.Register(actionHistory);
-            var gridDataProvider = new GridDataProvider(gridModel);
-            ServiceProvider.Register<IGridDataProvider>(gridDataProvider);
-            var matchValidator = new MatchValidator(gridDataProvider);
-            ServiceProvider.Register(matchValidator);
-            ServiceProvider.Register(view);
-            ServiceProvider.Register(headerNumberDisplay);
 
-            var yandexPlatformService = new YandexPlatformService();
-            ServiceProvider.Register<IPlatformServices>(yandexPlatformService);
-            var yandexSaveLoadService = new YandexSaveLoadService();
+            RegisterModelsAndHistory();
+            var platformServices = RegisterPlatformServices();
+            var gameplayLogic = RegisterGameplayLogic();
+            RegisterViews();
+
+            _gameController = RegisterGameController(platformServices, gameplayLogic);
+        }
+
+        private void RegisterModelsAndHistory()
+        {
+            ServiceProvider.Register(new GridModel());
+            ServiceProvider.Register(new StatisticsModel());
+            ServiceProvider.Register(new ActionCountersModel());
+            ServiceProvider.Register(new ActionHistory());
+        }
+
+        private IPlatformServices RegisterPlatformServices()
+        {
+            var gridModel = ServiceProvider.GetService<GridModel>();
+            var statisticsModel = ServiceProvider.GetService<StatisticsModel>();
+            var actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
+
+            var yandexSaveLoadService = new YandexSaveLoadService(gridModel, statisticsModel, actionCountersModel, gameEvents);
             ServiceProvider.Register<ISaveLoadService>(yandexSaveLoadService);
+
             var yandexLeaderboardService = new YandexLeaderboardService(leaderboardName);
             ServiceProvider.Register<ILeaderboardService>(yandexLeaderboardService);
 
-            _gameManager = gameObject.AddComponent<GameManager>();
-            ServiceProvider.Register(_gameManager);
-            gameObject.AddComponent<LeaderboardUpdater>();
-            ServiceProvider.Register(gameObject.AddComponent<LeaderboardUpdater>());
-            var gameController = new GameController();
+            var yandexPlatformService = new YandexPlatformService();
+            ServiceProvider.Register<IPlatformServices>(yandexPlatformService);
+
+            return yandexPlatformService;
+        }
+
+        private (IGridDataProvider, MatchValidator) RegisterGameplayLogic()
+        {
+            var gridModel = ServiceProvider.GetService<GridModel>();
+            var gridDataProvider = new GridDataProvider(gridModel);
+            ServiceProvider.Register<IGridDataProvider>(gridDataProvider);
+
+            var matchValidator = new MatchValidator(gridDataProvider);
+            ServiceProvider.Register(matchValidator);
+
+            return (gridDataProvider, matchValidator);
+        }
+
+        private void RegisterViews()
+        {
+            ServiceProvider.Register(view);
+            ServiceProvider.Register(headerNumberDisplay);
+        }
+
+        private GameController RegisterGameController(IPlatformServices platformServices, (IGridDataProvider, MatchValidator) gameplayLogic)
+        {
+            var gameController = new GameController(
+                ServiceProvider.GetService<GridModel>(),
+                gameplayLogic.Item2,
+                gameEvents,
+                ServiceProvider.GetService<ActionHistory>(),
+                ServiceProvider.GetService<ActionCountersModel>(),
+                ServiceProvider.GetService<StatisticsModel>(),
+                _gameManager,
+                view,
+                platformServices
+            );
             ServiceProvider.Register(gameController);
+            return gameController;
         }
 
         private void OnEnable()
@@ -93,8 +136,7 @@ namespace Core
             saveLoadService.LoadGame(loadSuccess =>
             {
                 if (loadSuccess) return;
-                var gameController = ServiceProvider.GetService<GameController>();
-                gameController.StartNewGame(true);
+                _gameController.StartNewGame(true);
                 if (topLineToggle)
                 {
                     gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
@@ -165,13 +207,13 @@ namespace Core
                 gameEvents.onRequestNewGame.RemoveListener(StartNewGameInternal);
             }
 
+            _gameController?.Dispose();
             ServiceProvider.Clear();
         }
 
         private void StartNewGameInternal()
         {
-            var gameController = ServiceProvider.GetService<GameController>();
-            gameController.StartNewGame(false);
+            _gameController.StartNewGame(false);
             if (topLineToggle)
             {
                 gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);

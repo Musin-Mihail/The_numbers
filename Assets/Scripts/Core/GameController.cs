@@ -9,41 +9,56 @@ using View.Grid;
 
 namespace Core
 {
-    public class GameController
+    public class GameController : IDisposable
     {
-        private GridModel _gridModel;
-        private MatchValidator _matchValidator;
-        private ActionHistory _actionHistory;
-        private ActionCountersModel _actionCountersModel;
-        private StatisticsModel _statisticsModel;
-        private GameEvents _gameEvents;
-        private GameManager _gameManager;
-        private GridView _gridView;
-        private IPlatformServices _platformServices;
+        private readonly GridModel _gridModel;
+        private readonly MatchValidator _matchValidator;
+        private readonly ActionHistory _actionHistory;
+        private readonly ActionCountersModel _actionCountersModel;
+        private readonly StatisticsModel _statisticsModel;
+        private readonly GameEvents _gameEvents;
+        private readonly GameManager _gameManager;
+        private readonly GridView _gridView;
+        private readonly IPlatformServices _platformServices;
 
         private const int InitialQuantityByHeight = 5;
         private const string DisableCountersProductId = "disable_counters_product_id";
         private const string RefillCountersRewardId = "refillCounters";
 
-        public GameController()
+        public GameController(
+            GridModel gridModel,
+            MatchValidator matchValidator,
+            GameEvents gameEvents,
+            ActionHistory actionHistory,
+            ActionCountersModel actionCountersModel,
+            StatisticsModel statisticsModel,
+            GameManager gameManager,
+            GridView gridView,
+            IPlatformServices platformServices)
         {
+            _gridModel = gridModel;
+            _matchValidator = matchValidator;
+            _gameEvents = gameEvents;
+            _actionHistory = actionHistory;
+            _actionCountersModel = actionCountersModel;
+            _statisticsModel = statisticsModel;
+            _gameManager = gameManager;
+            _gridView = gridView;
+            _platformServices = platformServices;
+
             Initialize();
         }
 
         private void Initialize()
         {
-            _gridModel = ServiceProvider.GetService<GridModel>();
-            _matchValidator = ServiceProvider.GetService<MatchValidator>();
-            _gameEvents = ServiceProvider.GetService<GameEvents>();
-            _actionHistory = ServiceProvider.GetService<ActionHistory>();
-            _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
-            _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
-            _gameManager = ServiceProvider.GetService<GameManager>();
-            _gridView = ServiceProvider.GetService<GridView>();
-            _platformServices = ServiceProvider.GetService<IPlatformServices>();
-
             SubscribeToInputEvents();
             SubscribeToPlatformEvents();
+        }
+
+        public void Dispose()
+        {
+            UnsubscribeFromInputEvents();
+            UnsubscribeFromPlatformEvents();
         }
 
         private void SubscribeToInputEvents()
@@ -243,7 +258,7 @@ namespace Core
                 _gameEvents.onBoardCleared.Raise();
             }
 
-            var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo, scoreBeforeAction, multiplierBeforeAction, pairScore, lineScores);
+            var action = new MatchAction(data1.Id, data2.Id, removedLinesInfo, scoreBeforeAction, multiplierBeforeAction, pairScore, lineScores, _gridModel, _statisticsModel, _gameEvents);
             _actionHistory.Record(action);
             _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
             _gameManager?.RequestSave();
@@ -291,12 +306,6 @@ namespace Core
 
             _gameEvents.onNewGameStarted.Raise();
             _gameManager?.RequestSave();
-        }
-
-        ~GameController()
-        {
-            UnsubscribeFromInputEvents();
-            UnsubscribeFromPlatformEvents();
         }
     }
 }

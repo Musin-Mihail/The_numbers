@@ -25,7 +25,7 @@ namespace Core
         private readonly StatisticsModel _statisticsModel;
         private readonly GameEvents _gameEvents;
 
-        public MatchAction(Guid cell1Id, Guid cell2Id, List<Tuple<int, List<CellData>>> removedLines, long scoreBefore, int multiplierBefore, int pairScore, Dictionary<int, int> lineScores)
+        public MatchAction(Guid cell1Id, Guid cell2Id, List<Tuple<int, List<CellData>>> removedLines, long scoreBefore, int multiplierBefore, int pairScore, Dictionary<int, int> lineScores, GridModel gridModel, StatisticsModel statisticsModel, GameEvents gameEvents)
         {
             _cell1Id = cell1Id;
             _cell2Id = cell2Id;
@@ -35,9 +35,9 @@ namespace Core
             _pairScore = pairScore;
             _lineScores = lineScores ?? new Dictionary<int, int>();
 
-            _gridModel = ServiceProvider.GetService<GridModel>();
-            _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
-            _gameEvents = ServiceProvider.GetService<GameEvents>();
+            _gridModel = gridModel;
+            _statisticsModel = statisticsModel;
+            _gameEvents = gameEvents;
         }
 
         public void Undo()

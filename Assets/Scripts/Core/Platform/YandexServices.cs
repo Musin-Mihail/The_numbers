@@ -18,12 +18,12 @@ namespace Core.Platform
         private bool _isLoading;
         private bool _isSaving;
 
-        public YandexSaveLoadService()
+        public YandexSaveLoadService(GridModel gridModel, StatisticsModel statisticsModel, ActionCountersModel actionCountersModel, GameEvents gameEvents)
         {
-            _gridModel = ServiceProvider.GetService<GridModel>();
-            _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
-            _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
-            _gameEvents = ServiceProvider.GetService<GameEvents>();
+            _gridModel = gridModel;
+            _statisticsModel = statisticsModel;
+            _actionCountersModel = actionCountersModel;
+            _gameEvents = gameEvents;
         }
 
         public void RequestSave()
@@ -72,16 +72,17 @@ namespace Core.Platform
                     {
                         _gameEvents.onCountersChanged?.Raise((YG2.saves.actionCounters.undoCount, YG2.saves.actionCounters.addNumbersCount, YG2.saves.actionCounters.hintCount));
                     }
+
                     _gameEvents.onStatisticsChanged?.Raise((YG2.saves.statistics.score, YG2.saves.statistics.multiplier));
                 }
 
-                UnityEngine.Debug.Log("Game data loaded successfully from Yandex saves.");
+                Debug.Log("Game data loaded successfully from Yandex saves.");
                 _isLoading = false;
                 onComplete?.Invoke(true);
             }
             else
             {
-                UnityEngine.Debug.LogWarning("No save data found in Yandex saves. A new game will be started.");
+                Debug.LogWarning("No save data found in Yandex saves. A new game will be started.");
                 _isLoading = false;
                 onComplete?.Invoke(false);
             }
