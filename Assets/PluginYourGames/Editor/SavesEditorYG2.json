@@ -1,5 +1,5 @@
 {
-    "idSave": 221,
+    "idSave": 223,
     "isTopLineVisible": false,
     "gridCells": [
         {
@@ -1211,7 +1211,7 @@
         "undoCount": 5,
         "addNumbersCount": 5,
         "hintCount": 1,
-        "areCountersDisabled": false
+        "areCountersDisabled": true
     },
     "isGameEverSaved": true
 }

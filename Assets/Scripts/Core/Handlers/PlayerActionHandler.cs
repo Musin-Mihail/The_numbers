@@ -1,0 +1,89 @@
+﻿using System;
+using Core.Events;
+using Model;
+
+namespace Core.Handlers
+{
+    public class PlayerActionHandler : IDisposable
+    {
+        private readonly ActionCountersModel _actionCountersModel;
+        private readonly ActionHistory _actionHistory;
+        private readonly GridModel _gridModel;
+        private readonly StatisticsModel _statisticsModel;
+        private readonly GameEvents _gameEvents;
+        private readonly GameManager _gameManager;
+
+        public PlayerActionHandler(
+            ActionCountersModel actionCountersModel,
+            ActionHistory actionHistory,
+            GridModel gridModel,
+            StatisticsModel statisticsModel,
+            GameEvents gameEvents,
+            GameManager gameManager)
+        {
+            _actionCountersModel = actionCountersModel;
+            _actionHistory = actionHistory;
+            _gridModel = gridModel;
+            _statisticsModel = statisticsModel;
+            _gameEvents = gameEvents;
+            _gameManager = gameManager;
+
+            _gameEvents.onAddExistingNumbers.AddListener(AddExistingNumbersAsNewLines);
+            _gameEvents.onUndoLastAction.AddListener(UndoLastAction);
+        }
+
+        public void Dispose()
+        {
+            _gameEvents.onAddExistingNumbers.RemoveListener(AddExistingNumbersAsNewLines);
+            _gameEvents.onUndoLastAction.RemoveListener(UndoLastAction);
+        }
+
+        private void AddExistingNumbersAsNewLines()
+        {
+            if (!_actionCountersModel.IsAddNumbersAvailable())
+            {
+                _gameEvents.onRequestRefillCounters.Raise();
+                return;
+            }
+
+            if (!_actionCountersModel.AreCountersDisabled)
+            {
+                _actionCountersModel.DecrementAddNumbers();
+            }
+
+            _gridModel.AppendActiveNumbersToGrid();
+            _actionHistory.Clear();
+            RaiseCountersChangedEvent();
+            _gameManager?.RequestSave();
+        }
+
+        private void UndoLastAction()
+        {
+            if (!_actionCountersModel.IsUndoAvailable())
+            {
+                _gameEvents.onRequestRefillCounters.Raise();
+                return;
+            }
+
+            if (!_actionHistory.CanUndo()) return;
+
+            _actionHistory.Undo();
+
+            if (!_actionCountersModel.AreCountersDisabled)
+            {
+                _actionCountersModel.DecrementUndo();
+            }
+
+            RaiseCountersChangedEvent();
+            _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
+            _gameManager?.RequestSave();
+        }
+
+        private void RaiseCountersChangedEvent()
+        {
+            _gameEvents.onCountersChanged.Raise(_actionCountersModel.AreCountersDisabled
+                ? (-1, -1, -1)
+                : (_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount));
+        }
+    }
+}

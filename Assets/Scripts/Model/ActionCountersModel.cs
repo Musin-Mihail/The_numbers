@@ -1,4 +1,6 @@
-﻿using Core;
+﻿// --- Измененный файл: Assets/Scripts/Model/ActionCountersModel.cs ---
+
+using Core;
 
 namespace Model
 {
@@ -8,7 +10,8 @@ namespace Model
         public int AddNumbersCount { get; private set; }
         public int HintCount { get; private set; }
         public bool AreCountersDisabled { get; private set; }
-        private const int InitialCount = 5;
+
+        private const int InitialCount = Constants.InitialActionsCount;
 
         public ActionCountersModel()
         {
@@ -43,7 +46,6 @@ namespace Model
             UndoCount = InitialCount;
             AddNumbersCount = InitialCount;
             HintCount = InitialCount;
-            AreCountersDisabled = false;
         }
 
         public void DisableCounters()

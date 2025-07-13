@@ -53,7 +53,7 @@ namespace Core
             var gameplayLogic = RegisterGameplayLogic();
             RegisterViews();
 
-            _gameController = RegisterGameController(platformServices, gameplayLogic);
+            _gameController = RegisterGameController(platformServices, gameplayLogic.matchValidator);
         }
 
         private void RegisterModelsAndHistory()
@@ -82,7 +82,7 @@ namespace Core
             return yandexPlatformService;
         }
 
-        private (IGridDataProvider, MatchValidator) RegisterGameplayLogic()
+        private (IGridDataProvider gridDataProvider, MatchValidator matchValidator) RegisterGameplayLogic()
         {
             var gridModel = ServiceProvider.GetService<GridModel>();
             var gridDataProvider = new GridDataProvider(gridModel);
@@ -100,11 +100,11 @@ namespace Core
             ServiceProvider.Register(headerNumberDisplay);
         }
 
-        private GameController RegisterGameController(IPlatformServices platformServices, (IGridDataProvider, MatchValidator) gameplayLogic)
+        private GameController RegisterGameController(IPlatformServices platformServices, MatchValidator matchValidator)
         {
             var gameController = new GameController(
                 ServiceProvider.GetService<GridModel>(),
-                gameplayLogic.Item2,
+                matchValidator,
                 gameEvents,
                 ServiceProvider.GetService<ActionHistory>(),
                 ServiceProvider.GetService<ActionCountersModel>(),
