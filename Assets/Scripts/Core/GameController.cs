@@ -275,6 +275,7 @@ namespace Core
 
         public void StartNewGame(bool resetStatisticsAndCounters = true)
         {
+            _gridView.ResetSelectionAndHints();
             _gridModel.ClearField();
             _actionHistory.Clear();
 

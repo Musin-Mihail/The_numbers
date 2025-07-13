@@ -110,6 +110,19 @@ namespace View.Grid
             _gameEvents.onBoardCleared?.RemoveListener(HandleBoardCleared);
         }
 
+        public void ResetSelectionAndHints()
+        {
+            ClearHintVisuals();
+            if (!_firstSelectedCellId.HasValue) return;
+
+            if (_cellViewInstances.TryGetValue(_firstSelectedCellId.Value, out var firstCellView))
+            {
+                firstCellView.SetSelected(false);
+            }
+
+            _firstSelectedCellId = null;
+        }
+
         private void HandleBoardCleared()
         {
             if (floatingScorePool == null) return;
@@ -280,7 +293,7 @@ namespace View.Grid
             }
 
             _cellViewInstances.Clear();
-            ClearHintVisuals();
+            _hintedCellIds.Clear();
             UpdateContentSize();
         }
 
