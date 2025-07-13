@@ -37,6 +37,8 @@ namespace View.Grid
         private float _topPaddingValue;
         private readonly List<Guid> _hintedCellIds = new();
 
+        public bool HasActiveHints => _hintedCellIds.Count > 0;
+
         private void Awake()
         {
             _cellPool = GetComponent<CellPool>();

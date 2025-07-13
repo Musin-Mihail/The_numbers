@@ -7,7 +7,7 @@
         false,
         false
     ],
-    "idSave": 21,
+    "idSave": 28,
     "isTopLineVisible": true,
     "gridCells": [
         {
@@ -26,7 +26,7 @@
             "number": 2,
             "line": 0,
             "column": 2,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 6,
@@ -62,43 +62,43 @@
             "number": 7,
             "line": 0,
             "column": 8,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 9,
             "line": 0,
             "column": 9,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 1,
             "line": 1,
             "column": 0,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 7,
             "line": 1,
             "column": 1,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 2,
             "line": 1,
             "column": 2,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 7,
             "line": 1,
             "column": 3,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 7,
             "line": 1,
             "column": 4,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 9,
@@ -140,7 +140,7 @@
             "number": 2,
             "line": 2,
             "column": 1,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 1,
@@ -152,7 +152,7 @@
             "number": 8,
             "line": 2,
             "column": 3,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 2,
@@ -200,7 +200,7 @@
             "number": 2,
             "line": 3,
             "column": 1,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 1,
@@ -212,7 +212,7 @@
             "number": 8,
             "line": 3,
             "column": 3,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 3,
@@ -312,7 +312,7 @@
         }
     ],
     "statistics": {
-        "score": 0,
+        "score": 6,
         "multiplier": 1
     },
     "actionCounters": {

@@ -6,6 +6,7 @@ using Core.Shop;
 using Gameplay;
 using Model;
 using UnityEngine;
+using View.Grid;
 using YG;
 
 namespace Core
@@ -20,6 +21,7 @@ namespace Core
         private GameEvents _gameEvents;
         private GameManager _gameManager;
         private IPurchaseHandler _purchaseHandler;
+        private GridView _gridView;
 
         private const int InitialQuantityByHeight = 5;
         private const string DisableCountersProductId = "disable_counters_product_id";
@@ -40,6 +42,7 @@ namespace Core
             _statisticsModel = ServiceProvider.GetService<StatisticsModel>();
             _gameManager = ServiceProvider.GetService<GameManager>();
             _purchaseHandler = ServiceProvider.GetService<IPurchaseHandler>();
+            _gridView = ServiceProvider.GetService<GridView>();
 
             SubscribeToInputEvents();
             SubscribeToYgEvents();
@@ -123,6 +126,11 @@ namespace Core
 
         private void FindAndShowHint()
         {
+            if (_gridView.HasActiveHints)
+            {
+                return;
+            }
+
             if (!_actionCountersModel.IsHintAvailable())
             {
                 _gameEvents.onRequestRefillCounters.Raise();
