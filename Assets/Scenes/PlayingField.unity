@@ -1485,6 +1485,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 12800000, guid: 6f61ac4d19fb117408dd8f60ffb79254, type: 3}
     - target: {fileID: 8137576732449713144, guid: 7e8446452335d9046a7294bf503167e3, type: 3}
+      propertyPath: m_FontData.m_BestFit
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8137576732449713144, guid: 7e8446452335d9046a7294bf503167e3, type: 3}
       propertyPath: m_FontData.m_MaxSize
       value: 67
       objectReference: {fileID: 0}

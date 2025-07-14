@@ -1,4 +1,6 @@
-﻿using Core.Events;
+﻿using System;
+using Core.Events;
+using Model;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,87 +18,80 @@ namespace Core.Shop
         [SerializeField] private Button purchaseButton;
         [SerializeField] private TextMeshProUGUI priceText;
 
-        [Header("Настройки товара")]
-        [SerializeField] private string productIdToDisplay = "disable_counters_product_id";
-
         [Header("Event Channels")]
         [SerializeField] private GameEvents gameEvents;
 
-        private bool _isShopInitialized;
         private Purchase _productInfo;
+        private ActionCountersModel _actionCountersModel;
 
         private void OnEnable()
         {
-            if (gameEvents)
-            {
-                gameEvents.onYandexSDKInitialized.AddListener(Initialize);
-            }
-
+            YG2.onGetSDKData += InitializeShop;
             YG2.onPurchaseSuccess += HandlePurchaseSuccess;
         }
 
         private void OnDisable()
         {
-            if (gameEvents)
-            {
-                gameEvents.onYandexSDKInitialized.RemoveListener(Initialize);
-            }
-
+            YG2.onGetSDKData -= InitializeShop;
             YG2.onPurchaseSuccess -= HandlePurchaseSuccess;
         }
 
         /// <summary>
         /// Инициализирует магазин после загрузки Yandex SDK.
         /// </summary>
-        private void Initialize()
+        private void InitializeShop()
         {
-            if (_isShopInitialized) return;
-            _isShopInitialized = true;
-
-            if (purchaseButton)
-                purchaseButton.interactable = false;
-            if (priceText)
-                priceText.text = "Загрузка...";
-
-            _productInfo = YG2.PurchaseByID(productIdToDisplay);
-
-            if (_productInfo == null)
+            try
             {
-                if (priceText)
-                    priceText.text = "Товар не найден";
-                Debug.LogError($"ShopManager Error: Товар с ID '{productIdToDisplay}' не найден. Проверьте настройки в InfoYG -> Payments.");
+                _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("ShopManager не смог получить ActionCountersModel. Убедитесь, что модель регистрируется до вызова onGetSDKData. " + e.Message);
+                if (purchaseButton) purchaseButton.interactable = false;
+                if (priceText) priceText.text = "Ошибка магазина";
                 return;
             }
 
+            YG2.ConsumePurchaseByID(Constants.DisableCountersProductId);
+            _productInfo = YG2.PurchaseByID(Constants.DisableCountersProductId);
             UpdateProductUI();
         }
 
         /// <summary>
-        /// Обновляет UI товара, проверяя статус покупки.
+        /// Обновляет UI товара, проверяя состояние игровой модели.
         /// </summary>
         private void UpdateProductUI()
         {
-            if (_productInfo == null) return;
-            if (_productInfo.consumed)
+            if (_actionCountersModel == null) return;
+            if (_actionCountersModel.AreCountersDisabled)
             {
                 SetProductAsPurchased();
             }
             else
             {
-                SetProductAsAvailable();
+                if (_productInfo != null)
+                {
+                    SetProductAsAvailable();
+                }
+                else
+                {
+                    if (priceText) priceText.text = "Товар не найден";
+                    Debug.LogError($"ShopManager Error: Товар с ID '{Constants.DisableCountersProductId}' не найден. Проверьте настройки в InfoYG -> Payments.");
+                    if (purchaseButton) purchaseButton.interactable = false;
+                }
             }
         }
 
         /// <summary>
-        /// Обрабатывает событие успешной покупки.
+        /// Обрабатывает событие успешной покупки (как новой, так и необработанной).
         /// </summary>
         /// <param name="purchasedId">ID купленного товара.</param>
         private void HandlePurchaseSuccess(string purchasedId)
         {
-            if (purchasedId == productIdToDisplay)
-            {
-                UpdateProductUI();
-            }
+            if (purchasedId != Constants.DisableCountersProductId) return;
+            Debug.Log($"Покупка '{purchasedId}' успешно обработана. Обновление UI.");
+            UpdateProductUI();
         }
 
         /// <summary>
@@ -107,8 +102,10 @@ namespace Core.Shop
             if (priceText)
                 priceText.text = _productInfo.price;
 
-            if (purchaseButton)
-                purchaseButton.interactable = true;
+            if (!purchaseButton) return;
+            purchaseButton.interactable = true;
+            purchaseButton.onClick.RemoveAllListeners();
+            purchaseButton.onClick.AddListener(() => gameEvents.onRequestDisableCounters.Raise());
         }
 
         /// <summary>
@@ -119,10 +116,9 @@ namespace Core.Shop
             if (priceText)
                 priceText.text = "Куплен";
 
-            if (purchaseButton)
-            {
-                purchaseButton.interactable = false;
-            }
+            if (!purchaseButton) return;
+            purchaseButton.interactable = false;
+            purchaseButton.onClick.RemoveAllListeners();
         }
     }
 }

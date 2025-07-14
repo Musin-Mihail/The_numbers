@@ -10,7 +10,6 @@ using UnityEngine.UI;
 using View.Grid;
 using View.UI;
 using YG;
-// Добавлено для использования корутин
 
 namespace Core
 {
@@ -33,9 +32,8 @@ namespace Core
         [Header("Leaderboard Settings")]
         [SerializeField] private string leaderboardName = "TotalScore";
 
-        // Новые константы для повторных попыток загрузки
         private const int MaxLoadAttempts = 3;
-        private const float LoadAttemptDelay = 2.0f;
+        private const float LoadAttemptDelay = 1.0f;
 
         private Action _requestNewGameAction;
         private GameManager _gameManager;
@@ -198,7 +196,6 @@ namespace Core
                     loadFinished = true;
                 });
 
-                // Ждем завершения асинхронной операции загрузки
                 yield return new WaitUntil(() => loadFinished);
 
                 if (!loadSuccess && attempts < MaxLoadAttempts)

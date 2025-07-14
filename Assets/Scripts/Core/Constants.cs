@@ -8,7 +8,7 @@
         /// <summary>
         /// Идентификатор продукта для отключения счетчиков действий (покупка в игре).
         /// </summary>
-        public const string DisableCountersProductId = "disable_counters_product_id";
+        public const string DisableCountersProductId = "disable_counters";
 
         /// <summary>
         /// Идентификатор для вознаграждения за просмотр рекламы (пополнение счетчиков).
