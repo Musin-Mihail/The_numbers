@@ -237,6 +237,8 @@ namespace Core
                     }
                 }
             }
+
+            _gameManager.GetComponent<IInitialLoadNotifier>()?.NotifyInitialLoadComplete();
         }
 
         /// <summary>

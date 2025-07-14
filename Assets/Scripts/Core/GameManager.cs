@@ -5,10 +5,21 @@ using UnityEngine;
 namespace Core
 {
     /// <summary>
+    /// Интерфейс для уведомления о завершении начальной загрузки.
+    /// </summary>
+    public interface IInitialLoadNotifier
+    {
+        /// <summary>
+        /// Уведомляет, что начальная загрузка данных завершена.
+        /// </summary>
+        void NotifyInitialLoadComplete();
+    }
+
+    /// <summary>
     /// Управляет глобальным состоянием игры, таким как сохранение прогресса,
     /// обработка паузы и выхода из приложения.
     /// </summary>
-    public class GameManager : MonoBehaviour
+    public class GameManager : MonoBehaviour, IInitialLoadNotifier
     {
         private GameEvents _gameEvents;
         private ISaveLoadService _saveLoadService;
@@ -17,6 +28,8 @@ namespace Core
         private float _timeSinceLastSave = 5.0f;
         private bool _savePending;
         private bool _isSaving;
+
+        private bool _isInitialLoadComplete;
 
         /// <summary>
         /// Инициализация, получение сервисов и подписка на события.
@@ -121,10 +134,26 @@ namespace Core
         }
 
         /// <summary>
+        /// Устанавливает флаг, что начальная загрузка завершена.
+        /// Вызывается из GameBootstrap после успешной загрузки или создания новой игры.
+        /// </summary>
+        public void NotifyInitialLoadComplete()
+        {
+            _isInitialLoadComplete = true;
+            Debug.Log("Начальная загрузка завершена. Сохранение разблокировано.");
+        }
+
+        /// <summary>
         /// Запрашивает сохранение игры. Если кулдаун не прошел, сохранение будет отложено.
         /// </summary>
         public void RequestSave()
         {
+            if (!_isInitialLoadComplete)
+            {
+                Debug.LogWarning("Сохранение заблокировано: начальная загрузка еще не завершена.");
+                return;
+            }
+
             if (_isSaving) return;
 
             if (_timeSinceLastSave >= SaveCooldown)
@@ -144,6 +173,12 @@ namespace Core
         private IEnumerator SaveGameCoroutine(bool force = false)
         {
             if (_isSaving && !force) yield break;
+
+            if (!_isInitialLoadComplete)
+            {
+                Debug.LogWarning("Принудительное сохранение заблокировано: начальная загрузка еще не завершена.");
+                yield break;
+            }
 
             _isSaving = true;
             _savePending = false;
