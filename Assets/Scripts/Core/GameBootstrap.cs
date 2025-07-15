@@ -208,41 +208,7 @@ namespace Core
                 }
             }
 
-            if (loadSuccess)
-            {
-                Debug.Log("Данные успешно загружены. Запуск игры с сохраненными данными.");
-            }
-            else
-            {
-                Debug.LogError($"Не удалось загрузить данные после {MaxLoadAttempts} попыток.");
-
-                if (confirmationDialog)
-                {
-                    confirmationDialog.Show(
-                        $"Не удалось загрузить данные. Начать новую игру? \n\n<color=red>ВНИМАНИЕ: Ваш текущий прогресс будет сброшен!</color>",
-                        () =>
-                        {
-                            Debug.Log("Игрок согласился начать новую игру после сбоя загрузки.");
-                            _gameController.StartNewGame(true);
-                            if (topLineToggle)
-                            {
-                                gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
-                            }
-
-                            FinalizeGameSetup();
-                        }, new Vector2(0, 550)
-                    );
-                    yield break;
-                }
-                else
-                {
-                    _gameController.StartNewGame(true);
-                    if (topLineToggle)
-                    {
-                        gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
-                    }
-                }
-            }
+            Debug.Log(loadSuccess ? "Данные успешно загружены. Отображение сохраненного состояния." : "Сохраненные данные не найдены или не удалось их загрузить. Игра ожидает начала новой сессии от пользователя.");
 
             FinalizeGameSetup();
         }
