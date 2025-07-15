@@ -71,7 +71,7 @@ namespace Core.Platform
                 var gridView = ServiceProvider.GetService<GridView>();
                 gridView?.FullRedraw();
 
-                if (_gameEvents != null)
+                if (_gameEvents)
                 {
                     _gameEvents.onToggleTopLine?.Raise(YG2.saves.isTopLineVisible);
                     if (YG2.saves.actionCounters.areCountersDisabled)
@@ -103,9 +103,7 @@ namespace Core.Platform
         /// </summary>
         public void SetTopLineVisibility(bool isVisible)
         {
-            if (YG2.saves.isTopLineVisible == isVisible) return;
             YG2.saves.isTopLineVisible = isVisible;
-            RequestSave();
         }
     }
 

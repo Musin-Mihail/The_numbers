@@ -53,26 +53,6 @@ namespace Core
         }
 
         /// <summary>
-        /// Сохраняет игру при постановке приложения на паузу.
-        /// </summary>
-        /// <param name="pauseStatus">Статус паузы.</param>
-        private void OnApplicationPause(bool pauseStatus)
-        {
-            if (pauseStatus)
-            {
-                StartCoroutine(SaveGameCoroutine(true));
-            }
-        }
-
-        /// <summary>
-        /// Сохраняет игру при выходе из приложения.
-        /// </summary>
-        private void OnApplicationQuit()
-        {
-            StartCoroutine(SaveGameCoroutine(true));
-        }
-
-        /// <summary>
         /// Подписывается на игровые события.
         /// </summary>
         private void SubscribeToEvents()
@@ -140,10 +120,9 @@ namespace Core
         /// <summary>
         /// Корутина для асинхронного сохранения игры.
         /// </summary>
-        /// <param name="force">Если true, сохранение произойдет немедленно, игнорируя статус _isSaving.</param>
-        private IEnumerator SaveGameCoroutine(bool force = false)
+        private IEnumerator SaveGameCoroutine()
         {
-            if (_isSaving && !force) yield break;
+            if (_isSaving) yield break;
             _isSaving = true;
             _savePending = false;
             _timeSinceLastSave = 0f;

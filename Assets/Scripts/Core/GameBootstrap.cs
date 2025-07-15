@@ -230,14 +230,14 @@ namespace Core
 
             if (confirmationDialog)
             {
-                _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", StartNewGameInternal, new Vector2(0, 350));
+                _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", StartNewGameFromButton, new Vector2(0, 350));
                 gameEvents.onRequestNewGame.AddListener(_requestNewGameAction);
                 gameEvents.onRequestRefillCounters.AddListener(HandleRequestRefillCounters);
                 gameEvents.onRequestDisableCounters.AddListener(HandleRequestDisableCounters);
             }
             else
             {
-                gameEvents.onRequestNewGame.AddListener(StartNewGameInternal);
+                gameEvents.onRequestNewGame.AddListener(StartNewGameFromButton);
             }
         }
 
@@ -293,7 +293,7 @@ namespace Core
             }
             else
             {
-                gameEvents.onRequestNewGame.RemoveListener(StartNewGameInternal);
+                gameEvents.onRequestNewGame.RemoveListener(StartNewGameFromButton);
             }
 
             _gameController?.Dispose();
@@ -301,9 +301,9 @@ namespace Core
         }
 
         /// <summary>
-        /// Внутренний метод для запуска новой игры.
+        /// Вызывается по нажатию кнопки "Новая игра".
         /// </summary>
-        private void StartNewGameInternal()
+        private void StartNewGameFromButton()
         {
             _gameController.StartNewGame(false);
             if (topLineToggle)
