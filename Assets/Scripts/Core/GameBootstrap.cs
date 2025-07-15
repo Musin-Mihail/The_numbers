@@ -26,6 +26,9 @@ namespace Core
         [SerializeField] private ConfirmationDialog confirmationDialog;
         [SerializeField] private Toggle topLineToggle;
 
+        [Header("UI Screens")]
+        [SerializeField] private GameObject loadingScreen;
+
         [Header("Event Channels")]
         [SerializeField] private GameEvents gameEvents;
 
@@ -45,6 +48,7 @@ namespace Core
         private void Awake()
         {
             _gameManager = GetComponent<GameManager>();
+            if (loadingScreen) loadingScreen.SetActive(true);
             if (gameEvents && gameEvents.onYandexSDKInitialized != null)
             {
                 gameEvents.onYandexSDKInitialized.Reset();
@@ -207,7 +211,7 @@ namespace Core
 
             if (loadSuccess)
             {
-                Debug.Log("Данные успешно загружены.");
+                Debug.Log("Данные успешно загружены. Запуск игры с сохраненными данными.");
             }
             else
             {
@@ -225,8 +229,11 @@ namespace Core
                             {
                                 gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
                             }
+
+                            FinalizeGameSetup();
                         }, new Vector2(0, 550)
                     );
+                    yield break;
                 }
                 else
                 {
@@ -238,12 +245,16 @@ namespace Core
                 }
             }
 
-            _gameManager.GetComponent<IInitialLoadNotifier>()?.NotifyInitialLoadComplete();
+            FinalizeGameSetup();
         }
 
-        /// <summary>
-        /// Настраивает прослушиватели событий для UI элементов.
-        /// </summary>
+        private void FinalizeGameSetup()
+        {
+            Debug.Log("Завершение настройки игры и активация UI.");
+            SetupListeners();
+            if (loadingScreen) loadingScreen.SetActive(false);
+        }
+
         private void SetupListeners()
         {
             if (topLineToggle)
