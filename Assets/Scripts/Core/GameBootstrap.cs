@@ -175,7 +175,6 @@ namespace Core
         {
             gameEvents.onYandexSDKInitialized.Raise();
             if (!_gameManager) return;
-            SetupListeners();
             StartCoroutine(LoadGameWithRetries());
         }
 
