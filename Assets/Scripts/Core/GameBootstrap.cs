@@ -41,6 +41,7 @@ namespace Core
         private Action _requestNewGameAction;
         private GameManager _gameManager;
         private GameController _gameController;
+        private bool _isNewUser;
 
         /// <summary>
         /// Вызывается при запуске. Инициализирует все системы игры.
@@ -153,19 +154,29 @@ namespace Core
         }
 
         /// <summary>
-        /// Подписывается на событие инициализации Yandex SDK.
+        /// Подписывается на события.
         /// </summary>
         private void OnEnable()
         {
             YG2.onGetSDKData += OnYandexSDKInitialized;
+            YG2.onDefaultSaves += OnDefaultSavesReceived;
         }
 
         /// <summary>
-        /// Отписывается от события инициализации Yandex SDK.
+        /// Отписывается от событий.
         /// </summary>
         private void OnDisable()
         {
             YG2.onGetSDKData -= OnYandexSDKInitialized;
+            YG2.onDefaultSaves -= OnDefaultSavesReceived;
+        }
+
+        /// <summary>
+        /// Вызывается, когда плагин определяет, что сохранений нет.
+        /// </summary>
+        private void OnDefaultSavesReceived()
+        {
+            _isNewUser = true;
         }
 
         /// <summary>
@@ -180,9 +191,17 @@ namespace Core
 
         /// <summary>
         /// Корутина для загрузки игры с несколькими попытками.
+        /// В случае неудачи - предлагает игроку выбор: повторить или начать новую игру.
         /// </summary>
         private IEnumerator LoadGameWithRetries()
         {
+            if (_isNewUser)
+            {
+                Debug.Log("Плагин не нашел сохранений (onDefaultSaves). Запуск новой игры.");
+                StartNewGameAndFinalize();
+                yield break;
+            }
+
             var saveLoadService = ServiceProvider.GetService<ISaveLoadService>();
             var attempts = 0;
             var loadSuccess = false;
@@ -208,7 +227,62 @@ namespace Core
                 }
             }
 
-            Debug.Log(loadSuccess ? "Данные успешно загружены. Отображение сохраненного состояния." : "Сохраненные данные не найдены или не удалось их загрузить. Игра ожидает начала новой сессии от пользователя.");
+            if (loadSuccess)
+            {
+                Debug.Log("Данные успешно загружены. Отображение сохраненного состояния.");
+                FinalizeGameSetup();
+            }
+            else
+            {
+                Debug.LogError("Не удалось загрузить данные после нескольких попыток. Показ диалога ошибки.");
+                ShowLoadErrorDialog();
+            }
+        }
+
+        /// <summary>
+        /// Показывает диалог с ошибкой загрузки и вариантами действий.
+        /// </summary>
+        private void ShowLoadErrorDialog()
+        {
+            confirmationDialog.Show(
+                "Не удалось загрузить данные. Проверьте интернет-соединение и попробуйте снова.",
+                "Попробовать снова",
+                "Новая игра",
+                OnRetryLoad,
+                OnStartNewGameWithWarning,
+                new Vector2(0, 450)
+            );
+        }
+
+        /// <summary>
+        /// Обработчик для кнопки "Попробовать снова" в диалоге ошибки загрузки.
+        /// </summary>
+        private void OnRetryLoad()
+        {
+            Debug.Log("Игрок выбрал повторную попытку загрузки.");
+            if (loadingScreen) loadingScreen.SetActive(true);
+            StartCoroutine(LoadGameWithRetries());
+        }
+
+        /// <summary>
+        /// Обработчик для кнопки "Новая игра" в диалоге ошибки загрузки.
+        /// </summary>
+        private void OnStartNewGameWithWarning()
+        {
+            Debug.Log("Игрок выбрал начать новую игру после ошибки загрузки.");
+            StartNewGameAndFinalize();
+        }
+
+        /// <summary>
+        /// Запускает новую игру со сбросом прогресса и финализирует настройку.
+        /// </summary>
+        private void StartNewGameAndFinalize()
+        {
+            _gameController.StartNewGame(true);
+            if (topLineToggle)
+            {
+                gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
+            }
 
             FinalizeGameSetup();
         }
@@ -230,7 +304,7 @@ namespace Core
 
             if (confirmationDialog)
             {
-                _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", StartNewGameFromButton, new Vector2(0, 350));
+                _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", "Да", "Нет", StartNewGameFromButton, null, new Vector2(0, 350));
                 gameEvents.onRequestNewGame.AddListener(_requestNewGameAction);
                 gameEvents.onRequestRefillCounters.AddListener(HandleRequestRefillCounters);
                 gameEvents.onRequestDisableCounters.AddListener(HandleRequestDisableCounters);
@@ -258,7 +332,7 @@ namespace Core
         /// </summary>
         private void HandleRequestDisableCounters()
         {
-            confirmationDialog.Show("Отключить ограничения за плату?", () => { gameEvents.onDisableCountersConfirmed.Raise(); }, new Vector2(0, 350));
+            confirmationDialog.Show("Отключить ограничения за плату?", "Да", "Нет", () => { gameEvents.onDisableCountersConfirmed.Raise(); }, null, new Vector2(0, 350));
         }
 
         /// <summary>
@@ -266,7 +340,7 @@ namespace Core
         /// </summary>
         private void HandleRequestRefillCounters()
         {
-            confirmationDialog.Show("Посмотреть рекламу, чтобы пополнить счетчики?", () => { gameEvents.onShowRewardedAdForRefill.Raise(); }, new Vector2(0, 350));
+            confirmationDialog.Show("Посмотреть рекламу, чтобы пополнить счетчики?", "Да", "Нет", () => { gameEvents.onShowRewardedAdForRefill.Raise(); }, null, new Vector2(0, 350));
         }
 
         /// <summary>

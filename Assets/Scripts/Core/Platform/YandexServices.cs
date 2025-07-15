@@ -92,7 +92,7 @@ namespace Core.Platform
             }
             else
             {
-                Debug.LogWarning("Данные сохранения в Yandex не найдены. Будет начата новая игра.");
+                Debug.LogWarning("Данные сохранения в Yandex не найдены");
                 _isLoading = false;
                 onComplete?.Invoke(false);
             }
