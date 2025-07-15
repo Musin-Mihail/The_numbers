@@ -20,7 +20,7 @@ namespace View.Grid
         {
             if (!rectTransform)
             {
-                Debug.LogWarning("RectTransform is null, cannot start animation.", this);
+                Debug.LogWarning("RectTransform равен null, невозможно запустить анимацию.", this);
                 return;
             }
 

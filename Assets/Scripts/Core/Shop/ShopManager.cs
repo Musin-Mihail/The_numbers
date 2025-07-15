@@ -18,7 +18,7 @@ namespace Core.Shop
         [SerializeField] private Button purchaseButton;
         [SerializeField] private TextMeshProUGUI priceText;
 
-        [Header("Event Channels")]
+        [Header("Каналы событий")]
         [SerializeField] private GameEvents gameEvents;
 
         private Purchase _productInfo;
@@ -77,7 +77,7 @@ namespace Core.Shop
                 else
                 {
                     if (priceText) priceText.text = "Товар не найден";
-                    Debug.LogError($"ShopManager Error: Товар с ID '{Constants.DisableCountersProductId}' не найден. Проверьте настройки в InfoYG -> Payments.");
+                    Debug.LogError($"Ошибка ShopManager: Товар с ID '{Constants.DisableCountersProductId}' не найден. Проверьте настройки в InfoYG -> Payments.");
                     if (purchaseButton) purchaseButton.interactable = false;
                 }
             }

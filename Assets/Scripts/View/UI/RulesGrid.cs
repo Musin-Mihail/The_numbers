@@ -10,12 +10,12 @@ namespace View.UI
     /// </summary>
     public class RulesGrid : MonoBehaviour
     {
-        [Header("Grid Settings")]
+        [Header("Настройки сетки")]
         [SerializeField] private GameObject cellPrefab;
         [SerializeField] private RectTransform gridContainer;
         private const int GridSize = 5;
 
-        [Header("Highlight Colors")]
+        [Header("Цвета подсветки")]
         [SerializeField] private Color sameNumberColor = Color.yellow;
         [SerializeField] private Color sumIsTenColor = Color.cyan;
         [SerializeField] private Color lineWrapColor = Color.magenta;
@@ -64,7 +64,7 @@ namespace View.UI
         {
             if (!cellPrefab || !gridContainer)
             {
-                Debug.LogError("Cell Prefab or Grid Container not assigned.");
+                Debug.LogError("Префаб ячейки или контейнер сетки не назначены.");
                 return;
             }
 

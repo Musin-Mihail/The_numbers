@@ -9,7 +9,7 @@ namespace View.UI
     /// </summary>
     public class UIEventCaller : MonoBehaviour
     {
-        [Header("Event Raising")]
+        [Header("Вызов событий")]
         [SerializeField] private GameEvents gameEvents;
 
         public void RaiseRequestNewGame() => gameEvents?.onRequestNewGame.Raise();

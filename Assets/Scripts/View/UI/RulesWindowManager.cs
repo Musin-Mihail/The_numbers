@@ -11,7 +11,7 @@ namespace View.UI
         [SerializeField] private GameObject rulesWindow;
         [SerializeField] private RulesGrid rulesGrid;
 
-        [Header("Event Listening")]
+        [Header("Каналы событий")]
         [SerializeField] private GameEvents gameEvents;
 
         private void OnEnable()
@@ -49,7 +49,7 @@ namespace View.UI
             }
             else
             {
-                Debug.LogError("RulesGrid is not assigned in the inspector for RulesWindowManager.");
+                Debug.LogError("RulesGrid не назначен в инспекторе для RulesWindowManager.");
             }
         }
 

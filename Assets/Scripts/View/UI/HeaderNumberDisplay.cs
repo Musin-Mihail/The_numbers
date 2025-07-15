@@ -11,11 +11,11 @@ namespace View.UI
     /// </summary>
     public class HeaderNumberDisplay : MonoBehaviour
     {
-        [Header("Scene Dependencies")]
+        [Header("Зависимости сцены")]
         [SerializeField] private GameObject cellPrefab;
         [SerializeField] private RectTransform container;
 
-        [Header("Event Listening")]
+        [Header("Каналы событий")]
         [SerializeField] private GameEvents gameEvents;
 
         private readonly List<Cell> _topLineCells = new();

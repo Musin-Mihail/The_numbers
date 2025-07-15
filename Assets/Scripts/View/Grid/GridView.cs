@@ -16,14 +16,14 @@ namespace View.Grid
     [RequireComponent(typeof(CellPool))]
     public class GridView : MonoBehaviour
     {
-        [Header("Scene Dependencies")]
+        [Header("Зависимости сцены")]
         [SerializeField] private GameObject cellPrefab;
         [SerializeField] private RectTransform contentContainer;
         [SerializeField] private ScrollRect scrollRect;
         [SerializeField] private RectTransform scrollviewContainer;
         [SerializeField] private FloatingScorePool floatingScorePool;
 
-        [Header("Settings")]
+        [Header("Настройки")]
         [SerializeField] private Color positiveScoreColor = Color.green;
         [SerializeField] private Color negativeScoreColor = Color.red;
 

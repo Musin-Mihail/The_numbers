@@ -20,19 +20,19 @@ namespace Core
     [RequireComponent(typeof(GameManager))]
     public class GameBootstrap : MonoBehaviour
     {
-        [Header("Scene Dependencies")]
+        [Header("Зависимости сцены")]
         [SerializeField] private GridView view;
         [SerializeField] private HeaderNumberDisplay headerNumberDisplay;
         [SerializeField] private ConfirmationDialog confirmationDialog;
         [SerializeField] private Toggle topLineToggle;
 
-        [Header("UI Screens")]
+        [Header("Экраны UI")]
         [SerializeField] private GameObject loadingScreen;
 
-        [Header("Event Channels")]
+        [Header("Каналы событий")]
         [SerializeField] private GameEvents gameEvents;
 
-        [Header("Leaderboard Settings")]
+        [Header("Настройки таблицы лидеров")]
         [SerializeField] private string leaderboardName = "TotalScore";
 
         private const int MaxLoadAttempts = 3;

@@ -51,7 +51,7 @@ namespace Core.Platform
             YG2.SaveProgress();
 
             _isSaving = false;
-            Debug.Log("Game data save requested via YandexSaveLoadService.");
+            Debug.Log("Запрос на сохранение игровых данных через YandexSaveLoadService.");
         }
 
         /// <summary>
@@ -86,13 +86,13 @@ namespace Core.Platform
                     _gameEvents.onStatisticsChanged?.Raise((YG2.saves.statistics.score, YG2.saves.statistics.multiplier));
                 }
 
-                Debug.Log("Game data loaded successfully from Yandex saves.");
+                Debug.Log("Игровые данные успешно загружены из сохранений Yandex.");
                 _isLoading = false;
                 onComplete?.Invoke(true);
             }
             else
             {
-                Debug.LogWarning("No save data found in Yandex saves. A new game will be started.");
+                Debug.LogWarning("Данные сохранения в Yandex не найдены. Будет начата новая игра.");
                 _isLoading = false;
                 onComplete?.Invoke(false);
             }
@@ -184,11 +184,11 @@ namespace Core.Platform
             if (YG2.player.auth)
             {
                 YG2.SetLeaderboard(_leaderboardName, score);
-                Debug.Log($"Leaderboard '{_leaderboardName}' updated with score: {score}");
+                Debug.Log($"Таблица лидеров '{_leaderboardName}' обновлена с результатом: {score}");
             }
             else
             {
-                Debug.LogWarning("Player is not authorized. Score not sent to leaderboard.");
+                Debug.LogWarning("Игрок не авторизован. Результат не отправлен в таблицу лидеров.");
             }
         }
     }
