@@ -248,23 +248,69 @@ namespace Model
         }
 
         /// <summary>
-        /// Добавляет все активные числа в конец сетки в виде новых линий.
+        /// Добавляет все активные числа в конец сетки.
+        /// Сначала удаляются все ячейки, находящиеся после последней активной ячейки.
+        /// Затем новые ячейки добавляются в конец.
         /// </summary>
         public void AppendActiveNumbersToGrid()
         {
-            var numbersToAdd = GetAllActiveCellData().Select(cell => cell.Number).ToList();
+            var activeCells = GetAllActiveCellData();
+            var numbersToAdd = activeCells.Select(cell => cell.Number).ToList();
             if (numbersToAdd.Count == 0) return;
             Shuffle(numbersToAdd);
-
-            var lineIndex = _cells.Count > 0 ? _cells.Count - 1 : 0;
-            var columnIndex = 0;
-            if (_cells.Count > 0 && _cells[lineIndex] != null)
+            var lastActiveCell = activeCells.LastOrDefault();
+            if (lastActiveCell != null)
             {
-                columnIndex = _cells[lineIndex].Count;
+                var lastActiveFound = false;
+                for (var l = _cells.Count - 1; l >= 0; l--)
+                {
+                    var line = _cells[l];
+                    for (var c = line.Count - 1; c >= 0; c--)
+                    {
+                        var cell = line[c];
+                        if (cell.Id == lastActiveCell.Id)
+                        {
+                            lastActiveFound = true;
+                            break;
+                        }
+
+                        _cellDataMap.Remove(cell.Id);
+                        _gameEvents?.onCellRemoved.Raise(cell.Id);
+                        line.RemoveAt(c);
+                    }
+
+                    if (lastActiveFound)
+                    {
+                        break;
+                    }
+                }
             }
 
-            if (_cells.Count == 0)
+            for (var l = _cells.Count - 1; l >= 0; l--)
             {
+                if (_cells[l].Count == 0)
+                {
+                    _cells.RemoveAt(l);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            int lineIndex;
+            int columnIndex;
+
+            if (_cells.Count > 0)
+            {
+                lineIndex = _cells.Count - 1;
+                var lastLine = _cells[lineIndex];
+                columnIndex = lastLine.Count;
+            }
+            else
+            {
+                lineIndex = 0;
+                columnIndex = 0;
                 _cells.Add(new List<CellData>());
             }
 
@@ -274,10 +320,7 @@ namespace Model
                 {
                     columnIndex = 0;
                     lineIndex++;
-                    if (_cells.Count <= lineIndex)
-                    {
-                        _cells.Add(new List<CellData>());
-                    }
+                    _cells.Add(new List<CellData>());
                 }
 
                 var newCellData = new CellData(number, lineIndex, columnIndex);
