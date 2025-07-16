@@ -89,6 +89,7 @@ namespace View.Grid
             _gameEvents.onPairScoreUndone?.AddListener(HandlePairScoreUndone);
             _gameEvents.onLineScoreUndone?.AddListener(HandleLineScoreUndone);
             _gameEvents.onBoardCleared?.AddListener(HandleBoardCleared);
+            _gameEvents.onLinesRemoved?.AddListener(HandleLinesRemoved);
         }
 
         private void UnsubscribeFromEvents()
@@ -110,6 +111,7 @@ namespace View.Grid
             _gameEvents.onPairScoreUndone?.RemoveListener(HandlePairScoreUndone);
             _gameEvents.onLineScoreUndone?.RemoveListener(HandleLineScoreUndone);
             _gameEvents.onBoardCleared?.RemoveListener(HandleBoardCleared);
+            _gameEvents.onLinesRemoved?.RemoveListener(HandleLinesRemoved);
         }
 
         /// <summary>
@@ -153,6 +155,15 @@ namespace View.Grid
                 HandleCellAdded((cellData, false));
             }
 
+            UpdateContentSize();
+            RefreshTopLine();
+        }
+
+        /// <summary>
+        /// Обработчик события удаления линий. Обновляет размер контейнера.
+        /// </summary>
+        private void HandleLinesRemoved()
+        {
             UpdateContentSize();
             RefreshTopLine();
         }
@@ -219,8 +230,6 @@ namespace View.Grid
         private void HandleMatchFound((Guid firstCellId, Guid secondCellId) data)
         {
             ClearHintVisuals();
-            UpdateContentSize();
-            RefreshTopLine();
         }
 
         private void HandleGameStarted()

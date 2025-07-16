@@ -120,6 +120,8 @@ namespace Core.Handlers
                 lineScores[lineIndex] = scoreForLine;
                 _gameEvents.onLineScoreAdded.Raise((lineIndex, scoreForLine));
             }
+
+            _gameEvents.onLinesRemoved.Raise();
         }
     }
 }

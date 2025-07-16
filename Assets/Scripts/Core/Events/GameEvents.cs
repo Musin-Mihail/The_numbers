@@ -21,6 +21,7 @@ namespace Core.Events
         public CellDataEvent onCellUpdated;
         public GuidEvent onCellRemoved;
         public VoidEvent onGridCleared;
+        public VoidEvent onLinesRemoved;
 
         [Header("Действия пользователя")]
         public VoidEvent onUndoLastAction;
