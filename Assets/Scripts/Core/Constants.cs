@@ -16,6 +16,11 @@
         public const string RefillCountersRewardId = "refillCounters";
 
         /// <summary>
+        /// Имя таблицы лидеров для Yandex Games.
+        /// </summary>
+        public const string LeaderboardName = "TotalScore";
+
+        /// <summary>
         /// Начальное количество доступных действий (отмена, добавление, подсказка).
         /// </summary>
         public const int InitialActionsCount = 5;

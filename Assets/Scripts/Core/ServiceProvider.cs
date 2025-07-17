@@ -29,8 +29,7 @@ namespace Core
         /// Возвращает зарегистрированный экземпляр сервиса указанного типа.
         /// </summary>
         /// <typeparam name="T">Тип запрашиваемого сервиса.</typeparam>
-        /// <returns>Экземпляр сервиса.</returns>
-        /// <exception cref="InvalidOperationException">Выбрасывается, если сервис не зарегистрирован.</exception>
+        /// <returns>Экземпляр сервиса или null, если сервис не найден.</returns>
         public static T GetService<T>()
         {
             var type = typeof(T);
@@ -39,7 +38,8 @@ namespace Core
                 return (T)service;
             }
 
-            throw new InvalidOperationException($"[ServiceProvider] Сервис типа {type.Name} не зарегистрирован.");
+            Debug.LogError($"[ServiceProvider] Сервис типа {type.Name} не зарегистрирован. Возвращено значение по умолчанию.");
+            return default;
         }
 
         /// <summary>

@@ -87,7 +87,6 @@ namespace Core
                 _statisticsModel.Reset();
             }
 
-            _gameEvents.onCountersChanged.Raise(_actionCountersModel.AreCountersDisabled ? (-1, -1, -1) : (_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount));
             _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
 
             for (var i = 0; i < Constants.InitialLinesOnStart; i++)
@@ -115,6 +114,5 @@ namespace Core
             yield return new WaitForSeconds(2.0f);
             StartNewGame(false);
         }
-        
     }
 }

@@ -2033,7 +2033,6 @@ MonoBehaviour:
   shopManager: {fileID: 382419730}
   loadingScreen: {fileID: 956927374}
   gameEvents: {fileID: 11400000, guid: f4c0432a5dafe5b4c97ce2400b9a7313, type: 2}
-  leaderboardName: TotalScore
 --- !u!114 &382419723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7841,7 +7840,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "999 \u0440\u0443\u0431"
+  m_text: "222 \u0440\u0443\u0431"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 29c4fecb7cceb6a4fb4775ff72ce73ee, type: 2}
   m_sharedMaterial: {fileID: 1276708922559436134, guid: 29c4fecb7cceb6a4fb4775ff72ce73ee, type: 2}

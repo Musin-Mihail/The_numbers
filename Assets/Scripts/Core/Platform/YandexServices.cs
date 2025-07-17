@@ -46,11 +46,9 @@ namespace Core.Platform
             YG2.saves.statistics = new StatisticsModelSerializable(_statisticsModel);
             YG2.saves.actionCounters = new ActionCountersModelSerializable(_actionCountersModel);
             YG2.saves.isGameEverSaved = true;
-
-            YG2.SaveProgress();
-
-            _isSaving = false;
             Debug.Log("Запрос на сохранение игровых данных через YandexSaveLoadService.");
+            YG2.SaveProgress();
+            _isSaving = false;
         }
 
         /// <summary>
@@ -70,7 +68,6 @@ namespace Core.Platform
                 if (_gameEvents)
                 {
                     _gameEvents.onToggleTopLine?.Raise(YG2.saves.isTopLineVisible);
-                    _gameEvents.onCountersChanged?.Raise(YG2.saves.actionCounters.areCountersDisabled ? (-1, -1, -1) : (YG2.saves.actionCounters.undoCount, YG2.saves.actionCounters.addNumbersCount, YG2.saves.actionCounters.hintCount));
                     _gameEvents.onStatisticsChanged?.Raise((YG2.saves.statistics.score, YG2.saves.statistics.multiplier));
                 }
 

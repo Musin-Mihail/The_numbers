@@ -36,9 +36,6 @@ namespace Core
         [Header("Каналы событий")]
         [SerializeField] private GameEvents gameEvents;
 
-        [Header("Настройки таблицы лидеров")]
-        [SerializeField] private string leaderboardName = "TotalScore";
-
         private const int MaxLoadAttempts = 3;
         private const float LoadAttemptDelay = 1.0f;
 
@@ -72,7 +69,7 @@ namespace Core
 
             var gridModel = new GridModel();
             var statisticsModel = new StatisticsModel();
-            var actionCountersModel = new ActionCountersModel();
+            var actionCountersModel = new ActionCountersModel(gameEvents);
             var actionHistory = new ActionHistory();
             ServiceProvider.Register(gridModel);
             ServiceProvider.Register(statisticsModel);
@@ -80,7 +77,7 @@ namespace Core
             ServiceProvider.Register(actionHistory);
 
             var yandexSaveLoadService = new YandexSaveLoadService(gridModel, statisticsModel, actionCountersModel, gameEvents);
-            var yandexLeaderboardService = new YandexLeaderboardService(leaderboardName);
+            var yandexLeaderboardService = new YandexLeaderboardService(Constants.LeaderboardName);
             var yandexPlatformService = new YandexPlatformService();
             ServiceProvider.Register<ISaveLoadService>(yandexSaveLoadService);
             ServiceProvider.Register<ILeaderboardService>(yandexLeaderboardService);

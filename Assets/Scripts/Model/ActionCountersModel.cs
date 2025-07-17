@@ -1,4 +1,5 @@
 ﻿using Core;
+using Core.Events;
 
 namespace Model
 {
@@ -26,11 +27,12 @@ namespace Model
         /// Указывает, отключены ли счетчики (например, после покупки).
         /// </summary>
         public bool AreCountersDisabled { get; private set; }
-
         private const int InitialCount = Constants.InitialActionsCount;
+        private readonly GameEvents _gameEvents;
 
-        public ActionCountersModel()
+        public ActionCountersModel(GameEvents gameEvents)
         {
+            _gameEvents = gameEvents;
             ResetCounters();
         }
 
@@ -44,6 +46,7 @@ namespace Model
             AddNumbersCount = data.addNumbersCount;
             HintCount = data.hintCount;
             AreCountersDisabled = data.areCountersDisabled;
+            RaiseCountersChanged();
         }
 
         /// <summary>
@@ -51,7 +54,9 @@ namespace Model
         /// </summary>
         public void DecrementUndo()
         {
-            if (UndoCount > 0) UndoCount--;
+            if (UndoCount <= 0) return;
+            UndoCount--;
+            RaiseCountersChanged();
         }
 
         /// <summary>
@@ -59,7 +64,9 @@ namespace Model
         /// </summary>
         public void DecrementAddNumbers()
         {
-            if (AddNumbersCount > 0) AddNumbersCount--;
+            if (AddNumbersCount <= 0) return;
+            AddNumbersCount--;
+            RaiseCountersChanged();
         }
 
         /// <summary>
@@ -67,7 +74,9 @@ namespace Model
         /// </summary>
         public void DecrementHint()
         {
-            if (HintCount > 0) HintCount--;
+            if (HintCount <= 0) return;
+            HintCount--;
+            RaiseCountersChanged();
         }
 
         /// <summary>
@@ -78,6 +87,7 @@ namespace Model
             UndoCount = InitialCount;
             AddNumbersCount = InitialCount;
             HintCount = InitialCount;
+            RaiseCountersChanged();
         }
 
         /// <summary>
@@ -86,6 +96,7 @@ namespace Model
         public void DisableCounters()
         {
             AreCountersDisabled = true;
+            RaiseCountersChanged();
         }
 
         /// <summary>
@@ -102,5 +113,15 @@ namespace Model
         /// Проверяет, доступна ли подсказка.
         /// </summary>
         public bool IsHintAvailable() => AreCountersDisabled || HintCount > 0;
+
+        /// <summary>
+        /// Вызывает событие onCountersChanged с текущими значениями счетчиков.
+        /// </summary>
+        private void RaiseCountersChanged()
+        {
+            _gameEvents?.onCountersChanged.Raise(AreCountersDisabled
+                ? (-1, -1, -1)
+                : (UndoCount, AddNumbersCount, HintCount));
+        }
     }
 }

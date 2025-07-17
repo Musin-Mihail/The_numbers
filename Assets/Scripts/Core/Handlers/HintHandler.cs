@@ -94,19 +94,8 @@ namespace Core.Handlers
                 _actionCountersModel.DecrementHint();
             }
 
-            RaiseCountersChangedEvent();
             _gameEvents.onHintFound.Raise((cell1.Id, cell2.Id));
             _gameManager?.RequestSave();
-        }
-
-        /// <summary>
-        /// Вызывает событие изменения счетчиков.
-        /// </summary>
-        private void RaiseCountersChangedEvent()
-        {
-            _gameEvents.onCountersChanged.Raise(_actionCountersModel.AreCountersDisabled
-                ? (-1, -1, -1)
-                : (_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount));
         }
     }
 }

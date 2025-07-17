@@ -92,7 +92,6 @@ namespace Core.Handlers
 
             Debug.Log($"Покупка '{purchasedId}' прошла успешно!");
             _actionCountersModel.DisableCounters();
-            RaiseCountersChangedEvent();
             _gameManager?.RequestSave();
         }
 
@@ -110,18 +109,9 @@ namespace Core.Handlers
         private void OnRewardVideoSuccess(string rewardId)
         {
             if (rewardId != Constants.RefillCountersRewardId) return;
-
             _actionCountersModel.ResetCounters();
-            RaiseCountersChangedEvent();
             _gameManager?.RequestSave();
             Debug.Log("Счетчики пополнены после просмотра рекламы.");
-        }
-
-        private void RaiseCountersChangedEvent()
-        {
-            _gameEvents.onCountersChanged.Raise(_actionCountersModel.AreCountersDisabled
-                ? (-1, -1, -1)
-                : (_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount));
         }
     }
 }

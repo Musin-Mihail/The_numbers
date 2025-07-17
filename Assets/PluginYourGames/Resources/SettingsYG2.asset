@@ -178,7 +178,7 @@ MonoBehaviour:
     durationPayPanel: 1
     testBuyFail: 0
     purshases:
-    - id: disable_counters_product_id
+    - id: disable_counters
       title: "\u0411\u0435\u0441\u043A\u043E\u043D\u0435\u0447\u043D\u044B\u0435
         \u043F\u043E\u0434\u0441\u043A\u0430\u0437\u043A\u04381"
       description: "\u0411\u0435\u0441\u043A\u043E\u043D\u0435\u0447\u043D\u044B\u0435
@@ -234,7 +234,7 @@ MonoBehaviour:
       color2: {r: 1, g: 0.831, b: 0.149, a: 0.7}
     fixedAspectRatio: 1
     aspectRatio: 9/16
-    disableForMobile: 1
+    disableForMobile: 0
     fillBackground: 0
     imageBackground: 0
     imageName: background.jpg

@@ -62,7 +62,6 @@ namespace Core.Handlers
 
             _gridModel.AppendActiveNumbersToGrid();
             _actionHistory.Clear();
-            RaiseCountersChangedEvent();
             _gameManager?.RequestSave();
         }
 
@@ -86,16 +85,8 @@ namespace Core.Handlers
                 _actionCountersModel.DecrementUndo();
             }
 
-            RaiseCountersChangedEvent();
             _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
             _gameManager?.RequestSave();
-        }
-
-        private void RaiseCountersChangedEvent()
-        {
-            _gameEvents.onCountersChanged.Raise(_actionCountersModel.AreCountersDisabled
-                ? (-1, -1, -1)
-                : (_actionCountersModel.UndoCount, _actionCountersModel.AddNumbersCount, _actionCountersModel.HintCount));
         }
     }
 }
