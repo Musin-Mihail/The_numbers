@@ -20,6 +20,9 @@ namespace Core.Handlers
         private readonly GameEvents _gameEvents;
         private readonly GameManager _gameManager;
 
+        /// <summary>
+        /// Инициализирует обработчик совпадений с необходимыми зависимостями.
+        /// </summary>
         public MatchHandler(
             GridModel gridModel,
             MatchValidator matchValidator,

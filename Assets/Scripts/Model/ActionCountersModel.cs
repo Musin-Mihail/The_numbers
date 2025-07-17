@@ -30,6 +30,10 @@ namespace Model
         private const int InitialCount = Constants.InitialActionsCount;
         private readonly GameEvents _gameEvents;
 
+        /// <summary>
+        /// Инициализирует модель счетчиков и сбрасывает их к начальным значениям.
+        /// </summary>
+        /// <param name="gameEvents">Контейнер игровых событий для уведомлений.</param>
         public ActionCountersModel(GameEvents gameEvents)
         {
             _gameEvents = gameEvents;

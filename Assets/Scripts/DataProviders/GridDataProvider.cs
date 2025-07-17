@@ -13,6 +13,10 @@ namespace DataProviders
     {
         private readonly GridModel _gridModel;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр провайдера данных с ссылкой на модель сетки.
+        /// </summary>
+        /// <param name="gridModel">Модель игровой сетки.</param>
         public GridDataProvider(GridModel gridModel)
         {
             _gridModel = gridModel;

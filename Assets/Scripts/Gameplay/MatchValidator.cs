@@ -10,6 +10,10 @@ namespace Gameplay
     {
         private readonly IGridDataProvider _gridDataProvider;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр валидатора с ссылкой на провайдер данных сетки.
+        /// </summary>
+        /// <param name="gridDataProvider">Провайдер данных игровой сетки.</param>
         public MatchValidator(IGridDataProvider gridDataProvider)
         {
             _gridDataProvider = gridDataProvider;

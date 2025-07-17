@@ -25,6 +25,9 @@ namespace Model
 
         private readonly GameEvents _gameEvents;
 
+        /// <summary>
+        /// Инициализирует новую модель сетки, получая зависимости через ServiceProvider.
+        /// </summary>
         public GridModel()
         {
             _gameEvents = ServiceProvider.GetService<GameEvents>();

@@ -34,6 +34,9 @@ namespace Core
         private readonly StatisticsModel _statisticsModel;
         private readonly GameEvents _gameEvents;
 
+        /// <summary>
+        /// Инициализирует новое отменяемое действие совпадения пары.
+        /// </summary>
         public MatchAction(Guid cell1Id, Guid cell2Id, List<Tuple<int, List<CellData>>> removedLines, long scoreBefore, int multiplierBefore, int pairScore, Dictionary<int, int> lineScores, GridModel gridModel, StatisticsModel statisticsModel, GameEvents gameEvents)
         {
             _cell1Id = cell1Id;
@@ -88,6 +91,9 @@ namespace Core
     {
         private readonly Stack<IUndoableAction> _actions = new();
 
+        /// <summary>
+        /// Инициализирует новый экземпляр истории действий.
+        /// </summary>
         public ActionHistory()
         {
         }

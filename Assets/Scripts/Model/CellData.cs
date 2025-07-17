@@ -12,27 +12,33 @@ namespace Model
         /// Уникальный идентификатор ячейки.
         /// </summary>
         public Guid Id { get; }
-        
+
         /// <summary>
         /// Число, отображаемое в ячейке.
         /// </summary>
         public int Number { get; }
-        
+
         /// <summary>
         /// Индекс строки, в которой находится ячейка.
         /// </summary>
         public int Line { get; set; }
-        
+
         /// <summary>
         /// Индекс столбца, в котором находится ячейка.
         /// </summary>
         public int Column { get; }
-        
+
         /// <summary>
         /// Указывает, является ли ячейка активной (видимой и доступной для взаимодействия).
         /// </summary>
         public bool IsActive { get; private set; }
 
+        /// <summary>
+        /// Инициализирует новый экземпляр данных ячейки с заданными параметрами.
+        /// </summary>
+        /// <param name="number">Число в ячейке.</param>
+        /// <param name="line">Индекс строки.</param>
+        /// <param name="column">Индекс столбца.</param>
         public CellData(int number, int line, int column)
         {
             Id = Guid.NewGuid();

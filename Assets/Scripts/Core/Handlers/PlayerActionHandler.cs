@@ -16,6 +16,9 @@ namespace Core.Handlers
         private readonly GameEvents _gameEvents;
         private readonly GameManager _gameManager;
 
+        /// <summary>
+        /// Инициализирует обработчик действий игрока с необходимыми зависимостями.
+        /// </summary>
         public PlayerActionHandler(
             ActionCountersModel actionCountersModel,
             ActionHistory actionHistory,

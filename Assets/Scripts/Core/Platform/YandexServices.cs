@@ -20,6 +20,9 @@ namespace Core.Platform
         private bool _isLoading;
         private bool _isSaving;
 
+        /// <summary>
+        /// Инициализирует сервис сохранения/загрузки с необходимыми моделями.
+        /// </summary>
         public YandexSaveLoadService(GridModel gridModel, StatisticsModel statisticsModel, ActionCountersModel actionCountersModel, GameEvents gameEvents)
         {
             _gridModel = gridModel;
@@ -102,6 +105,9 @@ namespace Core.Platform
         public event Action<string> OnPurchaseFailed;
         public event Action<string> OnRewardVideoSuccess;
 
+        /// <summary>
+        /// Инициализирует сервис и подписывается на события Yandex SDK.
+        /// </summary>
         public YandexPlatformService()
         {
             YG2.onPurchaseSuccess += OnYgPurchaseSuccess;
@@ -158,6 +164,10 @@ namespace Core.Platform
     {
         private readonly string _leaderboardName;
 
+        /// <summary>
+        /// Инициализирует сервис таблицы лидеров с указанным именем.
+        /// </summary>
+        /// <param name="leaderboardName">Имя таблицы лидеров в Yandex Games Console.</param>
         public YandexLeaderboardService(string leaderboardName)
         {
             _leaderboardName = leaderboardName;

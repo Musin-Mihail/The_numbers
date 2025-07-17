@@ -9,12 +9,15 @@
         /// Текущий счет игрока.
         /// </summary>
         public long Score { get; private set; }
-        
+
         /// <summary>
         /// Текущий множитель очков.
         /// </summary>
         public int Multiplier { get; private set; }
 
+        /// <summary>
+        /// Инициализирует модель статистики и сбрасывает ее к начальным значениям.
+        /// </summary>
         public StatisticsModel()
         {
             Reset();

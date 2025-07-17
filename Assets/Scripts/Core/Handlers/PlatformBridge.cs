@@ -15,6 +15,9 @@ namespace Core.Handlers
         private readonly ActionCountersModel _actionCountersModel;
         private readonly GameManager _gameManager;
 
+        /// <summary>
+        /// Инициализирует мост с необходимыми сервисами и подписывается на события.
+        /// </summary>
         public PlatformBridge(
             IPlatformServices platformServices,
             GameEvents gameEvents,

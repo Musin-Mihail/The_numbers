@@ -18,6 +18,9 @@ namespace Core.Handlers
         private readonly GridView _gridView;
         private readonly GameManager _gameManager;
 
+        /// <summary>
+        /// Инициализирует обработчик подсказок с необходимыми зависимостями.
+        /// </summary>
         public HintHandler(
             GridModel gridModel,
             MatchValidator matchValidator,
