@@ -23,5 +23,15 @@ namespace View.UI
         public void RaiseHideStatistics() => gameEvents?.onHideStatistics.Raise();
         public void RaiseShowRules() => gameEvents?.onShowRules.Raise();
         public void RaiseHideRules() => gameEvents?.onHideRules.Raise();
+
+        /// <summary>
+        /// Вызывает событие для показа окна настроек.
+        /// </summary>
+        public void RaiseShowOptions() => gameEvents?.onShowOptions.Raise();
+
+        /// <summary>
+        /// Вызывает событие для скрытия окна настроек.
+        /// </summary>
+        public void RaiseHideOptions() => gameEvents?.onHideOptions.Raise();
     }
 }

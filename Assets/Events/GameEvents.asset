@@ -46,3 +46,5 @@ MonoBehaviour:
   onHideStatistics: {fileID: 11400000, guid: b7cbc2599a773d043a474efaa5f656dc, type: 2}
   onShowRules: {fileID: 11400000, guid: 0e19d066ba9cd8549b6ebfda319eb5fb, type: 2}
   onHideRules: {fileID: 11400000, guid: 9486733ce494cef40a5c8b85cca9d93f, type: 2}
+  onShowOptions: {fileID: 11400000, guid: f82ce8881e0af7443abb68d24f6630aa, type: 2}
+  onHideOptions: {fileID: 11400000, guid: 38e41e9211dce2c40bd3abfcb33abf92, type: 2}

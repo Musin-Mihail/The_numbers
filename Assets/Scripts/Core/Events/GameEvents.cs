@@ -62,5 +62,7 @@ namespace Core.Events
         public VoidEvent onHideStatistics;
         public VoidEvent onShowRules;
         public VoidEvent onHideRules;
+        public VoidEvent onShowOptions;
+        public VoidEvent onHideOptions;
     }
 }
