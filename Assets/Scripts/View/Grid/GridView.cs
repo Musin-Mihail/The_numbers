@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Core;
 using Core.Events;
 using Model;
 using UnityEngine;
@@ -45,13 +44,19 @@ namespace View.Grid
         /// </summary>
         public bool HasActiveHints => _hintedCellIds.Count > 0;
 
+        /// <summary>
+        /// Инициализация зависимостей, полученных из GameBootstrap.
+        /// </summary>
+        public void Initialize(GameEvents gameEvents, GridModel gridModel, HeaderNumberDisplay headerNumberDisplay)
+        {
+            _gameEvents = gameEvents;
+            _gridModel = gridModel;
+            _headerNumberDisplay = headerNumberDisplay;
+        }
+
         private void Awake()
         {
             _cellPool = GetComponent<CellPool>();
-            _gameEvents = ServiceProvider.GetService<GameEvents>();
-            _gridModel = ServiceProvider.GetService<GridModel>();
-            _headerNumberDisplay = ServiceProvider.GetService<HeaderNumberDisplay>();
-            SubscribeToEvents();
 
             if (!cellPrefab)
             {
@@ -61,7 +66,6 @@ namespace View.Grid
             }
 
             _cellSize = cellPrefab.GetComponent<RectTransform>().sizeDelta.x;
-
             _topPaddingValue = _cellSize * 1.1f;
             _scrollLoggingThreshold = _cellSize / 2f;
 
@@ -70,48 +74,63 @@ namespace View.Grid
             scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
         }
 
+        private void OnEnable()
+        {
+            SubscribeToEvents();
+        }
+
+        private void OnDisable()
+        {
+            UnsubscribeFromEvents();
+        }
+
+        private void OnDestroy()
+        {
+            if (scrollRect) scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
+        }
+
         private void SubscribeToEvents()
         {
             if (!_gameEvents) return;
 
-            _gameEvents.onCellAdded?.AddListener(HandleCellAdded);
-            _gameEvents.onCellUpdated?.AddListener(HandleCellUpdated);
-            _gameEvents.onCellRemoved?.AddListener(HandleCellRemoved);
-            _gameEvents.onGridCleared?.AddListener(HandleGridCleared);
+            _gameEvents.onCellAdded.AddListener(HandleCellAdded);
+            _gameEvents.onCellUpdated.AddListener(HandleCellUpdated);
+            _gameEvents.onCellRemoved.AddListener(HandleCellRemoved);
+            _gameEvents.onGridCleared.AddListener(HandleGridCleared);
 
-            _gameEvents.onMatchFound?.AddListener(HandleMatchFound);
-            _gameEvents.onInvalidMatch?.AddListener(HandleInvalidMatch);
-            _gameEvents.onToggleTopLine?.AddListener(SetTopPaddingActive);
-            _gameEvents.onNewGameStarted?.AddListener(HandleGameStarted);
-            _gameEvents.onHintFound?.AddListener(HandleHintFound);
-            _gameEvents.onPairScoreAdded?.AddListener(HandlePairScoreAdded);
-            _gameEvents.onLineScoreAdded?.AddListener(HandleLineScoreAdded);
-            _gameEvents.onPairScoreUndone?.AddListener(HandlePairScoreUndone);
-            _gameEvents.onLineScoreUndone?.AddListener(HandleLineScoreUndone);
-            _gameEvents.onBoardCleared?.AddListener(HandleBoardCleared);
-            _gameEvents.onLinesRemoved?.AddListener(HandleLinesRemoved);
+            _gameEvents.onMatchFound.AddListener(HandleMatchFound);
+            _gameEvents.onInvalidMatch.AddListener(HandleInvalidMatch);
+            _gameEvents.onToggleTopLine.AddListener(SetTopPaddingActive);
+            _gameEvents.onNewGameStarted.AddListener(HandleGameStarted);
+            _gameEvents.onHintFound.AddListener(HandleHintFound);
+            _gameEvents.onPairScoreAdded.AddListener(HandlePairScoreAdded);
+            _gameEvents.onLineScoreAdded.AddListener(HandleLineScoreAdded);
+            _gameEvents.onPairScoreUndone.AddListener(HandlePairScoreUndone);
+            _gameEvents.onLineScoreUndone.AddListener(HandleLineScoreUndone);
+            _gameEvents.onBoardCleared.AddListener(HandleBoardCleared);
+            _gameEvents.onLinesRemoved.AddListener(HandleLinesRemoved);
         }
 
         private void UnsubscribeFromEvents()
         {
             if (_gameEvents == null) return;
 
-            _gameEvents.onCellAdded?.RemoveListener(HandleCellAdded);
-            _gameEvents.onCellUpdated?.RemoveListener(HandleCellUpdated);
-            _gameEvents.onCellRemoved?.RemoveListener(HandleCellRemoved);
-            _gameEvents.onGridCleared?.RemoveListener(HandleGridCleared);
+            _gameEvents.onCellAdded.RemoveListener(HandleCellAdded);
+            _gameEvents.onCellUpdated.RemoveListener(HandleCellUpdated);
+            _gameEvents.onCellRemoved.RemoveListener(HandleCellRemoved);
+            _gameEvents.onGridCleared.RemoveListener(HandleGridCleared);
 
-            _gameEvents.onMatchFound?.RemoveListener(HandleMatchFound);
-            _gameEvents.onInvalidMatch?.RemoveListener(HandleInvalidMatch);
-            _gameEvents.onToggleTopLine?.RemoveListener(SetTopPaddingActive);
-            _gameEvents.onNewGameStarted?.RemoveListener(HandleGameStarted);
-            _gameEvents.onHintFound?.RemoveListener(HandleHintFound);
-            _gameEvents.onPairScoreAdded?.RemoveListener(HandlePairScoreAdded);
-            _gameEvents.onLineScoreAdded?.RemoveListener(HandleLineScoreAdded);
-            _gameEvents.onPairScoreUndone?.RemoveListener(HandlePairScoreUndone);
-            _gameEvents.onLineScoreUndone?.RemoveListener(HandleLineScoreUndone);
-            _gameEvents.onBoardCleared?.RemoveListener(HandleBoardCleared);
-            _gameEvents.onLinesRemoved?.RemoveListener(HandleLinesRemoved);
+            _gameEvents.onMatchFound.RemoveListener(HandleMatchFound);
+            _gameEvents.onInvalidMatch.RemoveListener(HandleInvalidMatch);
+            _gameEvents.onToggleTopLine.RemoveListener(SetTopPaddingActive);
+            _gameEvents.onNewGameStarted.RemoveListener(HandleGameStarted);
+            _gameEvents.onHintFound.RemoveListener(HandleHintFound);
+            _gameEvents.onPairScoreAdded.RemoveListener(HandlePairScoreAdded);
+            _gameEvents.onLineScoreAdded.RemoveListener(HandleLineScoreAdded);
+            _gameEvents.onPairScoreUndone.RemoveListener(HandlePairScoreUndone);
+            _gameEvents.onLineScoreUndone.RemoveListener(HandleLineScoreUndone);
+            _gameEvents.onBoardCleared.RemoveListener(HandleBoardCleared);
+            _gameEvents.onLinesRemoved.RemoveListener(HandleLinesRemoved);
         }
 
         /// <summary>
@@ -219,12 +238,6 @@ namespace View.Grid
             {
                 Debug.LogWarning("scrollviewContainer не назначен в инспекторе GridView. Отступ сверху не будет применен.");
             }
-        }
-
-        private void OnDestroy()
-        {
-            if (scrollRect) scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
-            UnsubscribeFromEvents();
         }
 
         private void HandleMatchFound((Guid firstCellId, Guid secondCellId) data)

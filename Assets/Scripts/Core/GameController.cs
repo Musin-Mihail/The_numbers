@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using Core.Events;
 using Core.Handlers;
 using Gameplay;
 using Model;
+using UnityEngine;
 using View.Grid;
 
 namespace Core
@@ -52,6 +54,8 @@ namespace Core
             _playerActionHandler = new PlayerActionHandler(actionCountersModel, actionHistory, gridModel, statisticsModel, gameEvents, gameManager);
             _hintHandler = new HintHandler(gridModel, matchValidator, actionCountersModel, gameEvents, gridView, gameManager);
             _platformBridge = new PlatformBridge(platformServices, gameEvents, actionCountersModel, gameManager);
+
+            _gameEvents.onBoardCleared.AddListener(HandleBoardCleared);
         }
 
         /// <summary>
@@ -59,6 +63,8 @@ namespace Core
         /// </summary>
         public void Dispose()
         {
+            _gameEvents.onBoardCleared.RemoveListener(HandleBoardCleared);
+
             _matchHandler?.Dispose();
             _playerActionHandler?.Dispose();
             _hintHandler?.Dispose();
@@ -92,5 +98,23 @@ namespace Core
             _gameEvents.onNewGameStarted.Raise();
             _gameManager?.RequestSave();
         }
+
+        /// <summary>
+        /// Обрабатывает событие полной очистки доски.
+        /// </summary>
+        private void HandleBoardCleared()
+        {
+            _gameManager.StartCoroutine(BoardClearedRoutine());
+        }
+
+        /// <summary>
+        /// Корутина, которая запускает новую игру после небольшой задержки после очистки доски.
+        /// </summary>
+        private IEnumerator BoardClearedRoutine()
+        {
+            yield return new WaitForSeconds(2.0f);
+            StartNewGame(false);
+        }
+        
     }
 }

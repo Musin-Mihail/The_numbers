@@ -3,7 +3,6 @@ using System.Linq;
 using Core.Events;
 using Model;
 using UnityEngine;
-using View.Grid;
 using YG;
 
 namespace Core.Platform
@@ -68,21 +67,10 @@ namespace Core.Platform
                 _statisticsModel.SetState(YG2.saves.statistics.score, YG2.saves.statistics.multiplier);
                 _actionCountersModel.RestoreState(YG2.saves.actionCounters);
 
-                var gridView = ServiceProvider.GetService<GridView>();
-                gridView?.FullRedraw();
-
                 if (_gameEvents)
                 {
                     _gameEvents.onToggleTopLine?.Raise(YG2.saves.isTopLineVisible);
-                    if (YG2.saves.actionCounters.areCountersDisabled)
-                    {
-                        _gameEvents.onCountersChanged?.Raise((-1, -1, -1));
-                    }
-                    else
-                    {
-                        _gameEvents.onCountersChanged?.Raise((YG2.saves.actionCounters.undoCount, YG2.saves.actionCounters.addNumbersCount, YG2.saves.actionCounters.hintCount));
-                    }
-
+                    _gameEvents.onCountersChanged?.Raise(YG2.saves.actionCounters.areCountersDisabled ? (-1, -1, -1) : (YG2.saves.actionCounters.undoCount, YG2.saves.actionCounters.addNumbersCount, YG2.saves.actionCounters.hintCount));
                     _gameEvents.onStatisticsChanged?.Raise((YG2.saves.statistics.score, YG2.saves.statistics.multiplier));
                 }
 
@@ -109,8 +97,9 @@ namespace Core.Platform
 
     /// <summary>
     /// Реализация платформенных сервисов (покупки, реклама) для Yandex Games.
+    /// Реализует IDisposable для корректной отписки от событий.
     /// </summary>
-    public class YandexPlatformService : IPlatformServices
+    public class YandexPlatformService : IPlatformServices, IDisposable
     {
         public event Action<string> OnPurchaseSuccess;
         public event Action<string> OnPurchaseFailed;
@@ -123,7 +112,10 @@ namespace Core.Platform
             YG2.onRewardAdv += OnYgRewardVideo;
         }
 
-        ~YandexPlatformService()
+        /// <summary>
+        /// Корректно отписывается от всех событий Yandex SDK.
+        /// </summary>
+        public void Dispose()
         {
             YG2.onPurchaseSuccess -= OnYgPurchaseSuccess;
             YG2.onPurchaseFailed -= OnYgPurchaseFailed;

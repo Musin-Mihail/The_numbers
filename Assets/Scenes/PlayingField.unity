@@ -2025,10 +2025,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c043e05fa1b4edc97f85335c6c69700, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  view: {fileID: 382419717}
+  gridView: {fileID: 382419717}
   headerNumberDisplay: {fileID: 382419723}
   confirmationDialog: {fileID: 196455909}
   topLineToggle: {fileID: 1346984341}
+  leaderboardUpdater: {fileID: 382419734}
+  shopManager: {fileID: 382419730}
   loadingScreen: {fileID: 956927374}
   gameEvents: {fileID: 11400000, guid: f4c0432a5dafe5b4c97ce2400b9a7313, type: 2}
   leaderboardName: TotalScore
@@ -2150,7 +2152,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   purchaseButton: {fileID: 1178050225}
   priceText: {fileID: 2103842178}
-  gameEvents: {fileID: 11400000, guid: f4c0432a5dafe5b4c97ce2400b9a7313, type: 2}
 --- !u!114 &382419732
 MonoBehaviour:
   m_ObjectHideFlags: 0

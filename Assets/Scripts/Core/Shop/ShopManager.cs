@@ -1,5 +1,4 @@
-﻿using System;
-using Core.Events;
+﻿using Core.Events;
 using Model;
 using TMPro;
 using UnityEngine;
@@ -18,38 +17,41 @@ namespace Core.Shop
         [SerializeField] private Button purchaseButton;
         [SerializeField] private TextMeshProUGUI priceText;
 
-        [Header("Каналы событий")]
-        [SerializeField] private GameEvents gameEvents;
-
+        private GameEvents _gameEvents;
         private Purchase _productInfo;
         private ActionCountersModel _actionCountersModel;
 
+        /// <summary>
+        /// Инициализация зависимостей, полученных из GameBootstrap.
+        /// </summary>
+        public void Initialize(GameEvents gameEvents, ActionCountersModel actionCountersModel)
+        {
+            _gameEvents = gameEvents;
+            _actionCountersModel = actionCountersModel;
+        }
+
         private void OnEnable()
         {
-            YG2.onGetSDKData += InitializeShop;
+            YG2.onGetSDKData += InitializeShopProduct;
             YG2.onPurchaseSuccess += HandlePurchaseSuccess;
         }
 
         private void OnDisable()
         {
-            YG2.onGetSDKData -= InitializeShop;
+            YG2.onGetSDKData -= InitializeShopProduct;
             YG2.onPurchaseSuccess -= HandlePurchaseSuccess;
         }
 
         /// <summary>
-        /// Инициализирует магазин после загрузки Yandex SDK.
+        /// Инициализирует информацию о продукте после загрузки Yandex SDK.
         /// </summary>
-        private void InitializeShop()
+        private void InitializeShopProduct()
         {
-            try
+            if (_actionCountersModel == null)
             {
-                _actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("ShopManager не смог получить ActionCountersModel. Убедитесь, что модель регистрируется до вызова onGetSDKData. " + e.Message);
+                Debug.LogError("ShopManager не смог получить ActionCountersModel. Убедитесь, что модель регистрируется до вызова onGetSDKData.");
                 if (purchaseButton) purchaseButton.interactable = false;
-                if (priceText) priceText.text = "Ошибка магазина";
+                if (priceText) priceText.text = "Ошибка";
                 return;
             }
 
@@ -105,7 +107,7 @@ namespace Core.Shop
             if (!purchaseButton) return;
             purchaseButton.interactable = true;
             purchaseButton.onClick.RemoveAllListeners();
-            purchaseButton.onClick.AddListener(() => gameEvents.onRequestDisableCounters.Raise());
+            purchaseButton.onClick.AddListener(() => _gameEvents.onRequestDisableCounters.Raise());
         }
 
         /// <summary>

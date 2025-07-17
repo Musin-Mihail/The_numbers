@@ -12,13 +12,19 @@ namespace Core
         private GameEvents _gameEvents;
 
         /// <summary>
-        /// Получает сервисы и подписывается на события.
+        /// Инициализация зависимостей, полученных из GameBootstrap.
         /// </summary>
-        private void Start()
+        public void Initialize(ILeaderboardService leaderboardService, GameEvents gameEvents)
         {
-            _leaderboardService = ServiceProvider.GetService<ILeaderboardService>();
-            _gameEvents = ServiceProvider.GetService<GameEvents>();
+            _leaderboardService = leaderboardService;
+            _gameEvents = gameEvents;
+        }
 
+        /// <summary>
+        /// Подписывается на события.
+        /// </summary>
+        private void OnEnable()
+        {
             if (_gameEvents)
             {
                 _gameEvents.onStatisticsChanged.AddListener(OnStatisticsChanged);

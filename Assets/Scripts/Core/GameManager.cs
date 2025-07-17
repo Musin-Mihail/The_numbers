@@ -19,12 +19,12 @@ namespace Core
         private bool _isSaving;
 
         /// <summary>
-        /// Инициализация, получение сервисов и подписка на события.
+        /// Инициализация зависимостей, полученных из GameBootstrap.
         /// </summary>
-        private void Awake()
+        public void Initialize(ISaveLoadService saveLoadService)
         {
+            _saveLoadService = saveLoadService;
             _gameEvents = ServiceProvider.GetService<GameEvents>();
-            _saveLoadService = ServiceProvider.GetService<ISaveLoadService>();
             SubscribeToEvents();
         }
 
@@ -59,7 +59,6 @@ namespace Core
         {
             if (!_gameEvents) return;
             _gameEvents.onToggleTopLine.AddListener(SetTopLineVisibilityAndSave);
-            _gameEvents.onBoardCleared.AddListener(HandleBoardCleared);
         }
 
         /// <summary>
@@ -69,26 +68,6 @@ namespace Core
         {
             if (!_gameEvents) return;
             _gameEvents.onToggleTopLine.RemoveListener(SetTopLineVisibilityAndSave);
-            _gameEvents.onBoardCleared.RemoveListener(HandleBoardCleared);
-        }
-
-        /// <summary>
-        /// Обрабатывает событие полной очистки доски.
-        /// </summary>
-        private void HandleBoardCleared()
-        {
-            StartCoroutine(BoardClearedRoutine());
-        }
-
-        /// <summary>
-        /// Корутина, которая запускает новую игру после небольшой задержки после очистки доски.
-        /// </summary>
-        private IEnumerator BoardClearedRoutine()
-        {
-            yield return new WaitForSeconds(2.0f);
-
-            var gameController = ServiceProvider.GetService<GameController>();
-            gameController?.StartNewGame(false);
         }
 
         /// <summary>

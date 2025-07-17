@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using Core.Events;
 using Core.Platform;
+using Core.Shop;
 using DataProviders;
 using Gameplay;
 using Model;
@@ -15,16 +17,18 @@ namespace Core
 {
     /// <summary>
     /// Основной класс для инициализации игры. Отвечает за создание и регистрацию всех
-    /// основных сервисов, моделей и контроллеров при запуске сцены.
+    /// основных сервисов, моделей и контроллеров, а также за внедрение зависимостей.
     /// </summary>
     [RequireComponent(typeof(GameManager))]
     public class GameBootstrap : MonoBehaviour
     {
         [Header("Зависимости сцены")]
-        [SerializeField] private GridView view;
+        [SerializeField] private GridView gridView;
         [SerializeField] private HeaderNumberDisplay headerNumberDisplay;
         [SerializeField] private ConfirmationDialog confirmationDialog;
         [SerializeField] private Toggle topLineToggle;
+        [SerializeField] private LeaderboardUpdater leaderboardUpdater;
+        [SerializeField] private ShopManager shopManager;
 
         [Header("Экраны UI")]
         [SerializeField] private GameObject loadingScreen;
@@ -42,6 +46,8 @@ namespace Core
         private GameManager _gameManager;
         private GameController _gameController;
         private bool _isNewUser;
+
+        private readonly List<IDisposable> _disposableServices = new();
 
         /// <summary>
         /// Вызывается при запуске. Инициализирует все системы игры.
@@ -64,93 +70,61 @@ namespace Core
             ServiceProvider.Clear();
             ServiceProvider.Register(gameEvents);
 
-            RegisterModelsAndHistory();
-            var platformServices = RegisterPlatformServices();
-            var gameplayLogic = RegisterGameplayLogic();
-            RegisterViews();
-
-            _gameController = RegisterGameController(platformServices, gameplayLogic.matchValidator);
-        }
-
-        /// <summary>
-        /// Регистрирует модели данных и историю действий.
-        /// </summary>
-        private void RegisterModelsAndHistory()
-        {
-            ServiceProvider.Register(new GridModel());
-            ServiceProvider.Register(new StatisticsModel());
-            ServiceProvider.Register(new ActionCountersModel());
-            ServiceProvider.Register(new ActionHistory());
-        }
-
-        /// <summary>
-        /// Регистрирует сервисы для взаимодействия с платформой (Yandex Games).
-        /// </summary>
-        /// <returns>Интерфейс платформенных сервисов.</returns>
-        private IPlatformServices RegisterPlatformServices()
-        {
-            var gridModel = ServiceProvider.GetService<GridModel>();
-            var statisticsModel = ServiceProvider.GetService<StatisticsModel>();
-            var actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
+            var gridModel = new GridModel();
+            var statisticsModel = new StatisticsModel();
+            var actionCountersModel = new ActionCountersModel();
+            var actionHistory = new ActionHistory();
+            ServiceProvider.Register(gridModel);
+            ServiceProvider.Register(statisticsModel);
+            ServiceProvider.Register(actionCountersModel);
+            ServiceProvider.Register(actionHistory);
 
             var yandexSaveLoadService = new YandexSaveLoadService(gridModel, statisticsModel, actionCountersModel, gameEvents);
-            ServiceProvider.Register<ISaveLoadService>(yandexSaveLoadService);
-
             var yandexLeaderboardService = new YandexLeaderboardService(leaderboardName);
-            ServiceProvider.Register<ILeaderboardService>(yandexLeaderboardService);
-
             var yandexPlatformService = new YandexPlatformService();
+            ServiceProvider.Register<ISaveLoadService>(yandexSaveLoadService);
+            ServiceProvider.Register<ILeaderboardService>(yandexLeaderboardService);
             ServiceProvider.Register<IPlatformServices>(yandexPlatformService);
+            _disposableServices.Add(yandexPlatformService);
 
-            return yandexPlatformService;
-        }
-
-        /// <summary>
-        /// Регистрирует основную игровую логику, такую как провайдер данных сетки и валидатор совпадений.
-        /// </summary>
-        /// <returns>Кортеж с провайдером данных и валидатором.</returns>
-        private (IGridDataProvider gridDataProvider, MatchValidator matchValidator) RegisterGameplayLogic()
-        {
-            var gridModel = ServiceProvider.GetService<GridModel>();
             var gridDataProvider = new GridDataProvider(gridModel);
-            ServiceProvider.Register<IGridDataProvider>(gridDataProvider);
-
             var matchValidator = new MatchValidator(gridDataProvider);
+            ServiceProvider.Register<IGridDataProvider>(gridDataProvider);
             ServiceProvider.Register(matchValidator);
 
-            return (gridDataProvider, matchValidator);
-        }
-
-        /// <summary>
-        /// Регистрирует компоненты представления (View).
-        /// </summary>
-        private void RegisterViews()
-        {
-            ServiceProvider.Register(view);
+            ServiceProvider.Register(gridView);
             ServiceProvider.Register(headerNumberDisplay);
-        }
 
-        /// <summary>
-        /// Создает и регистрирует главный игровой контроллер.
-        /// </summary>
-        /// <param name="platformServices">Сервисы платформы.</param>
-        /// <param name="matchValidator">Валидатор совпадений.</param>
-        /// <returns>Созданный игровой контроллер.</returns>
-        private GameController RegisterGameController(IPlatformServices platformServices, MatchValidator matchValidator)
-        {
-            var gameController = new GameController(
-                ServiceProvider.GetService<GridModel>(),
+            _gameController = new GameController(
+                gridModel,
                 matchValidator,
                 gameEvents,
-                ServiceProvider.GetService<ActionHistory>(),
-                ServiceProvider.GetService<ActionCountersModel>(),
-                ServiceProvider.GetService<StatisticsModel>(),
+                actionHistory,
+                actionCountersModel,
+                statisticsModel,
                 _gameManager,
-                view,
-                platformServices
+                gridView,
+                yandexPlatformService
             );
-            ServiceProvider.Register(gameController);
-            return gameController;
+            ServiceProvider.Register(_gameController);
+            _disposableServices.Add(_gameController);
+
+            InjectDependencies();
+        }
+
+        /// <summary>
+        /// Внедряет зависимости в компоненты MonoBehaviour, которые не могут получить их через конструктор.
+        /// </summary>
+        private void InjectDependencies()
+        {
+            var saveLoadService = ServiceProvider.GetService<ISaveLoadService>();
+            var leaderboardService = ServiceProvider.GetService<ILeaderboardService>();
+            var actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
+
+            _gameManager.Initialize(saveLoadService);
+            leaderboardUpdater.Initialize(leaderboardService, gameEvents);
+            shopManager.Initialize(gameEvents, actionCountersModel);
+            gridView.Initialize(gameEvents, ServiceProvider.GetService<GridModel>(), headerNumberDisplay);
         }
 
         /// <summary>
@@ -230,6 +204,7 @@ namespace Core
             if (loadSuccess)
             {
                 Debug.Log("Данные успешно загружены. Отображение сохраненного состояния.");
+                gridView.FullRedraw();
                 FinalizeGameSetup();
             }
             else
@@ -344,33 +319,40 @@ namespace Core
         }
 
         /// <summary>
-        /// Вызывается при уничтожении объекта. Отписывается от всех событий.
+        /// Вызывается при уничтожении объекта. Отписывается от всех событий и освобождает ресурсы.
         /// </summary>
         private void OnDestroy()
         {
-            if (!gameEvents) return;
-            if (topLineToggle)
+            if (gameEvents)
             {
-                gameEvents.onToggleTopLine.RemoveListener(UpdateTopLineToggleState);
-                topLineToggle.onValueChanged.RemoveListener(gameEvents.onToggleTopLine.Raise);
-            }
-
-            if (confirmationDialog)
-            {
-                if (_requestNewGameAction != null)
+                if (topLineToggle)
                 {
-                    gameEvents.onRequestNewGame.RemoveListener(_requestNewGameAction);
+                    gameEvents.onToggleTopLine.RemoveListener(UpdateTopLineToggleState);
+                    topLineToggle.onValueChanged.RemoveListener(gameEvents.onToggleTopLine.Raise);
                 }
 
-                gameEvents.onRequestRefillCounters.RemoveListener(HandleRequestRefillCounters);
-                gameEvents.onRequestDisableCounters.RemoveListener(HandleRequestDisableCounters);
-            }
-            else
-            {
-                gameEvents.onRequestNewGame.RemoveListener(StartNewGameFromButton);
+                if (confirmationDialog)
+                {
+                    if (_requestNewGameAction != null)
+                    {
+                        gameEvents.onRequestNewGame.RemoveListener(_requestNewGameAction);
+                    }
+
+                    gameEvents.onRequestRefillCounters.RemoveListener(HandleRequestRefillCounters);
+                    gameEvents.onRequestDisableCounters.RemoveListener(HandleRequestDisableCounters);
+                }
+                else
+                {
+                    gameEvents.onRequestNewGame.RemoveListener(StartNewGameFromButton);
+                }
             }
 
-            _gameController?.Dispose();
+            foreach (var service in _disposableServices)
+            {
+                service.Dispose();
+            }
+
+            _disposableServices.Clear();
             ServiceProvider.Clear();
         }
 
