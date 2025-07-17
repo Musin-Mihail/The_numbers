@@ -115,8 +115,9 @@
 
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('visibilitychange', () => SetVisibility(!document.hidden));
-        document.addEventListener('blur', () => SetVisibility(false));
-        document.addEventListener('focus', () => SetVisibility(false));
+        window.addEventListener('blur', () => SetVisibility(false));
+        window.addEventListener('focus', () => SetVisibility(true));
+
 
         window.addEventListener('pointerdown', () => {
             FocusGame();
