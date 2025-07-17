@@ -276,7 +276,7 @@ namespace Core
 
             if (confirmationDialog)
             {
-                _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?", "Да", "Нет", StartNewGameFromButton, null, new Vector2(0, 350));
+                _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?\nСтатистика сохранится", "Да", "Нет", StartNewGameFromButton, null, new Vector2(0, 370));
                 gameEvents.onRequestNewGame.AddListener(_requestNewGameAction);
                 gameEvents.onRequestRefillCounters.AddListener(HandleRequestRefillCounters);
                 gameEvents.onRequestDisableCounters.AddListener(HandleRequestDisableCounters);
@@ -312,7 +312,7 @@ namespace Core
         /// </summary>
         private void HandleRequestRefillCounters()
         {
-            confirmationDialog.Show("Посмотреть рекламу, чтобы пополнить счетчики?", "Да", "Нет", () => { gameEvents.onShowRewardedAdForRefill.Raise(); }, null, new Vector2(0, 350));
+            confirmationDialog.Show("Посмотреть рекламу, чтобы пополнить счетчики?", "Да", "Нет", () => { gameEvents.onShowRewardedAdForRefill.Raise(); }, null, new Vector2(0, 370));
         }
 
         /// <summary>
