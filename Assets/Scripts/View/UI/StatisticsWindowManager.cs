@@ -63,7 +63,7 @@ namespace View.UI
 
             if (YG2.player.auth)
             {
-                YG2.GetLeaderboard(Constants.LeaderboardName);
+                YG2.GetLeaderboard(Constants.LeaderboardName, 10, 3);
             }
             else
             {

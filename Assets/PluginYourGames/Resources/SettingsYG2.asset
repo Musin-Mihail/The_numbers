@@ -24,28 +24,7 @@ MonoBehaviour:
     saveScoreAnonymousPlayers: 1
     listLBSim:
     - technoName: TotalScore
-      entries: '1. Max: 10
-
-        2. Masha: 15
-
-        3. anonymous: 23
-
-        4.
-        Player 4: 30
-
-        5. Player current: 40
-
-        6. Player 6: 50
-
-        7.
-        Player 7: 60
-
-        8. Player 8: 70
-
-        9. Player 9: 80
-
-        10.
-        Player 10: 90'
+      entries: 
       isDefault: 0
       isInvertSortOrder: 0
       decimalOffset: 0
@@ -73,7 +52,7 @@ MonoBehaviour:
         name: Player 4
         score: 70
         photo: demo image
-        uniqueID: 321
+        uniqueID: 3212
         extraData: 
       - rank: 5
         name: Player current
@@ -112,8 +91,8 @@ MonoBehaviour:
         uniqueID: 330
         extraData: 
       currentPlayer:
-        rank: 5
-        score: 60
+        rank: 10
+        score: 10
         extraData: 
     - technoName: time
       entries: '1. Max: 7123
