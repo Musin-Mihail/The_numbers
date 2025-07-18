@@ -20,7 +20,7 @@ namespace View.UI
         [SerializeField] private GameEvents gameEvents;
 
         private readonly List<Cell> _topLineCells = new();
-        private float _cellSize;
+
 
         private void OnEnable()
         {
@@ -38,9 +38,7 @@ namespace View.UI
                 enabled = false;
                 return;
             }
-
-            _cellSize = cellPrefab.GetComponent<RectTransform>().sizeDelta.x;
-
+            
             CreateLineDisplay();
         }
 
@@ -78,7 +76,7 @@ namespace View.UI
                 _topLineCells.Add(cell);
                 cellGo.SetActive(true);
                 var rectTransform = cell.TargetRectTransform;
-                rectTransform.anchoredPosition = new Vector2(_cellSize * i + GameConstants.Indent / 2f, -GameConstants.Indent / 2f);
+                rectTransform.anchoredPosition = new Vector2(GameConstants.CellSize * i + GameConstants.Indent / 2f, -GameConstants.Indent / 2f);
             }
         }
 

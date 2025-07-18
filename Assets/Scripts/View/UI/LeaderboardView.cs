@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using View.UI;
 using YG.Utils.LB;
 
-namespace Services
+namespace View.UI
 {
     /// <summary>
-    /// Управляет созданием и отображением записей в таблице лидеров с использованием пула объектов.
+    /// Управляет отображением записей в таблице лидеров, используя пул объектов.
+    /// Логика обработки данных делегирована классу LeaderboardDataProcessor.
     /// </summary>
     public class LeaderboardView : MonoBehaviour
     {
@@ -18,6 +17,12 @@ namespace Services
 
         private readonly List<LeaderboardEntry> _activeEntries = new();
         private readonly Queue<LeaderboardEntry> _pooledEntries = new();
+        private LeaderboardDataProcessor _dataProcessor;
+
+        private void Awake()
+        {
+            _dataProcessor = new LeaderboardDataProcessor();
+        }
 
         /// <summary>
         /// Строит и отображает таблицу лидеров на основе полученных данных.
@@ -25,13 +30,7 @@ namespace Services
         /// <param name="lb">Данные таблицы лидеров от Yandex Games.</param>
         public void BuildLeaderboard(LBData lb)
         {
-            foreach (var entry in _activeEntries)
-            {
-                entry.gameObject.SetActive(false);
-                _pooledEntries.Enqueue(entry);
-            }
-
-            _activeEntries.Clear();
+            ReturnAllEntriesToPool();
 
             if (lb?.players == null || lb.players.Length == 0)
             {
@@ -39,33 +38,7 @@ namespace Services
                 return;
             }
 
-            const int minEntries = 10;
-            var allPlayers = lb.players.ToList();
-            var currentPlayerRank = lb.currentPlayer.rank;
-            var addedPlayerIDs = new HashSet<string>();
-            var top3Players = allPlayers.Where(p => p.rank <= 3).OrderBy(p => p.rank);
-            var playersToShow = top3Players.Where(player => addedPlayerIDs.Add(player.uniqueID)).ToList();
-            var neighbors = allPlayers
-                .Where(p => Mathf.Abs(p.rank - currentPlayerRank) <= 3)
-                .OrderBy(p => p.rank);
-            playersToShow.AddRange(neighbors.Where(player => addedPlayerIDs.Add(player.uniqueID)));
-            var finalDisplayList = playersToShow.OrderBy(p => p.rank).ToList();
-            if (finalDisplayList.Count < minEntries && allPlayers.Count > finalDisplayList.Count)
-            {
-                var maxRankInList = finalDisplayList.Any() ? finalDisplayList.Max(p => p.rank) : 0;
-                var potentialAdditions = allPlayers
-                    .Where(p => p.rank > maxRankInList)
-                    .OrderBy(p => p.rank);
-
-                foreach (var player in potentialAdditions)
-                {
-                    if (finalDisplayList.Count >= minEntries) break;
-                    if (!addedPlayerIDs.Add(player.uniqueID)) continue;
-                    finalDisplayList.Add(player);
-                }
-
-                finalDisplayList = finalDisplayList.OrderBy(p => p.rank).ToList();
-            }
+            var finalDisplayList = _dataProcessor.ProcessLeaderboardData(lb);
 
             var lastRank = 0;
             foreach (var player in finalDisplayList)
@@ -80,6 +53,20 @@ namespace Services
                 entryObject.Populate(player);
                 lastRank = player.rank;
             }
+        }
+
+        /// <summary>
+        /// Возвращает все активные UI-элементы в пул.
+        /// </summary>
+        private void ReturnAllEntriesToPool()
+        {
+            foreach (var entry in _activeEntries)
+            {
+                entry.gameObject.SetActive(false);
+                _pooledEntries.Enqueue(entry);
+            }
+
+            _activeEntries.Clear();
         }
 
         /// <summary>

@@ -328,7 +328,6 @@ namespace Core
         private void StartNewGameFromButton()
         {
             _gameController.StartNewGame(false);
-            gameEvents.onToggleTopLine.Raise(true);
         }
     }
 }

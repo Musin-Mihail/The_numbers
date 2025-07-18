@@ -43,5 +43,10 @@
         /// Продолжительность анимации перемещения ячейки.
         /// </summary>
         public const float CellMoveDuration = 0.3f;
+        
+        /// <summary>
+        /// Размер ячейки.
+        /// </summary>
+        public const float CellSize = 105f;
     }
 }
