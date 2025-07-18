@@ -27,7 +27,7 @@ namespace Model
         /// Указывает, отключены ли счетчики (например, после покупки).
         /// </summary>
         public bool AreCountersDisabled { get; private set; }
-        private const int InitialCount = Constants.InitialActionsCount;
+        private const int InitialCount = GameConstants.InitialActionsCount;
         private readonly GameEvents _gameEvents;
 
         /// <summary>

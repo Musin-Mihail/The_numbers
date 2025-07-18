@@ -12,7 +12,6 @@ namespace View.Grid
     /// Основной компонент представления, отвечающий за отображение игровой сетки.
     /// Управляет созданием, удалением и обновлением визуальных представлений ячеек (Cell).
     /// </summary>
-    [RequireComponent(typeof(CellPool))]
     public class GridView : MonoBehaviour
     {
         [Header("Зависимости сцены")]
@@ -21,6 +20,7 @@ namespace View.Grid
         [SerializeField] private ScrollRect scrollRect;
         [SerializeField] private RectTransform scrollviewContainer;
         [SerializeField] private FloatingScorePool floatingScorePool;
+        [SerializeField] private CellPool cellPool;
 
         [Header("Настройки")]
         [SerializeField] private Color positiveScoreColor = Color.green;
@@ -29,7 +29,6 @@ namespace View.Grid
         private readonly Dictionary<Guid, Cell> _cellViewInstances = new();
         private HeaderNumberDisplay _headerNumberDisplay;
         private GridModel _gridModel;
-        private CellPool _cellPool;
         private GameEvents _gameEvents;
 
         private float _cellSize;
@@ -56,8 +55,6 @@ namespace View.Grid
 
         private void Awake()
         {
-            _cellPool = GetComponent<CellPool>();
-
             if (!cellPrefab)
             {
                 Debug.LogError("Ошибка: cellPrefab не назначен в инспекторе!", this);
@@ -293,7 +290,7 @@ namespace View.Grid
         {
             if (_cellViewInstances.ContainsKey(payload.data.Id)) return;
 
-            var newCellView = _cellPool.GetCell();
+            var newCellView = cellPool.GetCell();
             newCellView.UpdateFromData(payload.data);
             newCellView.OnClickedCallback = HandleCellClicked;
             _cellViewInstances[payload.data.Id] = newCellView;
@@ -313,7 +310,7 @@ namespace View.Grid
         private void HandleCellRemoved(Guid dataId)
         {
             if (!_cellViewInstances.TryGetValue(dataId, out var cellToReturn)) return;
-            _cellPool.ReturnCell(cellToReturn);
+            cellPool.ReturnCell(cellToReturn);
             _cellViewInstances.Remove(dataId);
         }
 
@@ -322,7 +319,7 @@ namespace View.Grid
             _firstSelectedCellId = null;
             foreach (var cell in _cellViewInstances.Values)
             {
-                _cellPool.ReturnCell(cell);
+                cellPool.ReturnCell(cell);
             }
 
             _cellViewInstances.Clear();
@@ -338,7 +335,7 @@ namespace View.Grid
             contentContainer.sizeDelta = new Vector2(contentContainer.sizeDelta.x, newHeight);
         }
 
-        private void UpdateCellPosition(CellData data, Cell cellView, bool animate = true)
+        private void UpdateCellPosition(CellData data, Cell cellView, bool animate)
         {
             var targetPosition = GetCellPosition(data);
 

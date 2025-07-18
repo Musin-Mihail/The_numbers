@@ -1,9 +1,9 @@
-﻿namespace Core
+﻿namespace Model
 {
     /// <summary>
-    /// Содержит глобальные константы, используемые в игре.
+    /// Содержит константы, связанные с игровой механикой и представлением.
     /// </summary>
-    public static class Constants
+    public static class GameConstants
     {
         /// <summary>
         /// Идентификатор продукта для отключения счетчиков действий (покупка в игре).
@@ -29,5 +29,19 @@
         /// Начальное количество линий, генерируемых в начале новой игры.
         /// </summary>
         public const int InitialLinesOnStart = 5;
+        /// <summary>
+        /// Количество ячеек в ширину сетки.
+        /// </summary>
+        public const int QuantityByWidth = 10;
+
+        /// <summary>
+        /// Отступ для элементов сетки.
+        /// </summary>
+        public const int Indent = 10;
+
+        /// <summary>
+        /// Продолжительность анимации перемещения ячейки.
+        /// </summary>
+        public const float CellMoveDuration = 0.3f;
     }
 }

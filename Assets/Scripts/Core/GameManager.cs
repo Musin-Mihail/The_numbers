@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Core.Events;
+using Interfaces;
 using UnityEngine;
 
 namespace Core

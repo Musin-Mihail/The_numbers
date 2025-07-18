@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Model;
 
-namespace Model
+namespace Interfaces
 {
     /// <summary>
     /// Интерфейс для предоставления данных о состоянии игровой сетки.
@@ -12,7 +13,7 @@ namespace Model
         /// </summary>
         /// <returns>True, если между ячейками нет препятствий.</returns>
         bool AreCellsOnSameLineOrColumnWithoutGaps(CellData firstCell, CellData secondCell);
-        
+
         /// <summary>
         /// Возвращает список всех активных ячеек на сетке.
         /// </summary>

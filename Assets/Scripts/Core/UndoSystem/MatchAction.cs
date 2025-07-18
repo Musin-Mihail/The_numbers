@@ -2,21 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Core.Events;
+using Interfaces;
 using Model;
 
-namespace Core
+namespace Core.UndoSystem
 {
-    /// <summary>
-    /// Интерфейс для действий, которые можно отменить.
-    /// </summary>
-    public interface IUndoableAction
-    {
-        /// <summary>
-        /// Отменяет действие, восстанавливая предыдущее состояние.
-        /// </summary>
-        void Undo();
-    }
-
     /// <summary>
     /// Представляет собой действие совпадения пары чисел, которое можно отменить.
     /// </summary>
@@ -81,57 +71,6 @@ namespace Core
             }
 
             _statisticsModel.SetState(_scoreBeforeAction, _multiplierBeforeAction);
-        }
-    }
-
-    /// <summary>
-    /// Управляет историей действий, которые можно отменить.
-    /// </summary>
-    public class ActionHistory
-    {
-        private readonly Stack<IUndoableAction> _actions = new();
-
-        /// <summary>
-        /// Инициализирует новый экземпляр истории действий.
-        /// </summary>
-        public ActionHistory()
-        {
-        }
-
-        /// <summary>
-        /// Записывает новое действие в историю.
-        /// </summary>
-        /// <param name="action">Действие для записи.</param>
-        public void Record(IUndoableAction action)
-        {
-            _actions.Push(action);
-        }
-
-        /// <summary>
-        /// Отменяет последнее выполненное действие.
-        /// </summary>
-        public void Undo()
-        {
-            if (_actions.Count <= 0) return;
-            var lastAction = _actions.Pop();
-            lastAction.Undo();
-        }
-
-        /// <summary>
-        /// Проверяет, возможно ли выполнить отмену.
-        /// </summary>
-        /// <returns>True, если есть действия для отмены.</returns>
-        public bool CanUndo()
-        {
-            return _actions.Count > 0;
-        }
-
-        /// <summary>
-        /// Очищает всю историю действий.
-        /// </summary>
-        public void Clear()
-        {
-            _actions.Clear();
         }
     }
 }

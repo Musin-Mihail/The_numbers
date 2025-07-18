@@ -2,7 +2,9 @@
 using System.Collections;
 using Core.Events;
 using Core.Handlers;
+using Core.UndoSystem;
 using Gameplay;
+using Interfaces;
 using Model;
 using UnityEngine;
 using View.Grid;
@@ -89,7 +91,7 @@ namespace Core
 
             _gameEvents.onStatisticsChanged.Raise((_statisticsModel.Score, _statisticsModel.Multiplier));
 
-            for (var i = 0; i < Constants.InitialLinesOnStart; i++)
+            for (var i = 0; i < GameConstants.InitialLinesOnStart; i++)
             {
                 _gridModel.CreateLine(i);
             }

@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using Core.Events;
 using Core.Platform;
 using Core.Shop;
+using Core.UndoSystem;
 using DataProviders;
 using Gameplay;
+using Interfaces;
 using Model;
 using UnityEngine;
 using View.Grid;
@@ -18,7 +20,6 @@ namespace Core
     /// Основной класс для инициализации игры. Отвечает за создание и регистрацию всех
     /// основных сервисов, моделей и контроллеров, а также за внедрение зависимостей.
     /// </summary>
-    [RequireComponent(typeof(GameManager))]
     public class GameBootstrap : MonoBehaviour
     {
         [Header("Зависимости сцены")]
@@ -27,6 +28,7 @@ namespace Core
         [SerializeField] private ConfirmationDialog confirmationDialog;
         [SerializeField] private LeaderboardUpdater leaderboardUpdater;
         [SerializeField] private ShopManager shopManager;
+        [SerializeField] private GameManager gameManager;
 
         [Header("Экраны UI")]
         [SerializeField] private GameObject loadingScreen;
@@ -38,7 +40,6 @@ namespace Core
         private const float LoadAttemptDelay = 1.0f;
 
         private Action _requestNewGameAction;
-        private GameManager _gameManager;
         private GameController _gameController;
         private bool _isNewUser;
 
@@ -49,7 +50,6 @@ namespace Core
         /// </summary>
         private void Awake()
         {
-            _gameManager = GetComponent<GameManager>();
             if (loadingScreen) loadingScreen.SetActive(true);
             if (gameEvents && gameEvents.onYandexSDKInitialized != null)
             {
@@ -75,7 +75,7 @@ namespace Core
             ServiceProvider.Register(actionHistory);
 
             var yandexSaveLoadService = new YandexSaveLoadService(gridModel, statisticsModel, actionCountersModel, gameEvents);
-            var yandexLeaderboardService = new YandexLeaderboardService(Constants.LeaderboardName);
+            var yandexLeaderboardService = new YandexLeaderboardService(GameConstants.LeaderboardName);
             var yandexPlatformService = new YandexPlatformService();
             ServiceProvider.Register<ISaveLoadService>(yandexSaveLoadService);
             ServiceProvider.Register<ILeaderboardService>(yandexLeaderboardService);
@@ -97,7 +97,7 @@ namespace Core
                 actionHistory,
                 actionCountersModel,
                 statisticsModel,
-                _gameManager,
+                gameManager,
                 gridView,
                 yandexPlatformService
             );
@@ -116,7 +116,7 @@ namespace Core
             var leaderboardService = ServiceProvider.GetService<ILeaderboardService>();
             var actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
 
-            _gameManager.Initialize(saveLoadService);
+            gameManager.Initialize(saveLoadService);
             leaderboardUpdater.Initialize(leaderboardService, gameEvents);
             shopManager.Initialize(gameEvents, actionCountersModel);
             gridView.Initialize(gameEvents, ServiceProvider.GetService<GridModel>(), headerNumberDisplay);
@@ -154,7 +154,7 @@ namespace Core
         private void OnYandexSDKInitialized()
         {
             gameEvents.onYandexSDKInitialized.Raise();
-            if (!_gameManager) return;
+            if (!gameManager) return;
             StartCoroutine(LoadGameWithRetries());
         }
 

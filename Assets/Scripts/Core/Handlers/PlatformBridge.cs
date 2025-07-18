@@ -1,5 +1,6 @@
 ﻿using System;
 using Core.Events;
+using Interfaces;
 using Model;
 using UnityEngine;
 
@@ -75,7 +76,7 @@ namespace Core.Handlers
         /// </summary>
         private void HandleDisableCountersConfirmed()
         {
-            _platformServices?.Purchase(Constants.DisableCountersProductId);
+            _platformServices?.Purchase(GameConstants.DisableCountersProductId);
         }
 
         /// <summary>
@@ -83,7 +84,7 @@ namespace Core.Handlers
         /// </summary>
         private void HandleShowRewardedAdForRefill()
         {
-            _platformServices?.ShowRewardedAd(Constants.RefillCountersRewardId);
+            _platformServices?.ShowRewardedAd(GameConstants.RefillCountersRewardId);
         }
 
         /// <summary>
@@ -91,7 +92,7 @@ namespace Core.Handlers
         /// </summary>
         private void OnPurchaseSuccess(string purchasedId)
         {
-            if (purchasedId != Constants.DisableCountersProductId) return;
+            if (purchasedId != GameConstants.DisableCountersProductId) return;
 
             Debug.Log($"Покупка '{purchasedId}' прошла успешно!");
             _actionCountersModel.DisableCounters();
@@ -111,7 +112,7 @@ namespace Core.Handlers
         /// </summary>
         private void OnRewardVideoSuccess(string rewardId)
         {
-            if (rewardId != Constants.RefillCountersRewardId) return;
+            if (rewardId != GameConstants.RefillCountersRewardId) return;
             _actionCountersModel.ResetCounters();
             _gameManager?.RequestSave();
             Debug.Log("Счетчики пополнены после просмотра рекламы.");

@@ -9,7 +9,7 @@ namespace Services
     /// <summary>
     /// Управляет созданием и отображением записей в таблице лидеров с использованием пула объектов.
     /// </summary>
-    public class LeaderboardController : MonoBehaviour
+    public class LeaderboardView : MonoBehaviour
     {
         [Tooltip("Префаб для одной строки в таблице лидеров")]
         [SerializeField] private LeaderboardEntry leaderboardEntryPrefab;

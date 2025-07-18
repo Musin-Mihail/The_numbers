@@ -55,8 +55,8 @@ namespace Core.Shop
                 return;
             }
 
-            YG2.ConsumePurchaseByID(Constants.DisableCountersProductId);
-            _productInfo = YG2.PurchaseByID(Constants.DisableCountersProductId);
+            YG2.ConsumePurchaseByID(GameConstants.DisableCountersProductId);
+            _productInfo = YG2.PurchaseByID(GameConstants.DisableCountersProductId);
             UpdateProductUI();
         }
 
@@ -79,7 +79,7 @@ namespace Core.Shop
                 else
                 {
                     if (priceText) priceText.text = "Товар не найден";
-                    Debug.LogError($"Ошибка ShopManager: Товар с ID '{Constants.DisableCountersProductId}' не найден. Проверьте настройки в InfoYG -> Payments.");
+                    Debug.LogError($"Ошибка ShopManager: Товар с ID '{GameConstants.DisableCountersProductId}' не найден. Проверьте настройки в InfoYG -> Payments.");
                     if (purchaseButton) purchaseButton.interactable = false;
                 }
             }
@@ -91,7 +91,7 @@ namespace Core.Shop
         /// <param name="purchasedId">ID купленного товара.</param>
         private void HandlePurchaseSuccess(string purchasedId)
         {
-            if (purchasedId != Constants.DisableCountersProductId) return;
+            if (purchasedId != GameConstants.DisableCountersProductId) return;
             Debug.Log($"Покупка '{purchasedId}' успешно обработана. Обновление UI.");
             UpdateProductUI();
         }

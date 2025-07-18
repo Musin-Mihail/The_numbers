@@ -18,7 +18,6 @@ namespace View.UI
             if (!gameEvents) return;
             gameEvents.onShowMenu.AddListener(ShowMenu);
             gameEvents.onHideMenu.AddListener(HideMenu);
-            gameEvents.onNewGameStarted.AddListener(HideMenu);
         }
 
         private void Start()
@@ -34,13 +33,12 @@ namespace View.UI
             if (!gameEvents) return;
             gameEvents.onShowMenu.RemoveListener(ShowMenu);
             gameEvents.onHideMenu.RemoveListener(HideMenu);
-            gameEvents.onNewGameStarted.RemoveListener(HideMenu);
         }
 
         /// <summary>
         /// Показывает окно меню.
         /// </summary>
-        public void ShowMenu()
+        private void ShowMenu()
         {
             if (windowMenu)
             {
@@ -51,7 +49,7 @@ namespace View.UI
         /// <summary>
         /// Скрывает окно меню.
         /// </summary>
-        public void HideMenu()
+        private void HideMenu()
         {
             if (windowMenu)
             {

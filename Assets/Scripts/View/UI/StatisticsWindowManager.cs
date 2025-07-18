@@ -1,5 +1,5 @@
-﻿using Core;
-using Core.Events;
+﻿using Core.Events;
+using Model;
 using Services;
 using UnityEngine;
 using YG;
@@ -17,7 +17,7 @@ namespace View.UI
 
         [Header("Leaderboard")]
         [Tooltip("Контроллер, отвечающий за создание и отображение таблицы лидеров")]
-        [SerializeField] private LeaderboardController leaderboardController;
+        [SerializeField] private LeaderboardView leaderboardView;
 
         [Header("Event Listening")]
         [Tooltip("Контейнер для игровых событий")]
@@ -63,7 +63,7 @@ namespace View.UI
 
             if (YG2.player.auth)
             {
-                YG2.GetLeaderboard(Constants.LeaderboardName, 10, 3);
+                YG2.GetLeaderboard(GameConstants.LeaderboardName, 10, 3);
             }
             else
             {
@@ -77,11 +77,11 @@ namespace View.UI
         /// <param name="lb">Данные таблицы лидеров типа LBData.</param>
         private void OnLeaderboardReceived(LBData lb)
         {
-            if (lb.technoName != Constants.LeaderboardName) return;
+            if (lb.technoName != GameConstants.LeaderboardName) return;
 
-            if (leaderboardController)
+            if (leaderboardView)
             {
-                leaderboardController.BuildLeaderboard(lb);
+                leaderboardView.BuildLeaderboard(lb);
             }
             else
             {
