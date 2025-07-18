@@ -8,7 +8,6 @@ using DataProviders;
 using Gameplay;
 using Model;
 using UnityEngine;
-using UnityEngine.UI;
 using View.Grid;
 using View.UI;
 using YG;
@@ -26,7 +25,6 @@ namespace Core
         [SerializeField] private GridView gridView;
         [SerializeField] private HeaderNumberDisplay headerNumberDisplay;
         [SerializeField] private ConfirmationDialog confirmationDialog;
-        [SerializeField] private Toggle topLineToggle;
         [SerializeField] private LeaderboardUpdater leaderboardUpdater;
         [SerializeField] private ShopManager shopManager;
 
@@ -191,11 +189,9 @@ namespace Core
 
                 yield return new WaitUntil(() => loadFinished);
 
-                if (!loadSuccess && attempts < MaxLoadAttempts)
-                {
-                    Debug.LogWarning($"Загрузка не удалась. Повторная попытка через {LoadAttemptDelay} сек.");
-                    yield return new WaitForSeconds(LoadAttemptDelay);
-                }
+                if (loadSuccess || attempts >= MaxLoadAttempts) continue;
+                Debug.LogWarning($"Загрузка не удалась. Повторная попытка через {LoadAttemptDelay} сек.");
+                yield return new WaitForSeconds(LoadAttemptDelay);
             }
 
             if (loadSuccess)
@@ -251,10 +247,7 @@ namespace Core
         private void StartNewGameAndFinalize()
         {
             _gameController.StartNewGame(true);
-            if (topLineToggle)
-            {
-                gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
-            }
+            gameEvents.onToggleTopLine.Raise(true);
 
             FinalizeGameSetup();
         }
@@ -268,12 +261,6 @@ namespace Core
 
         private void SetupListeners()
         {
-            if (topLineToggle)
-            {
-                gameEvents.onToggleTopLine.AddListener(UpdateTopLineToggleState);
-                topLineToggle.onValueChanged.AddListener(gameEvents.onToggleTopLine.Raise);
-            }
-
             if (confirmationDialog)
             {
                 _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?\nСтатистика сохранится", "Да", "Нет", StartNewGameFromButton, null, new Vector2(0, 370));
@@ -284,18 +271,6 @@ namespace Core
             else
             {
                 gameEvents.onRequestNewGame.AddListener(StartNewGameFromButton);
-            }
-        }
-
-        /// <summary>
-        /// Обновляет состояние переключателя верхней строки.
-        /// </summary>
-        /// <param name="isVisible">Новое состояние видимости.</param>
-        private void UpdateTopLineToggleState(bool isVisible)
-        {
-            if (topLineToggle)
-            {
-                topLineToggle.isOn = isVisible;
             }
         }
 
@@ -322,12 +297,6 @@ namespace Core
         {
             if (gameEvents)
             {
-                if (topLineToggle)
-                {
-                    gameEvents.onToggleTopLine.RemoveListener(UpdateTopLineToggleState);
-                    topLineToggle.onValueChanged.RemoveListener(gameEvents.onToggleTopLine.Raise);
-                }
-
                 if (confirmationDialog)
                 {
                     if (_requestNewGameAction != null)
@@ -359,10 +328,7 @@ namespace Core
         private void StartNewGameFromButton()
         {
             _gameController.StartNewGame(false);
-            if (topLineToggle)
-            {
-                gameEvents.onToggleTopLine.Raise(topLineToggle.isOn);
-            }
+            gameEvents.onToggleTopLine.Raise(true);
         }
     }
 }

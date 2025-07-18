@@ -1,25 +1,10 @@
 fileFormatVersion: 2
-guid: 8c7ab4fe7b6f37a4f92162cf449f681a
+guid: 5677715f6502a584796da39b61c2a8c2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 495367587157968522
-    second: hint_0
-  - first:
-      213: 1199028794772665275
-    second: hint_1
-  - first:
-      213: 2938817184429400356
-    second: hint_2
-  - first:
-      213: 1834645745885146840
-    second: hint_3
-  - first:
-      213: 6185354257784583458
-    second: hint_4
-  - first:
-      213: -4976865915644985433
-    second: hint_5
+      213: 5585235101267928744
+    second: Hint_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -141,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: hint_0
+      name: Hint_0
       rect:
         serializedVersion: 2
-        x: 11
-        y: 62
-        width: 27
-        height: 27
+        x: 19
+        y: 19
+        width: 262
+        height: 262
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -156,118 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a860bc92236efd600800000000000000
-      internalID: 495367587157968522
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: hint_1
-      rect:
-        serializedVersion: 2
-        x: 34
-        y: 40
-        width: 30
-        height: 36
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bb3b3eb065ec3a010800000000000000
-      internalID: 1199028794772665275
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: hint_2
-      rect:
-        serializedVersion: 2
-        x: 62
-        y: 62
-        width: 27
-        height: 27
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4216ab1a8a6c8c820800000000000000
-      internalID: 2938817184429400356
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: hint_3
-      rect:
-        serializedVersion: 2
-        x: 11
-        y: 11
-        width: 27
-        height: 27
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8de6a24e598f57910800000000000000
-      internalID: 1834645745885146840
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: hint_4
-      rect:
-        serializedVersion: 2
-        x: 44
-        y: 24
-        width: 11
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 22533311deac6d550800000000000000
-      internalID: 6185354257784583458
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: hint_5
-      rect:
-        serializedVersion: 2
-        x: 62
-        y: 11
-        width: 27
-        height: 27
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7af3b3b71de9eeab0800000000000000
-      internalID: -4976865915644985433
+      spriteID: 8a62e169bbdb28d40800000000000000
+      internalID: 5585235101267928744
       vertices: []
       indices: 
       edges: []
@@ -286,12 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      hint_0: 495367587157968522
-      hint_1: 1199028794772665275
-      hint_2: 2938817184429400356
-      hint_3: 1834645745885146840
-      hint_4: 6185354257784583458
-      hint_5: -4976865915644985433
+      Hint_0: 5585235101267928744
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

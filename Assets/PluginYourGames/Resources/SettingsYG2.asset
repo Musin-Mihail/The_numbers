@@ -234,7 +234,7 @@ MonoBehaviour:
       color2: {r: 1, g: 0.831, b: 0.149, a: 0.7}
     fixedAspectRatio: 1
     aspectRatio: 9/16
-    disableForMobile: 0
+    disableForMobile: 1
     fillBackground: 0
     imageBackground: 0
     imageName: background.jpg
