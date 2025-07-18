@@ -1,5 +1,5 @@
-﻿using Core.Events;
-using Model;
+﻿using Core;
+using Core.Events;
 using Services;
 using UnityEngine;
 using YG;

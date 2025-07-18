@@ -7,7 +7,7 @@ using UnityEngine;
 public class ScriptUsageReporter : EditorWindow
 {
     private string _scriptsFolderPath = "Assets/Scripts";
-    private Dictionary<string, List<(GameObject go, string path)>> scriptUsages = new();
+    private Dictionary<string, List<(GameObject go, string path)>> _scriptUsages = new();
     private Vector2 _scrollPosition;
 
     public ScriptUsageReporter(Vector2 scrollPosition)
@@ -36,13 +36,13 @@ public class ScriptUsageReporter : EditorWindow
 
         _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 
-        if (scriptUsages.Count == 0)
+        if (_scriptUsages.Count == 0)
         {
             EditorGUILayout.LabelField("No scripts from the specified folder found in this scene.");
         }
         else
         {
-            foreach (var entry in scriptUsages)
+            foreach (var entry in _scriptUsages)
             {
                 EditorGUILayout.LabelField(entry.Key, EditorStyles.boldLabel);
                 foreach (var usage in entry.Value)
@@ -60,7 +60,7 @@ public class ScriptUsageReporter : EditorWindow
 
     private void FindScriptsInScene()
     {
-        scriptUsages.Clear();
+        _scriptUsages.Clear();
         var allScripts = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
 
         foreach (var script in allScripts)
@@ -72,16 +72,16 @@ public class ScriptUsageReporter : EditorWindow
 
             if (!assetPath.StartsWith(_scriptsFolderPath)) continue;
             var scriptName = script.GetType().Name;
-            if (!scriptUsages.ContainsKey(scriptName))
+            if (!_scriptUsages.ContainsKey(scriptName))
             {
-                scriptUsages[scriptName] = new List<(GameObject, string)>();
+                _scriptUsages[scriptName] = new List<(GameObject, string)>();
             }
 
             var hierarchyPath = GetHierarchyPath(script.gameObject);
-            scriptUsages[scriptName].Add((script.gameObject, hierarchyPath));
+            _scriptUsages[scriptName].Add((script.gameObject, hierarchyPath));
         }
 
-        scriptUsages = scriptUsages.OrderBy(kvp => kvp.Key)
+        _scriptUsages = _scriptUsages.OrderBy(kvp => kvp.Key)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         Repaint();
     }
