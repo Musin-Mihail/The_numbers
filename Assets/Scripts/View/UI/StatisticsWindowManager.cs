@@ -1,6 +1,9 @@
-﻿using Core.Events;
+﻿using Core;
+using Core.Events;
+using Services;
 using UnityEngine;
 using YG;
+using YG.Utils.LB;
 
 namespace View.UI
 {
@@ -9,19 +12,37 @@ namespace View.UI
     /// </summary>
     public class StatisticsWindowManager : MonoBehaviour
     {
+        [Tooltip("Объект окна статистики, который будет показан/скрыт")]
         [SerializeField] private GameObject statisticsWindow;
 
         [Header("Leaderboard")]
-        [SerializeField] private LeaderboardYG leaderboardYG;
+        [Tooltip("Контроллер, отвечающий за создание и отображение таблицы лидеров")]
+        [SerializeField] private LeaderboardController leaderboardController;
 
         [Header("Event Listening")]
+        [Tooltip("Контейнер для игровых событий")]
         [SerializeField] private GameEvents gameEvents;
 
         private void OnEnable()
         {
-            if (!gameEvents) return;
-            gameEvents.onShowStatistics.AddListener(ShowStatisticsWindow);
-            gameEvents.onHideStatistics.AddListener(HideStatisticsWindow);
+            if (gameEvents)
+            {
+                gameEvents.onShowStatistics.AddListener(ShowStatisticsWindow);
+                gameEvents.onHideStatistics.AddListener(HideStatisticsWindow);
+            }
+
+            YG2.onGetLeaderboard += OnLeaderboardReceived;
+        }
+
+        private void OnDisable()
+        {
+            if (gameEvents)
+            {
+                gameEvents.onShowStatistics.RemoveListener(ShowStatisticsWindow);
+                gameEvents.onHideStatistics.RemoveListener(HideStatisticsWindow);
+            }
+
+            YG2.onGetLeaderboard -= OnLeaderboardReceived;
         }
 
         private void Start()
@@ -32,30 +53,46 @@ namespace View.UI
             }
         }
 
-        private void OnDisable()
-        {
-            if (!gameEvents) return;
-            gameEvents.onShowStatistics.RemoveListener(ShowStatisticsWindow);
-            gameEvents.onHideStatistics.RemoveListener(HideStatisticsWindow);
-        }
-
         /// <summary>
         /// Показывает окно статистики и запрашивает обновление таблицы лидеров.
         /// </summary>
-        public void ShowStatisticsWindow()
+        private void ShowStatisticsWindow()
         {
             if (!statisticsWindow) return;
             statisticsWindow.SetActive(true);
-            if (leaderboardYG)
+
+            if (YG2.player.auth)
             {
-                leaderboardYG.UpdateLB();
+                YG2.GetLeaderboard(Constants.LeaderboardName);
+            }
+            else
+            {
+                Debug.LogWarning("Player is not authorized. Cannot fetch leaderboard.");
+            }
+        }
+
+        /// <summary>
+        /// Метод-обработчик, который вызывается после получения данных от YG2.
+        /// </summary>
+        /// <param name="lb">Данные таблицы лидеров типа LBData.</param>
+        private void OnLeaderboardReceived(LBData lb)
+        {
+            if (lb.technoName != Constants.LeaderboardName) return;
+
+            if (leaderboardController)
+            {
+                leaderboardController.BuildLeaderboard(lb);
+            }
+            else
+            {
+                Debug.LogError("LeaderboardController не назначен в инспекторе!", this);
             }
         }
 
         /// <summary>
         /// Скрывает окно статистики.
         /// </summary>
-        public void HideStatisticsWindow()
+        private void HideStatisticsWindow()
         {
             if (statisticsWindow)
             {
