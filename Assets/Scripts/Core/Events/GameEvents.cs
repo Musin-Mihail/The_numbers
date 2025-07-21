@@ -15,6 +15,7 @@ namespace Core.Events
         [Header("Игровой процесс")]
         public VoidEvent onRequestNewGame;
         public VoidEvent onNewGameStarted;
+        public VoidEvent onRequestHardReset;
 
         [Header("События сетки (Grid)")]
         public CellDataAnimateEvent onCellAdded;

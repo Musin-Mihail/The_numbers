@@ -153,6 +153,8 @@ MonoBehaviour:
         rank: 5
         score: 127000
         extraData: 
+  Localization:
+    setLanguageMod: 1
   Payments:
     durationPayPanel: 1
     testBuyFail: 0
@@ -167,7 +169,7 @@ MonoBehaviour:
       priceValue: 250
       priceCurrencyCode: "\u0420\u0423\u0411"
       currencyImageURL: https://yastatic.net/s3/games-static/static-data/images/payments/sdk/currency-icon-s@2x.png
-      consumed: 1
+      consumed: 0
   RewardedAdv:
     rewardedAfterClosing: 1
     skipInterAdvAfterReward: 0

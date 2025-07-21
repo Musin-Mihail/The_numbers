@@ -104,6 +104,14 @@ namespace Model
         }
 
         /// <summary>
+        /// Повторно включает ограничения на счетчики (используется для полного сброса).
+        /// </summary>
+        public void ReEnableCounterLimits()
+        {
+            AreCountersDisabled = false;
+        }
+
+        /// <summary>
         /// Проверяет, доступна ли отмена хода.
         /// </summary>
         public bool IsUndoAvailable() => AreCountersDisabled || UndoCount > 0;

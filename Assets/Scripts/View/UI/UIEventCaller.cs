@@ -33,5 +33,10 @@ namespace View.UI
         /// Вызывает событие для скрытия окна настроек.
         /// </summary>
         public void RaiseHideOptions() => gameEvents?.onHideOptions.Raise();
+
+        /// <summary>
+        /// Вызывает событие для полного сброса игры с очисткой статистики.
+        /// </summary>
+        public void RaiseRequestHardReset() => gameEvents?.onRequestHardReset.Raise();
     }
 }

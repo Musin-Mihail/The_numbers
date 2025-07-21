@@ -272,6 +272,20 @@ namespace Core
             {
                 gameEvents.onRequestNewGame.AddListener(StartNewGameFromButton);
             }
+
+            gameEvents.onRequestHardReset.AddListener(HandleHardReset);
+        }
+
+        /// <summary>
+        /// Обрабатывает запрос на полный сброс игры.
+        /// Сбрасывает статус покупки и запускает новую игру со сбросом прогресса.
+        /// </summary>
+        private void HandleHardReset()
+        {
+            Debug.Log("Игрок запросил полный сброс. Сброс счетчиков и статистики.");
+            var actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
+            actionCountersModel?.ReEnableCounterLimits();
+            StartNewGameAndFinalize();
         }
 
         /// <summary>
@@ -297,6 +311,7 @@ namespace Core
         {
             if (gameEvents)
             {
+                gameEvents.onRequestHardReset.RemoveListener(HandleHardReset);
                 if (confirmationDialog)
                 {
                     if (_requestNewGameAction != null)
