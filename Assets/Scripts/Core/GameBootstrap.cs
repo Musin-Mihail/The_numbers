@@ -1,6 +1,4 @@
-﻿// Файл: Assets/Scripts/Core/GameBootstrap.cs
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Core.Events;
@@ -258,8 +256,7 @@ namespace Core
         {
             Debug.Log("Завершение настройки игры и активация UI.");
             SetupListeners();
-
-            if (YG2.saves.seenUpdateVersion < GameConstants.GameVersion)
+            if (!YG2.saves.seenUpdateVersions.Contains(GameConstants.GameVersion))
             {
                 gameEvents.onNewUpdateAvailable.Raise();
             }
@@ -293,7 +290,7 @@ namespace Core
             Debug.Log("Игрок запросил полный сброс. Сброс счетчиков и статистики.");
             var actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
             actionCountersModel?.ReEnableCounterLimits();
-            YG2.saves.seenUpdateVersion = 0;
+            YG2.saves.seenUpdateVersions.Clear();
             StartNewGameAndFinalize();
         }
 

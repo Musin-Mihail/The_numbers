@@ -81,9 +81,9 @@ namespace Core
         /// </summary>
         private void HandleMarkUpdateSeen()
         {
-            if (YG2.saves.seenUpdateVersion >= GameConstants.GameVersion) return;
+            if (YG2.saves.seenUpdateVersions.Contains(GameConstants.GameVersion)) return;
             Debug.Log($"Игрок посмотрел обновление {GameConstants.GameVersion}.");
-            YG2.saves.seenUpdateVersion = GameConstants.GameVersion;
+            YG2.saves.seenUpdateVersions.Add(GameConstants.GameVersion);
             _gameEvents.onUpdateSeen.Raise();
             RequestSave();
         }

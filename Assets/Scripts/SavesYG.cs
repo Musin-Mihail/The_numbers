@@ -29,10 +29,10 @@ namespace YG
         public ActionCountersModelSerializable actionCounters = new();
 
         /// <summary>
-        /// Версия последнего обновления, которое видел игрок.
-        /// При загрузке старых сохранений, где этого поля нет, оно получит значение по умолчанию (0).
+        /// Хранит список версий обновлений, которые игрок уже видел.
+        /// Это позволяет показывать анимацию для каждого нового обновления.
         /// </summary>
-        public int seenUpdateVersion;
+        public List<int> seenUpdateVersions = new();
 
         /// <summary>
         /// Выбранное время для таймера межстраничной рекламы.

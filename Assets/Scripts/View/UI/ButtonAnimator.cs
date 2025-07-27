@@ -52,7 +52,7 @@ namespace View.UI
         {
             if (onAnimationStart) onAnimationStart.AddListener(StartAnimation);
             if (onAnimationStop) onAnimationStop.AddListener(StopAnimation);
-            if (isForUpdateNotification && YG2.isSDKEnabled && YG2.saves.seenUpdateVersion < GameConstants.GameVersion)
+            if (isForUpdateNotification && YG2.isSDKEnabled && !YG2.saves.seenUpdateVersions.Contains(GameConstants.GameVersion))
             {
                 StartAnimation();
             }

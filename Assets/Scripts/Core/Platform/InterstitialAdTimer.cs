@@ -198,7 +198,6 @@ namespace Core.Platform
         /// </summary>
         private void UpdateVisuals()
         {
-            Debug.Log(defaultColor.ToString());
             foreach (var pair in _timerButtons)
             {
                 if (!pair.Value) continue;
