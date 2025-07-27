@@ -6,6 +6,12 @@
     public static class GameConstants
     {
         /// <summary>
+        /// Текущая версия игры для системы оповещений об обновлениях.
+        /// Увеличивайте это число (например, до 3, 4 и т.д.) при каждом новом обновлении.
+        /// </summary>
+        public const int GameVersion = 2;
+
+        /// <summary>
         /// Идентификатор продукта для отключения счетчиков действий (покупка в игре).
         /// </summary>
         public const string DisableCountersProductId = "disable_counters";
@@ -43,7 +49,7 @@
         /// Продолжительность анимации перемещения ячейки.
         /// </summary>
         public const float CellMoveDuration = 0.3f;
-        
+
         /// <summary>
         /// Размер ячейки.
         /// </summary>

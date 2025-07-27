@@ -27,5 +27,11 @@ namespace YG
         /// Сериализованные данные счетчиков действий (отмена, добавление чисел, подсказки).
         /// </summary>
         public ActionCountersModelSerializable actionCounters = new();
+
+        /// <summary>
+        /// Версия последнего обновления, которое видел игрок.
+        /// При загрузке старых сохранений, где этого поля нет, оно получит значение по умолчанию (0).
+        /// </summary>
+        public int seenUpdateVersion = 0;
     }
 }

@@ -25,11 +25,6 @@ namespace View.UI
         public void RaiseHideRules() => gameEvents?.onHideRules.Raise();
 
         /// <summary>
-        /// Вызывает событие для показа окна настроек.
-        /// </summary>
-        public void RaiseShowOptions() => gameEvents?.onShowOptions.Raise();
-
-        /// <summary>
         /// Вызывает событие для скрытия окна настроек.
         /// </summary>
         public void RaiseHideOptions() => gameEvents?.onHideOptions.Raise();
@@ -38,5 +33,15 @@ namespace View.UI
         /// Вызывает событие для полного сброса игры с очисткой статистики.
         /// </summary>
         public void RaiseRequestHardReset() => gameEvents?.onRequestHardReset.Raise();
+
+        /// <summary>
+        /// Показывает окно настроек и одновременно отмечает обновление как просмотренное.
+        /// Используйте этот метод для кнопки, которая открывает окно с информацией об обновлении.
+        /// </summary>
+        public void RaiseShowOptionsAndMarkUpdateSeen()
+        {
+            gameEvents?.onShowOptions.Raise();
+            gameEvents?.onRequestMarkUpdateSeen.Raise();
+        }
     }
 }

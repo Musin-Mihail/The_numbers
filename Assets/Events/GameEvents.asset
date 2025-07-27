@@ -49,3 +49,6 @@ MonoBehaviour:
   onHideRules: {fileID: 11400000, guid: 9486733ce494cef40a5c8b85cca9d93f, type: 2}
   onShowOptions: {fileID: 11400000, guid: f82ce8881e0af7443abb68d24f6630aa, type: 2}
   onHideOptions: {fileID: 11400000, guid: 38e41e9211dce2c40bd3abfcb33abf92, type: 2}
+  onNewUpdateAvailable: {fileID: 11400000, guid: 2b09e5ecd3c4f21478b7e97b6cec133e, type: 2}
+  onUpdateSeen: {fileID: 11400000, guid: 82680156efe0a4a4a8b1d9a0ec614cba, type: 2}
+  onRequestMarkUpdateSeen: {fileID: 11400000, guid: d2dd8453957589440961420b44a58646, type: 2}

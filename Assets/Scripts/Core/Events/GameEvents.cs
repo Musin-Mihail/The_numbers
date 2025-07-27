@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿// Файл: Assets/Scripts/Core/Events/GameEvents.cs
+
+using UnityEngine;
 
 namespace Core.Events
 {
@@ -65,5 +67,10 @@ namespace Core.Events
         public VoidEvent onHideRules;
         public VoidEvent onShowOptions;
         public VoidEvent onHideOptions;
+
+        [Header("Update Notifications")]
+        public VoidEvent onNewUpdateAvailable;
+        public VoidEvent onUpdateSeen;
+        public VoidEvent onRequestMarkUpdateSeen;
     }
 }

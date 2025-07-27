@@ -2,6 +2,7 @@
 using Core.Events;
 using Interfaces;
 using UnityEngine;
+using YG;
 
 namespace Core
 {
@@ -60,6 +61,7 @@ namespace Core
         {
             if (!_gameEvents) return;
             _gameEvents.onToggleTopLine.AddListener(SetTopLineVisibilityAndSave);
+            _gameEvents.onRequestMarkUpdateSeen.AddListener(HandleMarkUpdateSeen);
         }
 
         /// <summary>
@@ -69,6 +71,21 @@ namespace Core
         {
             if (!_gameEvents) return;
             _gameEvents.onToggleTopLine.RemoveListener(SetTopLineVisibilityAndSave);
+
+            _gameEvents.onRequestMarkUpdateSeen.RemoveListener(HandleMarkUpdateSeen);
+        }
+
+        /// <summary>
+        /// Обрабатывает запрос на отметку обновления как просмотренного.
+        /// Обновляет версию в сохранениях, останавливает анимацию и сохраняет прогресс.
+        /// </summary>
+        private void HandleMarkUpdateSeen()
+        {
+            if (YG2.saves.seenUpdateVersion >= GameConstants.GameVersion) return;
+            Debug.Log($"Игрок посмотрел обновление {GameConstants.GameVersion}.");
+            YG2.saves.seenUpdateVersion = GameConstants.GameVersion;
+            _gameEvents.onUpdateSeen.Raise();
+            RequestSave();
         }
 
         /// <summary>

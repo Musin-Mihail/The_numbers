@@ -1,5 +1,5 @@
 {
-    "idSave": 107,
+    "idSave": 108,
     "isTopLineVisible": true,
     "gridCells": [
         {
@@ -1177,5 +1177,5 @@
         "hintCount": 2,
         "areCountersDisabled": true
     },
-    "isGameEverSaved": true
+    "seenUpdateVersion": 2
 }

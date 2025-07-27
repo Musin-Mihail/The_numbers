@@ -256,6 +256,12 @@ namespace Core
         {
             Debug.Log("Завершение настройки игры и активация UI.");
             SetupListeners();
+
+            if (YG2.saves.seenUpdateVersion < GameConstants.GameVersion)
+            {
+                gameEvents.onNewUpdateAvailable.Raise();
+            }
+
             if (loadingScreen) loadingScreen.SetActive(false);
         }
 

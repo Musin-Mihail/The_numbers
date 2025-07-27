@@ -2161,7 +2161,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1845067630}
         m_TargetAssemblyTypeName: View.UI.UIEventCaller, Assembly-CSharp
-        m_MethodName: RaiseShowOptions
+        m_MethodName: RaiseShowOptionsAndMarkUpdateSeen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -63,7 +63,7 @@ namespace View.UI
         /// <summary>
         /// Запускает корутину анимации.
         /// </summary>
-        public void StartAnimation()
+        private void StartAnimation()
         {
             if (!enabled || !gameObject.activeInHierarchy) return;
             if (_animationCoroutine != null)
@@ -77,7 +77,7 @@ namespace View.UI
         /// <summary>
         /// Останавливает анимацию и возвращает кнопку в исходное состояние.
         /// </summary>
-        public void StopAnimation()
+        private void StopAnimation()
         {
             if (_animationCoroutine != null)
             {
