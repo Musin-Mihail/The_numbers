@@ -32,6 +32,6 @@ namespace YG
         /// Версия последнего обновления, которое видел игрок.
         /// При загрузке старых сохранений, где этого поля нет, оно получит значение по умолчанию (0).
         /// </summary>
-        public int seenUpdateVersion = 0;
+        public int seenUpdateVersion;
     }
 }

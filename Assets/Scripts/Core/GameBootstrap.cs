@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Файл: Assets/Scripts/Core/GameBootstrap.cs
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Core.Events;
@@ -291,6 +293,7 @@ namespace Core
             Debug.Log("Игрок запросил полный сброс. Сброс счетчиков и статистики.");
             var actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
             actionCountersModel?.ReEnableCounterLimits();
+            YG2.saves.seenUpdateVersion = 0;
             StartNewGameAndFinalize();
         }
 

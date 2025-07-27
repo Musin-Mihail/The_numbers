@@ -2088,6 +2088,7 @@ GameObject:
   - component: {fileID: 406439007}
   - component: {fileID: 406439006}
   - component: {fileID: 406439005}
+  - component: {fileID: 406439008}
   m_Layer: 5
   m_Name: Options
   m_TagString: Untagged
@@ -2209,6 +2210,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 406439003}
   m_CullTransparentMesh: 1
+--- !u!114 &406439008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 406439003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 668bbf4e71da40ee8848fe0b0ea1e7a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  highlightColor: {r: 0.7783019, g: 1, b: 0.7783019, a: 1}
+  animationSpeed: 1.5
+  scaleAmount: 1.05
+  rotationAmount: 1.5
+  onAnimationStart: {fileID: 11400000, guid: 2b09e5ecd3c4f21478b7e97b6cec133e, type: 2}
+  onAnimationStop: {fileID: 11400000, guid: 82680156efe0a4a4a8b1d9a0ec614cba, type: 2}
 --- !u!1 &489982509
 GameObject:
   m_ObjectHideFlags: 0
@@ -3707,7 +3726,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &817600851
 RectTransform:
   m_ObjectHideFlags: 0
