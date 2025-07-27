@@ -3,6 +3,7 @@ using Core.Events;
 using Interfaces;
 using Model;
 using UnityEngine;
+using YG;
 
 namespace Core.Handlers
 {
@@ -61,6 +62,7 @@ namespace Core.Handlers
             _platformServices.OnPurchaseSuccess += OnPurchaseSuccess;
             _platformServices.OnPurchaseFailed += OnPurchaseFailed;
             _platformServices.OnRewardVideoSuccess += OnRewardVideoSuccess;
+            YG2.onCloseInterAdvWasShow += OnInterstitialAdSuccess;
         }
 
         private void UnsubscribeFromPlatformEvents()
@@ -69,6 +71,7 @@ namespace Core.Handlers
             _platformServices.OnPurchaseSuccess -= OnPurchaseSuccess;
             _platformServices.OnPurchaseFailed -= OnPurchaseFailed;
             _platformServices.OnRewardVideoSuccess -= OnRewardVideoSuccess;
+            YG2.onCloseInterAdvWasShow -= OnInterstitialAdSuccess;
         }
 
         /// <summary>
@@ -113,9 +116,20 @@ namespace Core.Handlers
         private void OnRewardVideoSuccess(string rewardId)
         {
             if (rewardId != GameConstants.RefillCountersRewardId) return;
-            _actionCountersModel.ResetCounters();
+            _actionCountersModel.AddCountersFromReward();
             _gameManager?.RequestSave();
             Debug.Log("Счетчики пополнены после просмотра рекламы.");
+        }
+
+        /// <summary>
+        /// Вызывается после успешного просмотра межстраничной рекламы.
+        /// </summary>
+        private void OnInterstitialAdSuccess(bool wasShown)
+        {
+            if (!wasShown) return;
+            _actionCountersModel.AddCountersFromInterstitialAd();
+            _gameManager?.RequestSave();
+            Debug.Log("Счетчики пополнены после просмотра межстраничной рекламы.");
         }
     }
 }

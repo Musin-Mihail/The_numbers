@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Core.Events;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using YG;
@@ -21,18 +22,35 @@ namespace Core.Platform
         [SerializeField] private Button timer140Button;
         [Tooltip("Кнопка для таймера на 280 секунд")]
         [SerializeField] private Button timer280Button;
+
         [Header("Визуальные настройки кнопок")]
         [Tooltip("Цвет для выделения активной кнопки")]
         [SerializeField] private Color selectedColor = new(0.4f, 1.0f, 0.4f);
         [Tooltip("Стандартный цвет неактивных кнопок")]
-        [SerializeField] private Color defaultColor = Color.white;
+        [SerializeField] private Color defaultColor = new(0.53f, 0.70f, 0.85f);
+
+        [Header("Обратный отсчет")]
+        [Tooltip("Панель с обратным отсчетом")]
+        [SerializeField] private GameObject countdownPanel;
+        [Tooltip("Текстовое поле для обратного отсчета перед рекламой")]
+        [SerializeField] private TextMeshProUGUI countdownText;
+
         [Header("Каналы событий")]
         [Tooltip("Ссылка на ScriptableObject с игровыми событиями")]
         [SerializeField] private GameEvents gameEvents;
+
         private Dictionary<int, Button> _timerButtons;
         private Coroutine _timerCoroutine;
         private int _selectedDuration;
         private bool _isGameActive;
+
+        private void Awake()
+        {
+            if (countdownPanel)
+            {
+                countdownPanel.SetActive(false);
+            }
+        }
 
         private void OnEnable()
         {
@@ -159,7 +177,18 @@ namespace Core.Platform
         {
             Debug.Log($"InterstitialAdTimer: Таймер запущен на {duration} секунд.");
             yield return new WaitForSeconds(duration);
-            Debug.Log("InterstitialAdTimer: Таймер завершен. Показ межстраничной рекламы.");
+            if (countdownPanel) countdownPanel.SetActive(true);
+            for (var i = 3; i > 0; i--)
+            {
+                if (countdownText)
+                {
+                    countdownText.text = $"Реклама через: {i}с";
+                }
+
+                yield return new WaitForSeconds(1.0f);
+            }
+
+            if (countdownPanel) countdownPanel.SetActive(false);
             YG2.InterstitialAdvShow();
             StartTimer();
         }
@@ -169,6 +198,7 @@ namespace Core.Platform
         /// </summary>
         private void UpdateVisuals()
         {
+            Debug.Log(defaultColor.ToString());
             foreach (var pair in _timerButtons)
             {
                 if (!pair.Value) continue;

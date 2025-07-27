@@ -1,5 +1,6 @@
 ﻿using Core;
 using Core.Events;
+using UnityEngine;
 
 namespace Model
 {
@@ -91,6 +92,32 @@ namespace Model
             UndoCount = InitialCount;
             AddNumbersCount = InitialCount;
             HintCount = InitialCount;
+            RaiseCountersChanged();
+        }
+
+        /// <summary>
+        /// Добавляет по 5 к каждому счетчику после просмотра рекламы, с лимитом в 9.
+        /// </summary>
+        public void AddCountersFromReward()
+        {
+            const int amountToAdd = 5;
+            const int maxCount = 9;
+            UndoCount = Mathf.Min(UndoCount + amountToAdd, maxCount);
+            AddNumbersCount = Mathf.Min(AddNumbersCount + amountToAdd, maxCount);
+            HintCount = Mathf.Min(HintCount + amountToAdd, maxCount);
+            RaiseCountersChanged();
+        }
+
+        /// <summary>
+        /// Добавляет по 1 к каждому счетчику после просмотра межстраничной рекламы, с лимитом в 9.
+        /// </summary>
+        public void AddCountersFromInterstitialAd()
+        {
+            const int amountToAdd = 1;
+            const int maxCount = 9;
+            UndoCount = Mathf.Min(UndoCount + amountToAdd, maxCount);
+            AddNumbersCount = Mathf.Min(AddNumbersCount + amountToAdd, maxCount);
+            HintCount = Mathf.Min(HintCount + amountToAdd, maxCount);
             RaiseCountersChanged();
         }
 
