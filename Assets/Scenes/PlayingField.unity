@@ -2727,6 +2727,7 @@ MonoBehaviour:
   timer280Button: {fileID: 1380691095}
   selectedColor: {r: 0.4, g: 1, b: 0.4, a: 1}
   defaultColor: {r: 1, g: 1, b: 1, a: 1}
+  gameEvents: {fileID: 11400000, guid: f4c0432a5dafe5b4c97ce2400b9a7313, type: 2}
 --- !u!1 &524787356
 GameObject:
   m_ObjectHideFlags: 0

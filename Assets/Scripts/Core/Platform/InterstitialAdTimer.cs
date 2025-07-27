@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Core.Events;
 using UnityEngine;
 using UnityEngine.UI;
 using YG;
@@ -22,16 +23,26 @@ namespace Core.Platform
         [SerializeField] private Button timer280Button;
         [Header("Визуальные настройки кнопок")]
         [Tooltip("Цвет для выделения активной кнопки")]
-        [SerializeField] private Color selectedColor = new(0.4f, 1.0f, 0.4f); // Ярко-зеленый
+        [SerializeField] private Color selectedColor = new(0.4f, 1.0f, 0.4f);
         [Tooltip("Стандартный цвет неактивных кнопок")]
         [SerializeField] private Color defaultColor = Color.white;
+        [Header("Каналы событий")]
+        [Tooltip("Ссылка на ScriptableObject с игровыми событиями")]
+        [SerializeField] private GameEvents gameEvents;
         private Dictionary<int, Button> _timerButtons;
         private Coroutine _timerCoroutine;
         private int _selectedDuration;
+        private bool _isGameActive;
 
         private void OnEnable()
         {
             YG2.onGetSDKData += Initialize;
+            if (gameEvents)
+            {
+                gameEvents.onShowMenu.AddListener(HandleShowMenu);
+                gameEvents.onHideMenu.AddListener(HandleHideMenu);
+            }
+
             if (YG2.isSDKEnabled)
             {
                 Initialize();
@@ -41,6 +52,9 @@ namespace Core.Platform
         private void OnDisable()
         {
             YG2.onGetSDKData -= Initialize;
+            if (!gameEvents) return;
+            gameEvents.onShowMenu.RemoveListener(HandleShowMenu);
+            gameEvents.onHideMenu.RemoveListener(HandleHideMenu);
         }
 
         /// <summary>
@@ -63,6 +77,36 @@ namespace Core.Platform
         }
 
         /// <summary>
+        /// Обработчик события показа игрового меню.
+        /// </summary>
+        private void HandleShowMenu()
+        {
+            _isGameActive = false;
+            Debug.Log("InterstitialAdTimer: Игровое поле закрыто, останавливаем таймер.");
+            StopCurrentTimer();
+        }
+
+        /// <summary>
+        /// Обработчик события скрытия игрового меню.
+        /// </summary>
+        private void HandleHideMenu()
+        {
+            _isGameActive = true;
+            Debug.Log("InterstitialAdTimer: Игровое поле открыто, запускаем таймер.");
+            StartTimer();
+        }
+
+        /// <summary>
+        /// Останавливает текущую корутину таймера.
+        /// </summary>
+        private void StopCurrentTimer()
+        {
+            if (_timerCoroutine == null) return;
+            StopCoroutine(_timerCoroutine);
+            _timerCoroutine = null;
+        }
+
+        /// <summary>
         /// Загружает сохраненное значение таймера и применяет его.
         /// </summary>
         private void LoadState()
@@ -70,7 +114,6 @@ namespace Core.Platform
             _selectedDuration = YG2.saves.interstitialAdTimerValue;
             Debug.Log($"InterstitialAdTimer: Загружено значение таймера: {_selectedDuration}");
             UpdateVisuals();
-            StartTimer();
         }
 
         /// <summary>
@@ -93,19 +136,18 @@ namespace Core.Platform
         /// </summary>
         private void StartTimer()
         {
-            if (_timerCoroutine != null)
+            StopCurrentTimer();
+            switch (_isGameActive)
             {
-                StopCoroutine(_timerCoroutine);
-                _timerCoroutine = null;
-            }
-
-            if (_selectedDuration > 0)
-            {
-                _timerCoroutine = StartCoroutine(TimerCoroutine(_selectedDuration));
-            }
-            else
-            {
-                Debug.Log("InterstitialAdTimer: Таймер отключен.");
+                case true when _selectedDuration > 0:
+                    _timerCoroutine = StartCoroutine(TimerCoroutine(_selectedDuration));
+                    break;
+                case false:
+                    Debug.Log("InterstitialAdTimer: Таймер не запущен, так как игровое поле неактивно.");
+                    break;
+                default:
+                    Debug.Log("InterstitialAdTimer: Таймер отключен (длительность 0).");
+                    break;
             }
         }
 

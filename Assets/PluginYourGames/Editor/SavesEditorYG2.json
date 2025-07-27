@@ -1,5 +1,5 @@
 {
-    "idSave": 124,
+    "idSave": 131,
     "isTopLineVisible": true,
     "gridCells": [
         {
@@ -314,5 +314,5 @@
         "areCountersDisabled": false
     },
     "seenUpdateVersion": 1,
-    "interstitialAdTimerValue": 0
+    "interstitialAdTimerValue": 70
 }
