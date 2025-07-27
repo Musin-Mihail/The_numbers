@@ -49,7 +49,6 @@ namespace Core.Platform
             YG2.saves.gridCells = _gridModel.GetAllCellData().Select(c => new CellDataSerializable(c)).ToList();
             YG2.saves.statistics = new StatisticsModelSerializable(_statisticsModel);
             YG2.saves.actionCounters = new ActionCountersModelSerializable(_actionCountersModel);
-            YG2.saves.isGameEverSaved = true;
             Debug.Log("Запрос на сохранение игровых данных через YandexSaveLoadService.");
             YG2.SaveProgress();
             _isSaving = false;
@@ -62,29 +61,18 @@ namespace Core.Platform
         public void LoadGame(Action<bool> onComplete)
         {
             _isLoading = true;
-
-            if (YG2.saves.isGameEverSaved)
+            _gridModel.RestoreState(YG2.saves.gridCells);
+            _statisticsModel.SetState(YG2.saves.statistics.score, YG2.saves.statistics.multiplier);
+            _actionCountersModel.RestoreState(YG2.saves.actionCounters);
+            if (_gameEvents)
             {
-                _gridModel.RestoreState(YG2.saves.gridCells);
-                _statisticsModel.SetState(YG2.saves.statistics.score, YG2.saves.statistics.multiplier);
-                _actionCountersModel.RestoreState(YG2.saves.actionCounters);
-
-                if (_gameEvents)
-                {
-                    _gameEvents.onToggleTopLine?.Raise(YG2.saves.isTopLineVisible);
-                    _gameEvents.onStatisticsChanged?.Raise((YG2.saves.statistics.score, YG2.saves.statistics.multiplier));
-                }
-
-                Debug.Log("Игровые данные успешно загружены из сохранений Yandex.");
-                _isLoading = false;
-                onComplete?.Invoke(true);
+                _gameEvents.onToggleTopLine?.Raise(YG2.saves.isTopLineVisible);
+                _gameEvents.onStatisticsChanged?.Raise((YG2.saves.statistics.score, YG2.saves.statistics.multiplier));
             }
-            else
-            {
-                Debug.LogWarning("Данные сохранения в Yandex не найдены");
-                _isLoading = false;
-                onComplete?.Invoke(false);
-            }
+
+            Debug.Log("Игровые данные успешно загружены из сохранений Yandex.");
+            _isLoading = false;
+            onComplete?.Invoke(true);
         }
 
         /// <summary>

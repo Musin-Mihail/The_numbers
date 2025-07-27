@@ -27,10 +27,5 @@ namespace YG
         /// Сериализованные данные счетчиков действий (отмена, добавление чисел, подсказки).
         /// </summary>
         public ActionCountersModelSerializable actionCounters = new();
-
-        /// <summary>
-        /// Флаг, указывающий, была ли игра когда-либо сохранена.
-        /// </summary>
-        public bool isGameEverSaved;
     }
 }
