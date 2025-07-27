@@ -2228,6 +2228,7 @@ MonoBehaviour:
   rotationAmount: 1.5
   onAnimationStart: {fileID: 11400000, guid: 2b09e5ecd3c4f21478b7e97b6cec133e, type: 2}
   onAnimationStop: {fileID: 11400000, guid: 82680156efe0a4a4a8b1d9a0ec614cba, type: 2}
+  isForUpdateNotification: 1
 --- !u!1 &489982509
 GameObject:
   m_ObjectHideFlags: 0
@@ -5070,6 +5071,7 @@ MonoBehaviour:
   rotationAmount: 5
   onAnimationStart: {fileID: 11400000, guid: eadf4278efe0d5844b0f8e0968b908ef, type: 2}
   onAnimationStop: {fileID: 11400000, guid: 45a6b4bb6aa4f1e44b151473e1e2bff4, type: 2}
+  isForUpdateNotification: 0
 --- !u!1 &1071732840
 GameObject:
   m_ObjectHideFlags: 0

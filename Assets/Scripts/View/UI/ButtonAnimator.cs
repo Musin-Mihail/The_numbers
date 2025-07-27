@@ -1,7 +1,9 @@
 ﻿using System.Collections;
+using Core;
 using Core.Events;
 using UnityEngine;
 using UnityEngine.UI;
+using YG;
 
 namespace View.UI
 {
@@ -17,11 +19,14 @@ namespace View.UI
         [SerializeField] private float animationSpeed = 2.0f;
         [SerializeField] private float scaleAmount = 1.1f;
         [SerializeField] private float rotationAmount = 5f;
-
         [Header("Event Listening")]
+        [Tooltip("Событие, которое запускает анимацию.")]
         [SerializeField] private VoidEvent onAnimationStart;
+        [Tooltip("Событие, которое останавливает анимацию.")]
         [SerializeField] private VoidEvent onAnimationStop;
-
+        [Header("Behavior")]
+        [Tooltip("Отметьте, если эта кнопка используется специально для уведомлений об обновлении.")]
+        [SerializeField] private bool isForUpdateNotification;
         private RectTransform _rectTransform;
         private Image _buttonImage;
         private Color _originalColor;
@@ -47,6 +52,10 @@ namespace View.UI
         {
             if (onAnimationStart) onAnimationStart.AddListener(StartAnimation);
             if (onAnimationStop) onAnimationStop.AddListener(StopAnimation);
+            if (isForUpdateNotification && YG2.isSDKEnabled && YG2.saves.seenUpdateVersion < GameConstants.GameVersion)
+            {
+                StartAnimation();
+            }
         }
 
         private void OnDisable()
@@ -54,10 +63,7 @@ namespace View.UI
             if (onAnimationStart) onAnimationStart.RemoveListener(StartAnimation);
             if (onAnimationStop) onAnimationStop.RemoveListener(StopAnimation);
 
-            if (_animationCoroutine != null)
-            {
-                StopCoroutine(_animationCoroutine);
-            }
+            StopAnimation();
         }
 
         /// <summary>
@@ -65,12 +71,8 @@ namespace View.UI
         /// </summary>
         private void StartAnimation()
         {
+            if (_animationCoroutine != null) return;
             if (!enabled || !gameObject.activeInHierarchy) return;
-            if (_animationCoroutine != null)
-            {
-                StopCoroutine(_animationCoroutine);
-            }
-
             _animationCoroutine = StartCoroutine(AnimateButton());
         }
 
@@ -90,6 +92,7 @@ namespace View.UI
                 _buttonImage.color = _originalColor;
             }
 
+            if (!_rectTransform) return;
             _rectTransform.localScale = _originalScale;
             _rectTransform.localRotation = _originalRotation;
         }
