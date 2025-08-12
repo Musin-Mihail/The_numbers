@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using YG;
 using YG.Utils.LB;
 
 namespace View.UI
@@ -39,6 +40,7 @@ namespace View.UI
             }
 
             var finalDisplayList = _dataProcessor.ProcessLeaderboardData(lb);
+            var currentPlayerId = YG2.player.id;
 
             var lastRank = 0;
             foreach (var player in finalDisplayList)
@@ -50,7 +52,9 @@ namespace View.UI
                 }
 
                 var entryObject = GetEntryFromPool();
-                entryObject.Populate(player);
+                // Проверяем, является ли запись записью текущего игрока
+                var isCurrentPlayer = !string.IsNullOrEmpty(currentPlayerId) && player.uniqueID == currentPlayerId;
+                entryObject.Populate(player, isCurrentPlayer);
                 lastRank = player.rank;
             }
         }
