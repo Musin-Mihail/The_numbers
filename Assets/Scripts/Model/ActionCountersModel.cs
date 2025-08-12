@@ -15,11 +15,6 @@ namespace Model
         public int UndoCount { get; private set; }
 
         /// <summary>
-        /// Количество доступных добавлений чисел.
-        /// </summary>
-        public int AddNumbersCount { get; private set; }
-
-        /// <summary>
         /// Количество доступных подсказок.
         /// </summary>
         public int HintCount { get; private set; }
@@ -48,7 +43,6 @@ namespace Model
         public void RestoreState(ActionCountersModelSerializable data)
         {
             UndoCount = data.undoCount;
-            AddNumbersCount = data.addNumbersCount;
             HintCount = data.hintCount;
             AreCountersDisabled = data.areCountersDisabled;
             RaiseCountersChanged();
@@ -64,15 +58,6 @@ namespace Model
             RaiseCountersChanged();
         }
 
-        /// <summary>
-        /// Уменьшает счетчик добавлений чисел на единицу.
-        /// </summary>
-        public void DecrementAddNumbers()
-        {
-            if (AddNumbersCount <= 0) return;
-            AddNumbersCount--;
-            RaiseCountersChanged();
-        }
 
         /// <summary>
         /// Уменьшает счетчик подсказок на единицу.
@@ -90,7 +75,6 @@ namespace Model
         public void ResetCounters()
         {
             UndoCount = InitialCount;
-            AddNumbersCount = InitialCount;
             HintCount = InitialCount;
             RaiseCountersChanged();
         }
@@ -103,7 +87,6 @@ namespace Model
             const int amountToAdd = 5;
             const int maxCount = 9;
             UndoCount = Mathf.Min(UndoCount + amountToAdd, maxCount);
-            AddNumbersCount = Mathf.Min(AddNumbersCount + amountToAdd, maxCount);
             HintCount = Mathf.Min(HintCount + amountToAdd, maxCount);
             RaiseCountersChanged();
         }
@@ -116,7 +99,6 @@ namespace Model
             const int amountToAdd = 1;
             const int maxCount = 9;
             UndoCount = Mathf.Min(UndoCount + amountToAdd, maxCount);
-            AddNumbersCount = Mathf.Min(AddNumbersCount + amountToAdd, maxCount);
             HintCount = Mathf.Min(HintCount + amountToAdd, maxCount);
             RaiseCountersChanged();
         }
@@ -144,11 +126,6 @@ namespace Model
         public bool IsUndoAvailable() => AreCountersDisabled || UndoCount > 0;
 
         /// <summary>
-        /// Проверяет, доступно ли добавление чисел.
-        /// </summary>
-        public bool IsAddNumbersAvailable() => AreCountersDisabled || AddNumbersCount > 0;
-
-        /// <summary>
         /// Проверяет, доступна ли подсказка.
         /// </summary>
         public bool IsHintAvailable() => AreCountersDisabled || HintCount > 0;
@@ -159,8 +136,8 @@ namespace Model
         private void RaiseCountersChanged()
         {
             _gameEvents?.onCountersChanged.Raise(AreCountersDisabled
-                ? (-1, -1, -1)
-                : (UndoCount, AddNumbersCount, HintCount));
+                ? (-1, -1)
+                : (UndoCount, HintCount));
         }
     }
 }

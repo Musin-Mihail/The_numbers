@@ -68,7 +68,6 @@ namespace Core
     public class ActionCountersModelSerializable
     {
         public int undoCount;
-        public int addNumbersCount;
         public int hintCount;
         public bool areCountersDisabled;
 
@@ -86,7 +85,6 @@ namespace Core
         public ActionCountersModelSerializable(ActionCountersModel model)
         {
             undoCount = model.UndoCount;
-            addNumbersCount = model.AddNumbersCount;
             hintCount = model.HintCount;
             areCountersDisabled = model.AreCountersDisabled;
         }

@@ -33,12 +33,5 @@ namespace YG
         /// Это позволяет показывать анимацию для каждого нового обновления.
         /// </summary>
         public List<int> seenUpdateVersions = new();
-
-        /// <summary>
-        /// Выбранное время для таймера межстраничной рекламы.
-        /// 0 - таймер выключен ("Нет").
-        /// 70, 140, 280 - время в секундах.
-        /// </summary>
-        public int interstitialAdTimerValue;
     }
 }

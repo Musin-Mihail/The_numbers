@@ -53,17 +53,6 @@ namespace Core.Handlers
         /// </summary>
         private void AddExistingNumbersAsNewLines()
         {
-            if (!_actionCountersModel.IsAddNumbersAvailable())
-            {
-                _gameEvents.onRequestRefillCounters.Raise();
-                return;
-            }
-
-            if (!_actionCountersModel.AreCountersDisabled)
-            {
-                _actionCountersModel.DecrementAddNumbers();
-            }
-
             _gridModel.AppendActiveNumbersToGrid();
             _actionHistory.Clear();
             _gameManager?.RequestSave();
