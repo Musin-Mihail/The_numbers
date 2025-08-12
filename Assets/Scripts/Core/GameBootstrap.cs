@@ -62,7 +62,7 @@ namespace Core
 
             ServiceProvider.Clear();
             ServiceProvider.Register(gameEvents);
-            
+
             _localizationManager = new LocalizationManager(gameEvents);
             ServiceProvider.Register(_localizationManager);
 
@@ -229,7 +229,7 @@ namespace Core
             var message = _localizationManager.Get("loadError");
             var retryText = _localizationManager.Get("retry");
             var newGameText = _localizationManager.Get("newGame");
-            
+
             confirmationDialog.Show(
                 message,
                 retryText,
@@ -286,11 +286,12 @@ namespace Core
         {
             if (confirmationDialog)
             {
-                _requestNewGameAction = () => {
+                _requestNewGameAction = () =>
+                {
                     var message = _localizationManager.Get("newGamePrompt");
                     var yes = _localizationManager.Get("yes");
                     var no = _localizationManager.Get("no");
-                    confirmationDialog.Show(message, yes, no, StartNewGameFromButton, null, new Vector2(0, 370));
+                    confirmationDialog.Show(message, yes, no, StartNewGameFromButton, null, new Vector2(0, 450));
                 };
 
                 gameEvents.onRequestNewGame.AddListener(_requestNewGameAction);
@@ -325,7 +326,10 @@ namespace Core
         /// </summary>
         private void HandleRequestDisableCounters()
         {
-            confirmationDialog.Show("Отключить ограничения за плату?", "Да", "Нет", () => { gameEvents.onDisableCountersConfirmed.Raise(); }, null, new Vector2(0, 350));
+            var message = _localizationManager.Get("buyInfiniteHintsPrompt");
+            var yes = _localizationManager.Get("yes");
+            var no = _localizationManager.Get("no");
+            confirmationDialog.Show(message, yes, no, () => { gameEvents.onDisableCountersConfirmed.Raise(); }, null, new Vector2(0, 350));
         }
 
         /// <summary>
@@ -333,7 +337,10 @@ namespace Core
         /// </summary>
         private void HandleRequestRefillCounters()
         {
-            confirmationDialog.Show("Посмотреть рекламу, чтобы пополнить счетчики?", "Да", "Нет", () => { gameEvents.onShowRewardedAdForRefill.Raise(); }, null, new Vector2(0, 370));
+            var message = _localizationManager.Get("watchAdPrompt");
+            var yes = _localizationManager.Get("yes");
+            var no = _localizationManager.Get("no");
+            confirmationDialog.Show(message, yes, no, () => { gameEvents.onShowRewardedAdForRefill.Raise(); }, null, new Vector2(0, 370));
         }
 
         /// <summary>

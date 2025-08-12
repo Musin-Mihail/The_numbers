@@ -27,21 +27,17 @@ namespace Localization
             }
         }
 
-        private void Start()
+        private void OnEnable()
         {
-            _localizationManager = ServiceProvider.GetService<LocalizationManager>();
+            _localizationManager ??= ServiceProvider.GetService<LocalizationManager>();
             if (_localizationManager == null)
             {
                 enabled = false;
                 return;
             }
 
-            UpdateText();
-        }
-
-        private void OnEnable()
-        {
             LocalizationManager.OnLanguageChanged += UpdateText;
+            UpdateText();
         }
 
         private void OnDisable()
@@ -58,11 +54,11 @@ namespace Localization
 
             var translation = _localizationManager.Get(localizationKey);
 
-            if (_textMeshPro != null)
+            if (_textMeshPro)
             {
                 _textMeshPro.text = translation;
             }
-            else if (_text != null)
+            else if (_text)
             {
                 _text.text = translation;
             }

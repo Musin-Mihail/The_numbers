@@ -1,5 +1,5 @@
 {
-    "idSave": 41,
+    "idSave": 61,
     "isTopLineVisible": true,
     "gridCells": [
         {
@@ -12,31 +12,31 @@
             "number": 5,
             "line": 0,
             "column": 1,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 9,
             "line": 0,
             "column": 2,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 9,
             "line": 0,
             "column": 3,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 4,
             "line": 0,
             "column": 4,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 6,
             "line": 0,
             "column": 5,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 1,
@@ -48,7 +48,7 @@
             "number": 3,
             "line": 0,
             "column": 7,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 8,
@@ -60,19 +60,19 @@
             "number": 6,
             "line": 0,
             "column": 9,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 6,
             "line": 1,
             "column": 0,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 5,
             "line": 1,
             "column": 1,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 2,
@@ -108,7 +108,7 @@
             "number": 3,
             "line": 1,
             "column": 7,
-            "isActive": true
+            "isActive": false
         },
         {
             "number": 4,
@@ -304,14 +304,16 @@
         }
     ],
     "statistics": {
-        "score": 0,
+        "score": 5,
         "multiplier": 1
     },
     "actionCounters": {
         "undoCount": 5,
-        "hintCount": 5,
+        "hintCount": 0,
         "areCountersDisabled": false
     },
-    "seenUpdateVersions": [],
-    "language": "es"
+    "seenUpdateVersions": [
+        2
+    ],
+    "language": "tr"
 }
