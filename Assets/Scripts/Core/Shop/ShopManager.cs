@@ -1,4 +1,6 @@
-﻿using Core.Events;
+﻿// --- Файл: D:\Repositories\The_numbers\Assets\Scripts\Core\Shop\ShopManager.cs ---
+
+using Core.Events;
 using Localization;
 using Model;
 using TMPro;
@@ -33,12 +35,22 @@ namespace Core.Shop
         {
             YG2.onGetSDKData += InitializeShopProduct;
             YG2.onPurchaseSuccess += HandlePurchaseSuccess;
+            LocalizationManager.OnLanguageChanged += HandleLanguageChanged;
         }
 
         private void OnDisable()
         {
             YG2.onGetSDKData -= InitializeShopProduct;
             YG2.onPurchaseSuccess -= HandlePurchaseSuccess;
+            LocalizationManager.OnLanguageChanged -= HandleLanguageChanged;
+        }
+
+        /// <summary>
+        /// Обрабатывает событие смены языка, обновляя UI магазина.
+        /// </summary>
+        private void HandleLanguageChanged()
+        {
+            UpdateProductUI();
         }
 
         /// <summary>
@@ -62,6 +74,12 @@ namespace Core.Shop
         private void UpdateProductUI()
         {
             if (_actionCountersModel == null) return;
+            if (_localizationManager == null)
+            {
+                _localizationManager = ServiceProvider.GetService<LocalizationManager>();
+                if (_localizationManager == null) return;
+            }
+
             if (_actionCountersModel.AreCountersDisabled)
             {
                 SetProductAsPurchased();
