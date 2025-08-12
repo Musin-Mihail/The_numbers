@@ -43,7 +43,6 @@ namespace Localization
             var asset = Resources.Load<TextAsset>("Localization/translations");
             if (asset != null)
             {
-                Debug.Log(asset.text);
                 _allTranslations = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(asset.text);
                 Debug.Log("[LocalizationManager] Файл переводов успешно загружен.");
             }
