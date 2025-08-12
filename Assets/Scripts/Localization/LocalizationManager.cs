@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Core.Events;
 using Newtonsoft.Json;
 using UnityEngine;
+
 namespace Localization
 {
     /// <summary>
