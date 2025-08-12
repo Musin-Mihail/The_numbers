@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace View.UI
 {
+    /// <summary>
+    /// Отображает игровую статистику (счет и множитель).
+    /// </summary>
     public class StatisticsView : MonoBehaviour
     {
         [Header("UI Dependencies")]
@@ -43,14 +46,24 @@ namespace View.UI
             }
         }
 
+        /// <summary>
+        /// Обновляет UI статистики на основе полученных данных.
+        /// Ручное обновление шрифтов больше не требуется.
+        /// </summary>
         private void UpdateStatisticsUI((long score, int multiplier) data)
         {
-            if (scoreText && _localizationManager != null)
+            if (_localizationManager == null)
+            {
+                _localizationManager = ServiceProvider.GetService<LocalizationManager>();
+                if (_localizationManager == null) return;
+            }
+
+            if (scoreText)
             {
                 scoreText.text = string.Format(_localizationManager.Get("score"), data.score);
             }
 
-            if (multiplierText && _localizationManager != null)
+            if (multiplierText)
             {
                 multiplierText.text = string.Format(_localizationManager.Get("multiplier"), data.multiplier);
             }

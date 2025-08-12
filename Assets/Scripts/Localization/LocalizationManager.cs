@@ -13,7 +13,12 @@ namespace Localization
     public class LocalizationManager
     {
         private Dictionary<string, Dictionary<string, string>> _allTranslations;
-        private string _currentLanguage;
+
+        /// <summary>
+        /// Возвращает код текущего установленного языка.
+        /// </summary>
+        public string CurrentLanguage { get; private set; }
+
         public static event Action OnLanguageChanged;
 
         public LocalizationManager(GameEvents gameEvents)
@@ -54,8 +59,8 @@ namespace Localization
         /// </summary>
         private void SetLanguage(string langCode)
         {
-            _currentLanguage = string.IsNullOrEmpty(langCode) ? "en" : langCode;
-            Debug.Log($"[LocalizationManager] Язык изменен на '{_currentLanguage}'.");
+            CurrentLanguage = string.IsNullOrEmpty(langCode) ? "en" : langCode;
+            Debug.Log($"[LocalizationManager] Язык изменен на '{CurrentLanguage}'.");
             OnLanguageChanged?.Invoke();
         }
 
@@ -66,14 +71,14 @@ namespace Localization
         {
             if (_allTranslations.TryGetValue(key, out var translationsForCurrentKey))
             {
-                if (translationsForCurrentKey.TryGetValue(_currentLanguage, out var translation))
+                if (translationsForCurrentKey.TryGetValue(CurrentLanguage, out var translation))
                 {
                     return translation;
                 }
 
                 if (translationsForCurrentKey.TryGetValue("en", out var fallbackTranslation))
                 {
-                    Debug.LogWarning($"[LocalizationManager] Перевод для ключа '{key}' на языке '{_currentLanguage}' не найден. Используется 'en'.");
+                    Debug.LogWarning($"[LocalizationManager] Перевод для ключа '{key}' на языке '{CurrentLanguage}' не найден. Используется 'en'.");
                     return fallbackTranslation;
                 }
             }

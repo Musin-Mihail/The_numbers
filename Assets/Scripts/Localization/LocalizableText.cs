@@ -8,6 +8,7 @@ namespace Localization
     /// <summary>
     /// Компонент, который автоматически обновляет текстовое поле при смене языка.
     /// Вешается на каждый GameObject с Text или TextMeshProUGUI.
+    /// Использует систему Font Fallbacks из TextMesh Pro для поддержки разных языков.
     /// </summary>
     public class LocalizableText : MonoBehaviour
     {
@@ -32,6 +33,7 @@ namespace Localization
             _localizationManager ??= ServiceProvider.GetService<LocalizationManager>();
             if (_localizationManager == null)
             {
+                Debug.LogWarning($"[LocalizableText] LocalizationManager не найден для ключа '{localizationKey}'. Компонент будет отключен.", this);
                 enabled = false;
                 return;
             }
@@ -42,11 +44,15 @@ namespace Localization
 
         private void OnDisable()
         {
-            LocalizationManager.OnLanguageChanged -= UpdateText;
+            if (_localizationManager != null)
+            {
+                LocalizationManager.OnLanguageChanged -= UpdateText;
+            }
         }
 
         /// <summary>
-        /// Получает перевод из LocalizationManager и обновляет текст.
+        /// Получает перевод и обновляет текст.
+        /// Смена шрифта больше не требуется, TextMesh Pro обработает это через Fallbacks.
         /// </summary>
         private void UpdateText()
         {
