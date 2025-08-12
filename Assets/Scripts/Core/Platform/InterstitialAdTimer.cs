@@ -22,7 +22,7 @@ namespace Core.Platform
         [SerializeField] private GameEvents gameEvents;
 
         private const float AdCooldown = 70.0f;
-        private float _lastAdShowTime = -AdCooldown;
+        private float _lastAdShowTime;
 
         private void Awake()
         {
@@ -30,6 +30,8 @@ namespace Core.Platform
             {
                 countdownPanel.SetActive(false);
             }
+
+            _lastAdShowTime = Time.time;
         }
 
         private void OnEnable()
