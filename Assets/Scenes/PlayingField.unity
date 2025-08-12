@@ -1345,7 +1345,6 @@ GameObject:
   - component: {fileID: 251003696}
   - component: {fileID: 251003695}
   - component: {fileID: 251003694}
-  - component: {fileID: 251003697}
   m_Layer: 5
   m_Name: Multiplier
   m_TagString: Untagged
@@ -1471,19 +1470,6 @@ RectTransform:
   m_AnchoredPosition: {x: 450, y: -255}
   m_SizeDelta: {x: 900, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &251003697
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 251003693}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ea90e192b5d4ee9a681808252b0a424, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  localizationKey: multiplier
 --- !u!1 &255268222
 GameObject:
   m_ObjectHideFlags: 0
@@ -7064,7 +7050,6 @@ GameObject:
   - component: {fileID: 1540637242}
   - component: {fileID: 1540637243}
   - component: {fileID: 1540637244}
-  - component: {fileID: 1540637245}
   m_Layer: 5
   m_Name: Score
   m_TagString: Untagged
@@ -7190,19 +7175,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &1540637245
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540637241}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ea90e192b5d4ee9a681808252b0a424, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  localizationKey: score
 --- !u!1 &1550148426
 GameObject:
   m_ObjectHideFlags: 0

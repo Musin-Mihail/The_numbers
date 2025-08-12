@@ -1,4 +1,5 @@
 ﻿using Core.Events;
+using Localization;
 using Model;
 using TMPro;
 using UnityEngine;
@@ -16,18 +17,16 @@ namespace Core.Shop
         [Header("UI Элементы")]
         [SerializeField] private Button purchaseButton;
         [SerializeField] private TextMeshProUGUI priceText;
-
         private GameEvents _gameEvents;
         private Purchase _productInfo;
         private ActionCountersModel _actionCountersModel;
+        private LocalizationManager _localizationManager;
 
-        /// <summary>
-        /// Инициализация зависимостей, полученных из GameBootstrap.
-        /// </summary>
         public void Initialize(GameEvents gameEvents, ActionCountersModel actionCountersModel)
         {
             _gameEvents = gameEvents;
             _actionCountersModel = actionCountersModel;
+            _localizationManager = ServiceProvider.GetService<LocalizationManager>();
         }
 
         private void OnEnable()
@@ -51,7 +50,7 @@ namespace Core.Shop
             {
                 Debug.LogError("ShopManager не смог получить ActionCountersModel. Убедитесь, что модель регистрируется до вызова onGetSDKData.");
                 if (purchaseButton) purchaseButton.interactable = false;
-                if (priceText) priceText.text = "Ошибка";
+                if (priceText) priceText.text = _localizationManager.Get("shopError");
                 return;
             }
 
@@ -60,9 +59,6 @@ namespace Core.Shop
             UpdateProductUI();
         }
 
-        /// <summary>
-        /// Обновляет UI товара, проверяя состояние игровой модели.
-        /// </summary>
         private void UpdateProductUI()
         {
             if (_actionCountersModel == null) return;
@@ -78,7 +74,7 @@ namespace Core.Shop
                 }
                 else
                 {
-                    if (priceText) priceText.text = "Товар не найден";
+                    if (priceText) priceText.text = _localizationManager.Get("shopProductNotFound");
                     Debug.LogError($"Ошибка ShopManager: Товар с ID '{GameConstants.DisableCountersProductId}' не найден. Проверьте настройки в InfoYG -> Payments.");
                     if (purchaseButton) purchaseButton.interactable = false;
                 }
@@ -103,7 +99,6 @@ namespace Core.Shop
         {
             if (priceText)
                 priceText.text = _productInfo.price;
-
             if (!purchaseButton) return;
             purchaseButton.interactable = true;
             purchaseButton.onClick.RemoveAllListeners();
@@ -116,8 +111,7 @@ namespace Core.Shop
         private void SetProductAsPurchased()
         {
             if (priceText)
-                priceText.text = "Куплен";
-
+                priceText.text = _localizationManager.Get("shopPurchased");
             if (!purchaseButton) return;
             purchaseButton.interactable = false;
             purchaseButton.onClick.RemoveAllListeners();

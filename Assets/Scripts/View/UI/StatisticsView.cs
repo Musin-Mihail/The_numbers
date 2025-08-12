@@ -1,12 +1,12 @@
-﻿using Core.Events;
+﻿using Core;
+using Core.Events;
+using Localization;
+using Model;
 using TMPro;
 using UnityEngine;
 
 namespace View.UI
 {
-    /// <summary>
-    /// Отображает статистику игрока (счет и множитель) в UI.
-    /// </summary>
     public class StatisticsView : MonoBehaviour
     {
         [Header("UI Dependencies")]
@@ -16,11 +16,22 @@ namespace View.UI
         [Header("Event Listening")]
         [SerializeField] private GameEvents gameEvents;
 
+        private LocalizationManager _localizationManager;
+        private StatisticsModel _statisticsModel;
+
         private void OnEnable()
         {
+            _localizationManager ??= ServiceProvider.GetService<LocalizationManager>();
+            _statisticsModel ??= ServiceProvider.GetService<StatisticsModel>();
+
             if (gameEvents)
             {
                 gameEvents.onStatisticsChanged.AddListener(UpdateStatisticsUI);
+            }
+
+            if (_statisticsModel != null)
+            {
+                UpdateStatisticsUI((_statisticsModel.Score, _statisticsModel.Multiplier));
             }
         }
 
@@ -32,20 +43,16 @@ namespace View.UI
             }
         }
 
-        /// <summary>
-        /// Обновляет текстовые поля со статистикой.
-        /// </summary>
-        /// <param name="data">Кортеж со счетом и множителем.</param>
         private void UpdateStatisticsUI((long score, int multiplier) data)
         {
-            if (scoreText)
+            if (scoreText && _localizationManager != null)
             {
-                scoreText.text = $"Счет: {data.score}";
+                scoreText.text = string.Format(_localizationManager.Get("score"), data.score);
             }
 
-            if (multiplierText)
+            if (multiplierText && _localizationManager != null)
             {
-                multiplierText.text = $"Множитель: x{data.multiplier}";
+                multiplierText.text = string.Format(_localizationManager.Get("multiplier"), data.multiplier);
             }
         }
     }

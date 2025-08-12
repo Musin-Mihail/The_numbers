@@ -196,5 +196,41 @@
     "fr": "Échec du chargement des données. Vérifiez votre connexion Internet et réessayez",
     "de": "Daten konnten nicht geladen werden. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut",
     "tr": "Veriler yüklenemedi. İnternet bağlantınızı kontrol edin ve tekrar deneyin"
+  },
+  "boardClearedMessage": {
+    "en": "Multiplier +1",
+    "zh": "乘数 +1",
+    "es": "Multiplicador +1",
+    "ru": "Множитель +1",
+    "fr": "Multiplicateur +1",
+    "de": "Multiplikator +1",
+    "tr": "Çarpan +1"
+  },
+  "shopError": {
+    "en": "Error",
+    "zh": "错误",
+    "es": "Error",
+    "ru": "Ошибка",
+    "fr": "Erreur",
+    "de": "Fehler",
+    "tr": "Hata"
+  },
+  "shopProductNotFound": {
+    "en": "Product not found",
+    "zh": "未找到产品",
+    "es": "Producto no encontrado",
+    "ru": "Товар не найден",
+    "fr": "Produit non trouvé",
+    "de": "Produkt nicht gefunden",
+    "tr": "Ürün bulunamadı"
+  },
+  "shopPurchased": {
+    "en": "Purchased",
+    "zh": "已购买",
+    "es": "Comprado",
+    "ru": "Куплен",
+    "fr": "Acheté",
+    "de": "Gekauft",
+    "tr": "Satın alındı"
   }
 }

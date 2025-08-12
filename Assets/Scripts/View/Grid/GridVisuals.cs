@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Core;
+using Localization;
 using Model;
 using UnityEngine;
 using View.UI;
@@ -18,7 +19,7 @@ namespace View.Grid
         private readonly GridModel _gridModel;
         private readonly Color _positiveScoreColor;
         private readonly Color _negativeScoreColor;
-
+        private readonly LocalizationManager _localizationManager;
         private readonly List<Guid> _hintedCellIds = new();
         public bool HasActiveHints => _hintedCellIds.Count > 0;
 
@@ -29,6 +30,7 @@ namespace View.Grid
             _gridModel = gridModel;
             _positiveScoreColor = positiveScoreColor;
             _negativeScoreColor = negativeScoreColor;
+            _localizationManager = ServiceProvider.GetService<LocalizationManager>();
         }
 
         /// <summary>
@@ -39,7 +41,6 @@ namespace View.Grid
             ClearHintVisuals();
             _hintedCellIds.Add(data.firstId);
             _hintedCellIds.Add(data.secondId);
-
             if (_cellViewInstances.TryGetValue(data.firstId, out var firstCell))
             {
                 firstCell.SetHighlight(true);
@@ -57,7 +58,6 @@ namespace View.Grid
         public void ClearHintVisuals()
         {
             if (_hintedCellIds.Count == 0) return;
-
             foreach (var id in _hintedCellIds)
             {
                 if (_cellViewInstances.TryGetValue(id, out var cell))
@@ -88,10 +88,8 @@ namespace View.Grid
             var cell1Data = _gridModel.GetCellDataById(cell1Id);
             var cell2Data = _gridModel.GetCellDataById(cell2Id);
             if (cell1Data == null || cell2Data == null) return;
-            
             var pos1Pivot = new Vector2(GameConstants.CellSize * cell1Data.Column + GameConstants.Indent / 2f, -GameConstants.CellSize * cell1Data.Line - GameConstants.Indent / 2f);
             var pos2Pivot = new Vector2(GameConstants.CellSize * cell2Data.Column + GameConstants.Indent / 2f, -GameConstants.CellSize * cell2Data.Line - GameConstants.Indent / 2f);
-
             var midPoint = (pos1Pivot + pos2Pivot) / 2f;
             var color = isPositive ? _positiveScoreColor : _negativeScoreColor;
             ShowFloatingScore(score, color, midPoint);
@@ -119,7 +117,8 @@ namespace View.Grid
             var size = new Vector2(700, 250);
             var adjustedPosition = new Vector2(centerPosition.x - size.x / 2f, centerPosition.y + size.y / 2f);
             var scoreTextInstance = _floatingScorePool.GetScore();
-            scoreTextInstance.Show("Множитель +1", _positiveScoreColor, adjustedPosition, size, _floatingScorePool.ReturnScore);
+            var message = _localizationManager.Get("boardClearedMessage");
+            scoreTextInstance.Show(message, _positiveScoreColor, adjustedPosition, size, _floatingScorePool.ReturnScore);
         }
 
         private void ShowFloatingScore(int score, Color color, Vector2 position)
