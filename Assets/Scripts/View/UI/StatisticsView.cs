@@ -26,12 +26,12 @@ namespace View.UI
         {
             _localizationManager ??= ServiceProvider.GetService<LocalizationManager>();
             _statisticsModel ??= ServiceProvider.GetService<StatisticsModel>();
-
             if (gameEvents)
             {
                 gameEvents.onStatisticsChanged.AddListener(UpdateStatisticsUI);
             }
 
+            LocalizationManager.OnLanguageChanged += HandleLanguageChanged;
             if (_statisticsModel != null)
             {
                 UpdateStatisticsUI((_statisticsModel.Score, _statisticsModel.Multiplier));
@@ -44,11 +44,23 @@ namespace View.UI
             {
                 gameEvents.onStatisticsChanged.RemoveListener(UpdateStatisticsUI);
             }
+
+            LocalizationManager.OnLanguageChanged -= HandleLanguageChanged;
+        }
+
+        /// <summary>
+        /// Обработчик события смены языка.
+        /// </summary>
+        private void HandleLanguageChanged()
+        {
+            if (_statisticsModel != null)
+            {
+                UpdateStatisticsUI((_statisticsModel.Score, _statisticsModel.Multiplier));
+            }
         }
 
         /// <summary>
         /// Обновляет UI статистики на основе полученных данных.
-        /// Ручное обновление шрифтов больше не требуется.
         /// </summary>
         private void UpdateStatisticsUI((long score, int multiplier) data)
         {
