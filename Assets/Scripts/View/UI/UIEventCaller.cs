@@ -43,5 +43,15 @@ namespace View.UI
             gameEvents?.onShowOptions.Raise();
             gameEvents?.onRequestMarkUpdateSeen.Raise();
         }
+
+        /// <summary>
+        /// Устанавливает язык игры, вызывая соответствующее событие.
+        /// Этот метод вызывается с кнопок в UI, где в инспекторе указывается код языка.
+        /// </summary>
+        /// <param name="languageCode">Код языка (например, "ru", "en", "tr").</param>
+        public void SetLanguage(string languageCode)
+        {
+            gameEvents?.onSetLanguage.Raise(languageCode);
+        }
     }
 }

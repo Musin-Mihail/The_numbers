@@ -1,6 +1,4 @@
-﻿// Файл: Assets/Scripts/Core/Events/GameEvents.cs
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Core.Events
 {
@@ -67,6 +65,7 @@ namespace Core.Events
         public VoidEvent onHideRules;
         public VoidEvent onShowOptions;
         public VoidEvent onHideOptions;
+        public StringEvent onSetLanguage; // НОВОЕ СОБЫТИЕ
 
         [Header("Update Notifications")]
         public VoidEvent onNewUpdateAvailable;

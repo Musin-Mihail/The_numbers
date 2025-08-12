@@ -1,5 +1,5 @@
 {
-    "idSave": 204,
+    "idSave": 207,
     "isTopLineVisible": true,
     "gridCells": [
         {
@@ -1209,12 +1209,11 @@
     },
     "actionCounters": {
         "undoCount": 6,
-        "addNumbersCount": 4,
         "hintCount": 6,
         "areCountersDisabled": false
     },
     "seenUpdateVersions": [
         1
     ],
-    "interstitialAdTimerValue": 70
+    "language": "zh"
 }

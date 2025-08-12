@@ -153,6 +153,16 @@ namespace Core
         /// </summary>
         private void OnYandexSDKInitialized()
         {
+            if (string.IsNullOrEmpty(YG2.saves.language))
+            {
+                YG2.saves.language = YG2.lang;
+                Debug.Log($"Язык не был установлен. Установлен язык устройства: '{YG2.lang}'.");
+            }
+            else
+            {
+                Debug.Log($"Загружен сохраненный язык: '{YG2.saves.language}'.");
+            }
+
             gameEvents.onYandexSDKInitialized.Raise();
             if (!gameManager) return;
             StartCoroutine(LoadGameWithRetries());
@@ -279,6 +289,7 @@ namespace Core
             }
 
             gameEvents.onRequestHardReset.AddListener(HandleHardReset);
+            gameEvents.onSetLanguage.AddListener(SetLanguageAndSave);
         }
 
         /// <summary>
@@ -291,6 +302,7 @@ namespace Core
             var actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
             actionCountersModel?.ReEnableCounterLimits();
             YG2.saves.seenUpdateVersions.Clear();
+            YG2.saves.language = "";
             StartNewGameAndFinalize();
         }
 
@@ -332,6 +344,8 @@ namespace Core
                 {
                     gameEvents.onRequestNewGame.RemoveListener(StartNewGameFromButton);
                 }
+
+                gameEvents.onSetLanguage.RemoveListener(SetLanguageAndSave);
             }
 
             foreach (var service in _disposableServices)
@@ -349,6 +363,18 @@ namespace Core
         private void StartNewGameFromButton()
         {
             _gameController.StartNewGame(false);
+        }
+
+        /// <summary>
+        /// Устанавливает выбранный язык и сохраняет его.
+        /// </summary>
+        /// <param name="langCode">Код языка (например, "ru", "en").</param>
+        private void SetLanguageAndSave(string langCode)
+        {
+            if (string.IsNullOrEmpty(langCode) || YG2.saves.language == langCode) return;
+            Debug.Log($"Игрок выбрал язык: {langCode}");
+            YG2.saves.language = langCode;
+            gameManager.RequestSave();
         }
     }
 }
