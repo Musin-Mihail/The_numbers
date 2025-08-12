@@ -187,7 +187,7 @@ MonoBehaviour:
   Basic:
     platform: {fileID: 11400000, guid: c2a303d33a9fd394bae4c4b88b9a1c44, type: 2}
     autoApplySettings: 1
-    autoPauseGame: 0
+    autoPauseGame: 1
     editEventSystem: 1
     autoGRA: 1
     logInEditor: 1
@@ -248,7 +248,7 @@ MonoBehaviour:
     compressionFormat: 1
     decompressionFallback: 1
     autoGraphicsAPI: 1
-    minimalCodeCompression: 1
+    managedStrippingLevel: 1
     dataCaching: 0
     colorSpace: 0
     archivingBuild: 0

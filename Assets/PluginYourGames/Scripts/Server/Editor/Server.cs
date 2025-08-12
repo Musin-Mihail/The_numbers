@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -26,7 +26,7 @@ namespace YG.EditorScr
             EditorApplication.delayCall += () =>
             {
                 if (PluginPrefs.GetInt(InfoYG.FIRST_STARTUP_KEY) != 0 &&
-                SessionState.GetBool(LOAD_COMPLETE_KEY, false) == false)
+                    SessionState.GetBool(LOAD_COMPLETE_KEY, false) == false)
                 {
                     LoadServerInfo();
                 }
@@ -85,9 +85,9 @@ namespace YG.EditorScr
                     else
                     {
 #if RU_YG2
-                        Debug.LogWarning($"Информация для {InfoYG.NAME_PLUGIN} не была загружена из-за отсутствия Интернета или неверного URL-адреса.");
+                        Debug.LogError($"РРЅС„РѕСЂРјР°С†РёСЏ РґР»СЏ {InfoYG.NAME_PLUGIN} РЅРµ Р±С‹Р»Р° Р·Р°РіСЂСѓР¶РµРЅР° РёР·-Р·Р° РѕС‚СЃСѓС‚СЃС‚РІРёСЏ РРЅС‚РµСЂРЅРµС‚Р° РёР»Рё РЅРµРІРµСЂРЅРѕРіРѕ URL-Р°РґСЂРµСЃР°.");
 #else
-                        Debug.LogWarning($"The information for the {InfoYG.NAME_PLUGIN} was not uploaded due to a lack of Internet or an incorrect URL.");
+                        Debug.LogError($"The information for the {InfoYG.NAME_PLUGIN} was not uploaded due to a lack of Internet or an incorrect URL.");
 #endif
                     }
                 }

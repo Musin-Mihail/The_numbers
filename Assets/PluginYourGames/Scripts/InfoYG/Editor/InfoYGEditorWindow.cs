@@ -69,7 +69,7 @@ namespace YG.EditorScr
             CreateIcon(Path.Combine(InfoYG.PATCH_PC_ICONS, "Debugging.png"), out iconDebugging);
             CreateIcon(Path.Combine(InfoYG.PATCH_PC_ICONS, "ImageLoad.png"), out iconTemplate);
             CreateIcon(Path.Combine(InfoYG.PATCH_PC_ICONS, "Platform.png"), out iconConnect);
-            CreateIcon(PlatformSettingsEditor.GetIconCurrentPlatformPach(PlatformSettings.currentPlatformBaseName), out iconPlatform);
+            CreateIcon(PlatformSettingsEditor.GetIconCurrentPlatformPath(PlatformSettings.currentPlatformBaseName), out iconPlatform);
 
             string[] modules = Directory.GetDirectories(InfoYG.PATCH_PC_MODULES);
             for (int i = 0; i < modules.Length; i++)
@@ -231,10 +231,12 @@ namespace YG.EditorScr
                 GUI.matrix = originalMatrix;
                 GUILayout.Space(8);
 
-
-                Rect textureLastRect = GUILayoutUtility.GetRect(40, 40, GUILayout.ExpandWidth(false));
-                GUI.DrawTexture(textureLastRect, iconPlatform);
-                GUILayout.Space(10);
+                if (iconPlatform)
+                {
+                    Rect textureLastRect = GUILayoutUtility.GetRect(40, 40, GUILayout.ExpandWidth(false));
+                    GUI.DrawTexture(textureLastRect, iconPlatform);
+                    GUILayout.Space(10);
+                }
             }
             else
             {

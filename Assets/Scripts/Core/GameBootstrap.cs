@@ -8,6 +8,7 @@ using Core.UndoSystem;
 using DataProviders;
 using Gameplay;
 using Interfaces;
+using Localization;
 using Model;
 using UnityEngine;
 using View.Grid;
@@ -42,12 +43,9 @@ namespace Core
         private Action _requestNewGameAction;
         private GameController _gameController;
         private bool _isNewUser;
-
         private readonly List<IDisposable> _disposableServices = new();
+        private LocalizationManager _localizationManager;
 
-        /// <summary>
-        /// Вызывается при запуске. Инициализирует все системы игры.
-        /// </summary>
         private void Awake()
         {
             if (loadingScreen) loadingScreen.SetActive(true);
@@ -64,6 +62,9 @@ namespace Core
 
             ServiceProvider.Clear();
             ServiceProvider.Register(gameEvents);
+            
+            _localizationManager = new LocalizationManager(gameEvents);
+            ServiceProvider.Register(_localizationManager);
 
             var gridModel = new GridModel();
             var statisticsModel = new StatisticsModel();
@@ -153,16 +154,19 @@ namespace Core
         /// </summary>
         private void OnYandexSDKInitialized()
         {
-            if (string.IsNullOrEmpty(YG2.saves.language))
+            var langToLoad = YG2.saves.language;
+            if (string.IsNullOrEmpty(langToLoad))
             {
-                YG2.saves.language = YG2.lang;
-                Debug.Log($"Язык не был установлен. Установлен язык устройства: '{YG2.lang}'.");
+                langToLoad = YG2.lang;
+                YG2.saves.language = langToLoad;
+                Debug.Log($"Язык не был установлен. Установлен язык устройства: '{langToLoad}'.");
             }
             else
             {
-                Debug.Log($"Загружен сохраненный язык: '{YG2.saves.language}'.");
+                Debug.Log($"Загружен сохраненный язык: '{langToLoad}'.");
             }
 
+            _localizationManager.SetInitialLanguage(langToLoad);
             gameEvents.onYandexSDKInitialized.Raise();
             if (!gameManager) return;
             StartCoroutine(LoadGameWithRetries());
@@ -222,10 +226,14 @@ namespace Core
         /// </summary>
         private void ShowLoadErrorDialog()
         {
+            var message = _localizationManager.Get("loadError");
+            var retryText = _localizationManager.Get("retry");
+            var newGameText = _localizationManager.Get("newGame");
+            
             confirmationDialog.Show(
-                "Не удалось загрузить данные. Проверьте интернет-соединение и попробуйте снова.",
-                "Попробовать снова",
-                "Новая игра",
+                message,
+                retryText,
+                newGameText,
                 OnRetryLoad,
                 OnStartNewGameWithWarning,
                 new Vector2(0, 450)
@@ -278,7 +286,13 @@ namespace Core
         {
             if (confirmationDialog)
             {
-                _requestNewGameAction = () => confirmationDialog.Show("Начать новую игру?\nСтатистика сохранится", "Да", "Нет", StartNewGameFromButton, null, new Vector2(0, 370));
+                _requestNewGameAction = () => {
+                    var message = _localizationManager.Get("newGamePrompt");
+                    var yes = _localizationManager.Get("yes");
+                    var no = _localizationManager.Get("no");
+                    confirmationDialog.Show(message, yes, no, StartNewGameFromButton, null, new Vector2(0, 370));
+                };
+
                 gameEvents.onRequestNewGame.AddListener(_requestNewGameAction);
                 gameEvents.onRequestRefillCounters.AddListener(HandleRequestRefillCounters);
                 gameEvents.onRequestDisableCounters.AddListener(HandleRequestDisableCounters);

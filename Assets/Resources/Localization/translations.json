@@ -1,0 +1,200 @@
+﻿{
+  "play": {
+    "en": "Play",
+    "zh": "玩",
+    "es": "Jugar",
+    "ru": "Играть",
+    "fr": "Jouer",
+    "de": "Spielen",
+    "tr": "Oyna"
+  },
+  "statistics": {
+    "en": "Statistics",
+    "zh": "统计",
+    "es": "Estadísticas",
+    "ru": "Статистика",
+    "fr": "Statistiques",
+    "de": "Statistiken",
+    "tr": "İstatistikler"
+  },
+  "rules": {
+    "en": "Rules",
+    "zh": "规则",
+    "es": "Reglas",
+    "ru": "Правила",
+    "fr": "Règles",
+    "de": "Regeln",
+    "tr": "Kurallar"
+  },
+  "options": {
+    "en": "Options",
+    "zh": "选项",
+    "es": "Opciones",
+    "ru": "Опции",
+    "fr": "Options",
+    "de": "Optionen",
+    "tr": "Seçenekler"
+  },
+  "close": {
+    "en": "Close",
+    "zh": "关闭",
+    "es": "Cerrar",
+    "ru": "Закрыть",
+    "fr": "Fermer",
+    "de": "Schließen",
+    "tr": "Kapat"
+  },
+  "multiplier": {
+    "en": "Multiplier: x{0}",
+    "zh": "乘数: x{0}",
+    "es": "Multiplicador: x{0}",
+    "ru": "Множитель: x{0}",
+    "fr": "Multiplicateur : x{0}",
+    "de": "Multiplikator: x{0}",
+    "tr": "Çarpan: x{0}"
+  },
+  "score": {
+    "en": "Score: {0}",
+    "zh": "分数: {0}",
+    "es": "Puntuación: {0}",
+    "ru": "Счёт: {0}",
+    "fr": "Score : {0}",
+    "de": "Punktzahl: {0}",
+    "tr": "Skor: {0}"
+  },
+  "playerRating": {
+    "en": "Player Rating",
+    "zh": "玩家评分",
+    "es": "Clasificación de jugadores",
+    "ru": "Рейтинг игроков",
+    "fr": "Classement des joueurs",
+    "de": "Spielerbewertung",
+    "tr": "Oyuncu Değerlendirmesi"
+  },
+  "restart": {
+    "en": "Restart",
+    "zh": "重新开始",
+    "es": "Reiniciar",
+    "ru": "Начать заново",
+    "fr": "Recommencer",
+    "de": "Neustart",
+    "tr": "Yeniden Başlat"
+  },
+  "infiniteHints": {
+    "en": "Infinite Hints",
+    "zh": "无限提示",
+    "es": "Pistas infinitas",
+    "ru": "Бесконечные подсказки",
+    "fr": "Indices infinis",
+    "de": "Unendlich viele Hinweise",
+    "tr": "Sınırsız İpuçları"
+  },
+  "resetData": {
+    "en": "Reset Data",
+    "zh": "重置数据",
+    "es": "Restablecer datos",
+    "ru": "Сброс данных",
+    "fr": "Réinitialiser les données",
+    "de": "Daten zurücksetzen",
+    "tr": "Verileri Sıfırla"
+  },
+  "showTopLine": {
+    "en": "Show top line",
+    "zh": "显示顶行",
+    "es": "Mostrar línea superior",
+    "ru": "Показать верхнюю линию",
+    "fr": "Afficher la ligne du haut",
+    "de": "Obere Zeile anzeigen",
+    "tr": "Üst çizgiyi göster"
+  },
+  "newGamePrompt": {
+    "en": "Start a new game?\nStatistics will be saved",
+    "zh": "开始新游戏吗？\n统计数据将被保存",
+    "es": "¿Empezar un juego nuevo?\nLas estadísticas se guardarán",
+    "ru": "Начать новую игру?\nСтатистика сохранится",
+    "fr": "Commencer une nouvelle partie ?\nLes statistiques seront sauvegardées",
+    "de": "Neues Spiel starten?\nStatistiken werden gespeichert",
+    "tr": "Yeni bir oyun başlatılsın mı?\nİstatistikler kaydedilecek"
+  },
+  "yes": {
+    "en": "Yes",
+    "zh": "是",
+    "es": "Sí",
+    "ru": "Да",
+    "fr": "Oui",
+    "de": "Ja",
+    "tr": "Evet"
+  },
+  "no": {
+    "en": "No",
+    "zh": "不",
+    "es": "No",
+    "ru": "Нет",
+    "fr": "Non",
+    "de": "Nein",
+    "tr": "Hayır"
+  },
+  "watchAdPrompt": {
+    "en": "Watch an ad to refill the counter?",
+    "zh": "观看广告以补充计数器？",
+    "es": "¿Ver un anuncio para rellenar el contador?",
+    "ru": "Посмотреть рекламу, чтобы пополнить счётчик?",
+    "fr": "Regarder une publicité pour recharger le compteur ?",
+    "de": "Werbung ansehen, um den Zähler aufzufüllen?",
+    "tr": "Sayacı doldurmak için bir reklam izlensin mi?"
+  },
+  "buyInfiniteHintsPrompt": {
+    "en": "Buy infinite hints?",
+    "zh": "购买无限提示？",
+    "es": "¿Comprar pistas infinitas?",
+    "ru": "Купить бесконечные подсказки?",
+    "fr": "Acheter des indices infinis ?",
+    "de": "Unendlich viele Hinweise kaufen?",
+    "tr": "Sınırsız ipucu satın alınsın mı?"
+  },
+  "gameRulesDescription": {
+    "en": "The two selected numbers must be the same\nThe sum of the two selected numbers must be 10\nCells are horizontal or vertical\nThere must be no other cells between them\nOne is the last in the row, the other is the first in the next row\nOne is the very first on the field, the other is the very last",
+    "zh": "选择的两个数字必须相同\n选择的两个数字之和必须为10\n单元格是水平或垂直的\n它们之间不能有其他单元格\n一个是该行的最后一个，另一个是下一行的第一个\n一个是整个字段的第一个，另一个是最后一个",
+    "es": "Los dos números seleccionados deben ser iguales\nLa suma de los dos números seleccionados debe ser 10\nLas celdas son horizontales o verticales\nNo debe haber otras celdas entre ellas\nUna es la última de la fila, la otra es la primera de la fila siguiente\nUna es la primera del campo, la otra es la última",
+    "ru": "Два выбранных числа должны быть одинаковыми\nСумма двух выбранных чисел должна быть равна 10\nЯчейки находятся по горизонтали или вертикали\nМежду ячейками не должно быть других ячеек\nОдна последней в строке, другая первой в следующей строке\nОдна самой первой на всем поле, другая самой последней",
+    "fr": "Les deux nombres sélectionnés doivent être identiques\nLa somme des deux nombres sélectionnés doit être égale à 10\nLes cellules sont horizontales ou verticales\nIl ne doit pas y avoir d'autres cellules entre elles\nL'une est la dernière de la ligne, l'autre est la première de la ligne suivante\nL'une est la toute première sur le terrain, l'autre est la toute dernière",
+    "de": "Die beiden ausgewählten Zahlen müssen gleich sein\nDie Summe der beiden ausgewählten Zahlen muss 10 ergeben\nDie Zellen sind horizontal oder vertikal\nEs dürfen keine anderen Zellen dazwischen liegen\nEine ist die letzte in der Reihe, die andere die erste in der nächsten Reihe\nEine ist die allererste auf dem Feld, die andere die allerletzte",
+    "tr": "Seçilen iki sayı aynı olmalıdır\nSeçilen iki sayının toplamı 10 olmalıdır\nHücreler yatay veya dikeydir\nAralarında başka hücre olmamalıdır\nBiri satırdaki son, diğeri sonraki satırdaki ilk hücredir\nBiri sahadaki ilk, diğeri en sondur"
+  },
+  "scoringRulesDescription": {
+    "en": "Removing one pair +1 point\nRemoving one line +10 points\nRemoving all numbers +1 multiplier\nPoints are multiplied by the multiplier",
+    "zh": "移除一对+1分\n移除一行+10分\n移除所有数字+1乘数\n分数乘以乘数",
+    "es": "Eliminar un par +1 punto\nEliminar una línea +10 puntos\nEliminar todos los números +1 multiplicador\nLos puntos se multiplican por el multiplicador",
+    "ru": "Удаление одной пары +1 очко\nУдаление одной линии +10 очков\nУдаление всех цифр +1 множитель\nОчки умножаются на множитель",
+    "fr": "Supprimer une paire +1 point\nSupprimer une ligne +10 points\nSupprimer tous les nombres +1 multiplicateur\nLes points sont multipliés par le multiplicateur",
+    "de": "Entfernen eines Paares +1 Punkt\nEntfernen einer Zeile +10 Punkte\nEntfernen aller Zahlen +1 Multiplikator\nPunkte werden mit dem Multiplikator multipliziert",
+    "tr": "Bir çifti kaldırma +1 puan\nBir satırı kaldırma +10 puan\nTüm sayıları kaldırma +1 çarpan\nPuanlar çarpanla çarpılır"
+  },
+  "newGame": {
+    "en": "New Game",
+    "zh": "新游戏",
+    "es": "Nuevo juego",
+    "ru": "Новая игра",
+    "fr": "Nouveau jeu",
+    "de": "Neues Spiel",
+    "tr": "Yeni Oyun"
+  },
+  "retry": {
+    "en": "Retry",
+    "zh": "再试一次",
+    "es": "Reintentar",
+    "ru": "Попробовать снова",
+    "fr": "Réessayer",
+    "de": "Wiederholen",
+    "tr": "Tekrar Dene"
+  },
+  "loadError": {
+    "en": "Failed to load data. Check your internet connection and try again",
+    "zh": "无法加载数据。请检查您的网络连接并重试",
+    "es": "No se pudieron cargar los datos. Comprueba tu conexión a Internet y vuelve a intentarlo.",
+    "ru": "Не удалось загрузить данные. Проверьте интернет-соединение и попробуйте снова",
+    "fr": "Échec du chargement des données. Vérifiez votre connexion Internet et réessayez",
+    "de": "Daten konnten nicht geladen werden. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut",
+    "tr": "Veriler yüklenemedi. İnternet bağlantınızı kontrol edin ve tekrar deneyin"
+  }
+}
