@@ -1,7 +1,10 @@
 ﻿using System;
 using Core.Events;
 using Core.UndoSystem;
+using Localization;
 using Model;
+using UnityEngine;
+using View.UI;
 
 namespace Core.Handlers
 {
@@ -16,6 +19,10 @@ namespace Core.Handlers
         private readonly StatisticsModel _statisticsModel;
         private readonly GameEvents _gameEvents;
         private readonly GameManager _gameManager;
+        private readonly ConfirmationDialog _confirmationDialog;
+        private readonly LocalizationManager _localizationManager;
+        private readonly GameController _gameController;
+        private const int LineLimit = 2500;
 
         /// <summary>
         /// Инициализирует обработчик действий игрока с необходимыми зависимостями.
@@ -26,7 +33,8 @@ namespace Core.Handlers
             GridModel gridModel,
             StatisticsModel statisticsModel,
             GameEvents gameEvents,
-            GameManager gameManager)
+            GameManager gameManager,
+            GameController gameController)
         {
             _actionCountersModel = actionCountersModel;
             _actionHistory = actionHistory;
@@ -34,6 +42,10 @@ namespace Core.Handlers
             _statisticsModel = statisticsModel;
             _gameEvents = gameEvents;
             _gameManager = gameManager;
+            _gameController = gameController;
+
+            _confirmationDialog = ServiceProvider.GetService<ConfirmationDialog>();
+            _localizationManager = ServiceProvider.GetService<LocalizationManager>();
 
             _gameEvents.onAddExistingNumbers.AddListener(AddExistingNumbersAsNewLines);
             _gameEvents.onUndoLastAction.AddListener(UndoLastAction);
@@ -53,9 +65,26 @@ namespace Core.Handlers
         /// </summary>
         private void AddExistingNumbersAsNewLines()
         {
-            _gridModel.AppendActiveNumbersToGrid();
-            _actionHistory.Clear();
-            _gameManager?.RequestSave();
+            if (_gridModel.Cells.Count > LineLimit)
+            {
+                var message = _localizationManager.Get("lineLimitReached");
+                var newGameText = _localizationManager.Get("newGame");
+                var continueText = _localizationManager.Get("continue");
+                _confirmationDialog.Show(
+                    message,
+                    newGameText,
+                    continueText,
+                    () => _gameController.StartNewGame(false),
+                    null,
+                    new Vector2(0, 350)
+                );
+            }
+            else
+            {
+                _gridModel.AppendActiveNumbersToGrid();
+                _actionHistory.Clear();
+                _gameManager?.RequestSave();
+            }
         }
 
         /// <summary>

@@ -53,7 +53,7 @@ namespace Core
             _gridView = gridView;
 
             _matchHandler = new MatchHandler(gridModel, matchValidator, statisticsModel, actionHistory, gameEvents, gameManager);
-            _playerActionHandler = new PlayerActionHandler(actionCountersModel, actionHistory, gridModel, statisticsModel, gameEvents, gameManager);
+            _playerActionHandler = new PlayerActionHandler(actionCountersModel, actionHistory, gridModel, statisticsModel, gameEvents, gameManager, this);
             _hintHandler = new HintHandler(gridModel, matchValidator, actionCountersModel, gameEvents, gridView, gameManager);
             _platformBridge = new PlatformBridge(platformServices, gameEvents, actionCountersModel, gameManager);
 

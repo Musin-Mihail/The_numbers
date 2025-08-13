@@ -232,5 +232,23 @@
     "fr": "Acheté",
     "de": "Gekauft",
     "tr": "Satın alındı"
+  },
+  "lineLimitReached": {
+    "en": "You have reached the line limit",
+    "zh": "您已达到行数限制",
+    "es": "Has alcanzado el límite de líneas",
+    "ru": "Вы достигли лимита линий",
+    "fr": "Vous avez atteint la limite de lignes",
+    "de": "Sie haben das Zeilenlimit erreicht",
+    "tr": "Satır sınırına ulaştınız"
+  },
+  "continue": {
+    "en": "Continue",
+    "zh": "继续",
+    "es": "Continuar",
+    "ru": "Продолжить",
+    "fr": "Continuer",
+    "de": "Fortsetzen",
+    "tr": "Devam et"
   }
 }

@@ -90,6 +90,7 @@ namespace Core
 
             ServiceProvider.Register(gridView);
             ServiceProvider.Register(headerNumberDisplay);
+            ServiceProvider.Register(confirmationDialog);
 
             _gameController = new GameController(
                 gridModel,
