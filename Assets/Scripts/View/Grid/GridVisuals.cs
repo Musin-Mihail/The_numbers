@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Core;
 using Localization;
-using Model;
 using UnityEngine;
 using View.UI;
 
@@ -16,22 +15,22 @@ namespace View.Grid
     {
         private readonly Dictionary<Guid, Cell> _cellViewInstances;
         private readonly FloatingScorePool _floatingScorePool;
-        private readonly GridModel _gridModel;
         private readonly Color _positiveScoreColor;
         private readonly Color _negativeScoreColor;
         private readonly LocalizationManager _localizationManager;
         private readonly List<Guid> _hintedCellIds = new();
         public bool HasActiveHints => _hintedCellIds.Count > 0;
 
-        public GridVisuals(Dictionary<Guid, Cell> cellViewInstances, FloatingScorePool floatingScorePool, GridModel gridModel, Color positiveScoreColor, Color negativeScoreColor)
+        public GridVisuals(Dictionary<Guid, Cell> cellViewInstances, FloatingScorePool floatingScorePool, Color positiveScoreColor, Color negativeScoreColor)
         {
             _cellViewInstances = cellViewInstances;
             _floatingScorePool = floatingScorePool;
-            _gridModel = gridModel;
             _positiveScoreColor = positiveScoreColor;
             _negativeScoreColor = negativeScoreColor;
             _localizationManager = ServiceProvider.GetService<LocalizationManager>();
         }
+
+        public bool IsCellHinted(Guid id) => _hintedCellIds.Contains(id);
 
         /// <summary>
         /// Отображает подсказку, подсвечивая две ячейки.
@@ -42,14 +41,9 @@ namespace View.Grid
             _hintedCellIds.Add(data.firstId);
             _hintedCellIds.Add(data.secondId);
             if (_cellViewInstances.TryGetValue(data.firstId, out var firstCell))
-            {
                 firstCell.SetHighlight(true);
-            }
-
             if (_cellViewInstances.TryGetValue(data.secondId, out var secondCell))
-            {
                 secondCell.SetHighlight(true);
-            }
         }
 
         /// <summary>
@@ -69,6 +63,12 @@ namespace View.Grid
             _hintedCellIds.Clear();
         }
 
+        public void ClearCellVisuals(Cell cell)
+        {
+            cell.SetHighlight(false);
+            cell.SetSelected(false);
+        }
+
         /// <summary>
         /// Устанавливает визуальное состояние выделения для ячейки.
         /// </summary>
@@ -83,14 +83,9 @@ namespace View.Grid
         /// <summary>
         /// Показывает всплывающие очки для найденной пары.
         /// </summary>
-        public void ShowFloatingScoreForPair(Guid cell1Id, Guid cell2Id, int score, bool isPositive)
+        public void ShowFloatingScoreForPair(Vector2 pos1, Vector2 pos2, int score, bool isPositive)
         {
-            var cell1Data = _gridModel.GetCellDataById(cell1Id);
-            var cell2Data = _gridModel.GetCellDataById(cell2Id);
-            if (cell1Data == null || cell2Data == null) return;
-            var pos1Pivot = new Vector2(GameConstants.CellSize * cell1Data.Column + GameConstants.Indent / 2f, -GameConstants.CellSize * cell1Data.Line - GameConstants.Indent / 2f);
-            var pos2Pivot = new Vector2(GameConstants.CellSize * cell2Data.Column + GameConstants.Indent / 2f, -GameConstants.CellSize * cell2Data.Line - GameConstants.Indent / 2f);
-            var midPoint = (pos1Pivot + pos2Pivot) / 2f;
+            var midPoint = (pos1 + pos2) / 2f;
             var color = isPositive ? _positiveScoreColor : _negativeScoreColor;
             ShowFloatingScore(score, color, midPoint);
         }

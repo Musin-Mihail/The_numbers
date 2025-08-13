@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.Events;
 using Model;
 using UnityEngine;
@@ -10,8 +11,7 @@ namespace View.Grid
 {
     /// <summary>
     /// Основной компонент-оркестратор для представления игровой сетки.
-    /// Делегирует задачи по обработке ввода, визуализации и расположению
-    /// специализированным классам-обработчикам.
+    /// Реализует виртуализацию UI, отображая только видимые ячейки.
     /// </summary>
     public class GridView : MonoBehaviour
     {
@@ -25,6 +25,8 @@ namespace View.Grid
         [Header("Настройки")]
         [SerializeField] private Color positiveScoreColor = Color.green;
         [SerializeField] private Color negativeScoreColor = Color.red;
+        [Tooltip("Количество рядов ячеек, которые будут созданы за пределами видимой области для плавной прокрутки.")]
+        [SerializeField] private int lineBuffer = 2;
 
         private readonly Dictionary<Guid, Cell> _cellViewInstances = new();
 
@@ -53,7 +55,7 @@ namespace View.Grid
 
         private void Awake()
         {
-            _visuals = new GridVisuals(_cellViewInstances, floatingScorePool, _gridModel, positiveScoreColor, negativeScoreColor);
+            _visuals = new GridVisuals(_cellViewInstances, floatingScorePool, positiveScoreColor, negativeScoreColor);
             _inputHandler = new GridInputHandler(_gameEvents, _visuals);
             _layoutManager = new GridLayoutManager(contentContainer, scrollRect, scrollviewContainer, _headerNumberDisplay, _gridModel);
 
@@ -79,9 +81,9 @@ namespace View.Grid
         {
             if (!_gameEvents) return;
 
-            _gameEvents.onCellAdded.AddListener(HandleCellAdded);
+            _gameEvents.onCellAdded.AddListener(HandleGridChanged);
             _gameEvents.onCellUpdated.AddListener(HandleCellUpdated);
-            _gameEvents.onCellRemoved.AddListener(HandleCellRemoved);
+            _gameEvents.onCellRemoved.AddListener(HandleGridChanged);
             _gameEvents.onGridCleared.AddListener(HandleGridCleared);
             _gameEvents.onMatchFound.AddListener(HandleMatchFound);
             _gameEvents.onInvalidMatch.AddListener(HandleInvalidMatch);
@@ -92,18 +94,18 @@ namespace View.Grid
             _gameEvents.onPairScoreUndone.AddListener(HandlePairScoreUndone);
             _gameEvents.onLineScoreUndone.AddListener(HandleLineScoreUndone);
             _gameEvents.onBoardCleared.AddListener(HandleBoardCleared);
-            _gameEvents.onLinesRemoved.AddListener(HandleLinesRemoved);
+            _gameEvents.onLinesRemoved.AddListener(HandleGridChanged);
 
-            _layoutManager.SubscribeToScrollEvents();
+            scrollRect.onValueChanged.AddListener(OnScrollPositionChanged);
         }
 
         private void UnsubscribeFromEvents()
         {
-            if (_gameEvents == null) return;
+            if (!_gameEvents) return;
 
-            _gameEvents.onCellAdded.RemoveListener(HandleCellAdded);
+            _gameEvents.onCellAdded.RemoveListener(HandleGridChanged);
             _gameEvents.onCellUpdated.RemoveListener(HandleCellUpdated);
-            _gameEvents.onCellRemoved.RemoveListener(HandleCellRemoved);
+            _gameEvents.onCellRemoved.RemoveListener(HandleGridChanged);
             _gameEvents.onGridCleared.RemoveListener(HandleGridCleared);
             _gameEvents.onMatchFound.RemoveListener(HandleMatchFound);
             _gameEvents.onInvalidMatch.RemoveListener(HandleInvalidMatch);
@@ -114,14 +116,66 @@ namespace View.Grid
             _gameEvents.onPairScoreUndone.RemoveListener(HandlePairScoreUndone);
             _gameEvents.onLineScoreUndone.RemoveListener(HandleLineScoreUndone);
             _gameEvents.onBoardCleared.RemoveListener(HandleBoardCleared);
-            _gameEvents.onLinesRemoved.RemoveListener(HandleLinesRemoved);
+            _gameEvents.onLinesRemoved.RemoveListener(HandleGridChanged);
 
-            _layoutManager.UnsubscribeFromScrollEvents();
+            scrollRect.onValueChanged.RemoveListener(OnScrollPositionChanged);
+        }
+
+        private void OnScrollPositionChanged(Vector2 pos)
+        {
+            UpdateVisibleCells();
+            _layoutManager.RefreshTopLine();
         }
 
         /// <summary>
-        /// Сбрасывает выделение ячеек и визуальные эффекты подсказок.
+        /// Основной метод виртуализации. Создает/удаляет вьюшки ячеек на основе их видимости.
         /// </summary>
+        private void UpdateVisibleCells()
+        {
+            if (_gridModel == null || !scrollRect) return;
+            // 1. Рассчитать диапазон видимых линий
+            var (firstVisibleLine, lastVisibleLine) = _layoutManager.GetVisibleLineRange(lineBuffer);
+            // 2. Определить, какие ячейки должны быть видимы
+            var requiredCells = new HashSet<Guid>();
+            for (var i = firstVisibleLine; i <= lastVisibleLine; i++)
+            {
+                if (i < 0 || i >= _gridModel.Cells.Count) continue;
+                foreach (var cellData in _gridModel.Cells[i])
+                {
+                    requiredCells.Add(cellData.Id);
+                }
+            }
+
+            // 3. Удалить ячейки, которые больше не видны
+            var cellsToRemove = _cellViewInstances.Keys.Where(cellId => !requiredCells.Contains(cellId)).ToList();
+            foreach (var cellId in cellsToRemove)
+            {
+                if (!_cellViewInstances.TryGetValue(cellId, out var cellView)) continue;
+                // Перед удалением сбрасываем состояние, чтобы не было "глюков" при переиспользовании
+                _visuals.ClearCellVisuals(cellView);
+                cellPool.ReturnCell(cellView);
+                _cellViewInstances.Remove(cellId);
+            }
+
+            // 4. Добавить ячейки, которые стали видимыми
+            for (var i = firstVisibleLine; i <= lastVisibleLine; i++)
+            {
+                if (i < 0 || i >= _gridModel.Cells.Count) continue;
+                foreach (var cellData in _gridModel.Cells[i])
+                {
+                    if (_cellViewInstances.ContainsKey(cellData.Id)) continue;
+                    var newCellView = cellPool.GetCell();
+                    newCellView.UpdateFromData(cellData);
+                    newCellView.OnClickedCallback = _inputHandler.HandleCellClicked;
+                    // Применяем сохраненные состояния (выделение, подсказка)
+                    newCellView.SetSelected(_inputHandler.IsCellSelected(cellData.Id));
+                    newCellView.SetHighlight(_visuals.IsCellHinted(cellData.Id));
+                    _cellViewInstances[cellData.Id] = newCellView;
+                    _layoutManager.UpdateCellPosition(cellData, newCellView, false); // Без анимации при прокрутке
+                }
+            }
+        }
+
         public void ResetSelectionAndHints()
         {
             _inputHandler.ResetSelection();
@@ -134,28 +188,17 @@ namespace View.Grid
         public void FullRedraw()
         {
             HandleGridCleared();
-            var allCells = _gridModel.GetAllCellData();
-            foreach (var cellData in allCells)
-            {
-                HandleCellAdded((cellData, false));
-            }
-
             _layoutManager.UpdateContentSize();
+            UpdateVisibleCells();
             _layoutManager.RefreshTopLine();
         }
 
-        private void HandleCellAdded((CellData data, bool animate) payload)
+        private void HandleGridChanged<T>(T payload) => HandleGridChanged();
+
+        private void HandleGridChanged()
         {
-            if (_cellViewInstances.ContainsKey(payload.data.Id)) return;
-
-            var newCellView = cellPool.GetCell();
-            newCellView.UpdateFromData(payload.data);
-            newCellView.OnClickedCallback = _inputHandler.HandleCellClicked;
-            _cellViewInstances[payload.data.Id] = newCellView;
-
-            _layoutManager.UpdateCellPosition(payload.data, newCellView, payload.animate);
             _layoutManager.UpdateContentSize();
-            _layoutManager.RefreshTopLine();
+            UpdateVisibleCells();
         }
 
         private void HandleCellUpdated(CellData data)
@@ -163,13 +206,6 @@ namespace View.Grid
             if (!_cellViewInstances.TryGetValue(data.Id, out var cellView)) return;
             cellView.UpdateFromData(data);
             _layoutManager.UpdateCellPosition(data, cellView, true);
-        }
-
-        private void HandleCellRemoved(Guid dataId)
-        {
-            if (!_cellViewInstances.TryGetValue(dataId, out var cellToReturn)) return;
-            cellPool.ReturnCell(cellToReturn);
-            _cellViewInstances.Remove(dataId);
         }
 
         private void HandleGridCleared()
@@ -184,12 +220,6 @@ namespace View.Grid
 
             _cellViewInstances.Clear();
             _layoutManager.UpdateContentSize();
-        }
-
-        private void HandleLinesRemoved()
-        {
-            _layoutManager.UpdateContentSize();
-            _layoutManager.RefreshTopLine();
         }
 
         private void HandleBoardCleared()
@@ -219,12 +249,22 @@ namespace View.Grid
 
         private void HandlePairScoreAdded((Guid cell1, Guid cell2, int score) data)
         {
-            _visuals.ShowFloatingScoreForPair(data.cell1, data.cell2, data.score, true);
+            var pos1 = _layoutManager.GetCellPosition(data.cell1);
+            var pos2 = _layoutManager.GetCellPosition(data.cell2);
+            if (pos1.HasValue && pos2.HasValue)
+            {
+                _visuals.ShowFloatingScoreForPair(pos1.Value, pos2.Value, data.score, true);
+            }
         }
 
         private void HandlePairScoreUndone((Guid cell1, Guid cell2, int score) data)
         {
-            _visuals.ShowFloatingScoreForPair(data.cell1, data.cell2, -data.score, false);
+            var pos1 = _layoutManager.GetCellPosition(data.cell1);
+            var pos2 = _layoutManager.GetCellPosition(data.cell2);
+            if (pos1.HasValue && pos2.HasValue)
+            {
+                _visuals.ShowFloatingScoreForPair(pos1.Value, pos2.Value, -data.score, false);
+            }
         }
 
         private void HandleLineScoreAdded((int lineIndex, int score) data)

@@ -20,6 +20,8 @@ namespace View.Grid
             _gridVisuals = gridVisuals;
         }
 
+        public bool IsCellSelected(Guid id) => _firstSelectedCellId.HasValue && _firstSelectedCellId.Value == id;
+
         /// <summary>
         /// Обрабатывает клик по ячейке.
         /// </summary>
@@ -53,7 +55,6 @@ namespace View.Grid
         public void ResetSelection()
         {
             if (!_firstSelectedCellId.HasValue) return;
-
             _gridVisuals.SetSelectionVisual(_firstSelectedCellId.Value, false);
             _firstSelectedCellId = null;
         }

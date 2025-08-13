@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using System;
+using Core;
 using Model;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,7 +17,7 @@ namespace View.Grid
         private readonly RectTransform _scrollviewContainer;
         private readonly HeaderNumberDisplay _headerNumberDisplay;
         private readonly GridModel _gridModel;
-        
+
         private readonly float _topPaddingValue;
         private readonly float _scrollLoggingThreshold;
         private float _lastLoggedScrollPosition;
@@ -28,7 +29,7 @@ namespace View.Grid
             _scrollviewContainer = scrollviewContainer;
             _headerNumberDisplay = headerNumberDisplay;
             _gridModel = gridModel;
-            
+
             _topPaddingValue = GameConstants.CellSize * 1.1f;
             _scrollLoggingThreshold = GameConstants.CellSize / 2f;
         }
@@ -41,17 +42,6 @@ namespace View.Grid
 
         public void Dispose()
         {
-            UnsubscribeFromScrollEvents();
-        }
-
-        public void SubscribeToScrollEvents()
-        {
-            _scrollRect?.onValueChanged.AddListener(OnScrollValueChanged);
-        }
-
-        public void UnsubscribeFromScrollEvents()
-        {
-            _scrollRect?.onValueChanged.RemoveListener(OnScrollValueChanged);
         }
 
         /// <summary>
@@ -74,7 +64,6 @@ namespace View.Grid
         public void UpdateCellPosition(CellData data, Cell cellView, bool animate)
         {
             var targetPosition = GetCellPosition(data);
-
             if (!cellView.Animator) return;
             var duration = animate ? GameConstants.CellMoveDuration : 0f;
             cellView.Animator.MoveTo(cellView.TargetRectTransform, targetPosition, duration);
@@ -86,6 +75,10 @@ namespace View.Grid
         public void RefreshTopLine()
         {
             if (!_headerNumberDisplay) return;
+            var currentScrollPosition = _scrollRect.content.anchoredPosition.y;
+            if (!(Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= _scrollLoggingThreshold)) return;
+
+            _lastLoggedScrollPosition = currentScrollPosition;
             var numberLine = Mathf.RoundToInt(_lastLoggedScrollPosition / GameConstants.CellSize);
             var activeNumbers = _gridModel.GetNumbersForTopLine(numberLine);
             _headerNumberDisplay.UpdateDisplayedNumbers(activeNumbers);
@@ -96,27 +89,44 @@ namespace View.Grid
         /// </summary>
         public void SetTopPaddingActive(bool isActive)
         {
-            if (_scrollviewContainer)
-            {
-                var topOffset = isActive ? -_topPaddingValue : 0;
-                _scrollviewContainer.offsetMax = new Vector2(_scrollviewContainer.offsetMax.x, topOffset);
-            }
+            if (!_scrollviewContainer) return;
+            var topOffset = isActive ? -_topPaddingValue : 0;
+            _scrollviewContainer.offsetMax = new Vector2(_scrollviewContainer.offsetMax.x, topOffset);
         }
 
-        private void OnScrollValueChanged(Vector2 position)
-        {
-            var currentScrollPosition = _scrollRect.content.anchoredPosition.y;
-            if (!(Mathf.Abs(currentScrollPosition - _lastLoggedScrollPosition) >= _scrollLoggingThreshold)) return;
-            _lastLoggedScrollPosition = currentScrollPosition;
-            RefreshTopLine();
-        }
-
+        /// <summary>
+        /// Вычисляет позицию ячейки по ее данным.
+        /// </summary>
         private Vector2 GetCellPosition(CellData data)
         {
             return new Vector2(
                 GameConstants.CellSize * data.Column + GameConstants.Indent / 2f,
                 -GameConstants.CellSize * data.Line - GameConstants.Indent / 2f
             );
+        }
+
+        /// <summary>
+        /// Получает позицию ячейки по ее ID.
+        /// </summary>
+        public Vector2? GetCellPosition(Guid cellId)
+        {
+            var data = _gridModel.GetCellDataById(cellId);
+            return data != null ? GetCellPosition(data) : null;
+        }
+
+        /// <summary>
+        /// Рассчитывает и возвращает диапазон видимых линий.
+        /// </summary>
+        public (int start, int end) GetVisibleLineRange(int buffer)
+        {
+            var viewportHeight = _scrollRect.viewport.rect.height;
+            var contentPos = _contentContainer.anchoredPosition.y;
+            var cellSize = GameConstants.CellSize;
+
+            var firstLine = Mathf.FloorToInt(contentPos / cellSize) - buffer;
+            var lastLine = Mathf.FloorToInt((contentPos + viewportHeight) / cellSize) + buffer;
+
+            return (Mathf.Max(0, firstLine), Mathf.Min(_gridModel.Cells.Count - 1, lastLine));
         }
     }
 }

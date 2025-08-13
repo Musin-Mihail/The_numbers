@@ -3755,8 +3755,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4129385542a34a97aa75a5b75fc2a0e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  countdownPanel: {fileID: 0}
-  countdownText: {fileID: 0}
   gameEvents: {fileID: 11400000, guid: f4c0432a5dafe5b4c97ce2400b9a7313, type: 2}
 --- !u!1 &524787356
 GameObject:
@@ -4843,6 +4841,7 @@ MonoBehaviour:
   scrollviewContainer: {fileID: 135620097}
   positiveScoreColor: {r: 0, g: 1, b: 0, a: 1}
   negativeScoreColor: {r: 1, g: 0, b: 0, a: 1}
+  lineBuffer: 2
 --- !u!1 &697506283
 GameObject:
   m_ObjectHideFlags: 0
