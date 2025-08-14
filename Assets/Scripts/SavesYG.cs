@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// --- Файл: Assets/Scripts/SavesYG.cs ---
+using System.Collections.Generic;
 using Core;
 
 namespace YG
@@ -14,9 +15,17 @@ namespace YG
         public bool isTopLineVisible = true;
 
         /// <summary>
-        /// Сериализованные данные всех ячеек на игровой сетке.
+        /// УСТАРЕВШЕЕ ПОЛЕ. Используется только для обратной совместимости со старыми сохранениями.
+        /// Новые сохранения используют `gridState`.
         /// </summary>
+        [System.Obsolete("This field is for backward compatibility with old saves. Use gridState instead.")]
         public List<CellDataSerializable> gridCells = new();
+
+        /// <summary>
+        /// Компактное представление сетки в виде строки для экономии места.
+        /// </summary>
+        public string gridState = "";
+        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
         /// <summary>
         /// Сериализованные данные статистики игрока (счет, множитель).

@@ -22,7 +22,7 @@ namespace Core.Handlers
         private readonly ConfirmationDialog _confirmationDialog;
         private readonly LocalizationManager _localizationManager;
         private readonly GameController _gameController;
-        private const int LineLimit = 300;
+        private const int LineLimit = 1000;
 
         /// <summary>
         /// Инициализирует обработчик действий игрока с необходимыми зависимостями.
@@ -65,7 +65,7 @@ namespace Core.Handlers
         /// </summary>
         private void AddExistingNumbersAsNewLines()
         {
-            if (_gridModel.Cells.Count > LineLimit)
+            if (_gridModel.Cells.Count * 2 > LineLimit)
             {
                 var message = _localizationManager.Get("lineLimitReached");
                 var newGameText = _localizationManager.Get("newGame");
@@ -99,9 +99,7 @@ namespace Core.Handlers
             }
 
             if (!_actionHistory.CanUndo()) return;
-
             _actionHistory.Undo();
-
             if (!_actionCountersModel.AreCountersDisabled)
             {
                 _actionCountersModel.DecrementUndo();
