@@ -22,7 +22,7 @@ namespace Core.Handlers
         private readonly ConfirmationDialog _confirmationDialog;
         private readonly LocalizationManager _localizationManager;
         private readonly GameController _gameController;
-        private const int LineLimit = 2500;
+        private const int LineLimit = 300;
 
         /// <summary>
         /// Инициализирует обработчик действий игрока с необходимыми зависимостями.
