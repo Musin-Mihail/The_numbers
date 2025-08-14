@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.Events;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace Localization
     public class LocalizationManager
     {
         private Dictionary<string, Dictionary<string, string>> _allTranslations;
+        private HashSet<string> _supportedLanguages;
 
         /// <summary>
         /// Возвращает код текущего установленного языка.
@@ -44,27 +46,42 @@ namespace Localization
             if (asset != null)
             {
                 _allTranslations = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(asset.text);
+                _supportedLanguages = new HashSet<string>(_allTranslations.Values
+                    .SelectMany(translations => translations.Keys)
+                    .Distinct());
                 Debug.Log("[LocalizationManager] Файл переводов успешно загружен.");
             }
             else
             {
                 Debug.LogError("[LocalizationManager] Файл 'translations.json' не найден в Resources/Localization.");
                 _allTranslations = new Dictionary<string, Dictionary<string, string>>();
+                _supportedLanguages = new HashSet<string>();
             }
         }
 
         /// <summary>
         /// Устанавливает текущий язык и уведомляет подписчиков.
+        /// --- ИЗМЕНЕНИЕ: Добавлена валидация языка ---
         /// </summary>
         private void SetLanguage(string langCode)
         {
-            var newLanguage = string.IsNullOrEmpty(langCode) ? "en" : langCode;
-            if (CurrentLanguage == newLanguage)
+            var languageToSet = langCode;
+            if (string.IsNullOrEmpty(languageToSet) || !_supportedLanguages.Contains(languageToSet))
+            {
+                if (!string.IsNullOrEmpty(langCode))
+                {
+                    Debug.LogWarning($"[LocalizationManager] Язык '{langCode}' не поддерживается. Устанавливается 'en'.");
+                }
+
+                languageToSet = "en";
+            }
+
+            if (CurrentLanguage == languageToSet)
             {
                 return;
             }
 
-            CurrentLanguage = newLanguage;
+            CurrentLanguage = languageToSet;
             Debug.Log($"[LocalizationManager] Язык изменен на '{CurrentLanguage}'.");
             OnLanguageChanged?.Invoke();
         }

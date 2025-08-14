@@ -65,7 +65,7 @@ namespace Core.Events
         public VoidEvent onHideRules;
         public VoidEvent onShowOptions;
         public VoidEvent onHideOptions;
-        public StringEvent onSetLanguage; // НОВОЕ СОБЫТИЕ
+        public StringEvent onSetLanguage;
 
         [Header("Update Notifications")]
         public VoidEvent onNewUpdateAvailable;
