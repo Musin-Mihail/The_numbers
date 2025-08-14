@@ -46,14 +46,7 @@ namespace Localization
         private void HandleLanguageChange(string langCode)
         {
             Debug.Log($"[YandexLanguageListener] Получен новый язык от плагина: {langCode}");
-            if (YG2.saves.language != langCode)
-            {
-                gameEvents.onSetLanguage.Raise(langCode);
-            }
-            else
-            {
-                Debug.Log($"[YandexLanguageListener] Смена языка проигнорирована, так как язык '{langCode}' уже установлен.");
-            }
+            gameEvents.onSetLanguage.Raise(langCode);
         }
     }
 }

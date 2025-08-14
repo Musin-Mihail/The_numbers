@@ -58,7 +58,13 @@ namespace Localization
         /// </summary>
         private void SetLanguage(string langCode)
         {
-            CurrentLanguage = string.IsNullOrEmpty(langCode) ? "en" : langCode;
+            var newLanguage = string.IsNullOrEmpty(langCode) ? "en" : langCode;
+            if (CurrentLanguage == newLanguage)
+            {
+                return;
+            }
+
+            CurrentLanguage = newLanguage;
             Debug.Log($"[LocalizationManager] Язык изменен на '{CurrentLanguage}'.");
             OnLanguageChanged?.Invoke();
         }

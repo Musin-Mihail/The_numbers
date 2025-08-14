@@ -33,10 +33,5 @@ namespace YG
         /// Это позволяет показывать анимацию для каждого нового обновления.
         /// </summary>
         public List<int> seenUpdateVersions = new();
-
-        /// <summary>
-        /// Сохраненный язык игры. По умолчанию - пустая строка.
-        /// </summary>
-        public string language = "";
     }
 }
