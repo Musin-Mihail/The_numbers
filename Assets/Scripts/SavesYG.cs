@@ -1,5 +1,4 @@
-﻿// --- Файл: Assets/Scripts/SavesYG.cs ---
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Core;
 
 namespace YG
@@ -15,6 +14,11 @@ namespace YG
         public bool isTopLineVisible = true;
 
         /// <summary>
+        /// Рекордный счет игрока.
+        /// </summary>
+        public long record = 0;
+
+        /// <summary>
         /// УСТАРЕВШЕЕ ПОЛЕ. Используется только для обратной совместимости со старыми сохранениями.
         /// Новые сохранения используют `gridState`.
         /// </summary>
@@ -25,7 +29,6 @@ namespace YG
         /// Компактное представление сетки в виде строки для экономии места.
         /// </summary>
         public string gridState = "";
-        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
         /// <summary>
         /// Сериализованные данные статистики игрока (счет, множитель).
@@ -42,5 +45,10 @@ namespace YG
         /// Это позволяет показывать анимацию для каждого нового обновления.
         /// </summary>
         public List<int> seenUpdateVersions = new();
+        
+        /// <summary>
+        /// Хранит идентификаторы выполненных миграций данных, чтобы избежать их повторного запуска.
+        /// </summary>
+        public List<string> seenMigrationIds = new();
     }
 }

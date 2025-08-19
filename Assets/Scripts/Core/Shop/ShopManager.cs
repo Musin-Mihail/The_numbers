@@ -1,6 +1,4 @@
-﻿// --- Файл: D:\Repositories\The_numbers\Assets\Scripts\Core\Shop\ShopManager.cs ---
-
-using Core.Events;
+﻿using Core.Events;
 using Localization;
 using Model;
 using TMPro;

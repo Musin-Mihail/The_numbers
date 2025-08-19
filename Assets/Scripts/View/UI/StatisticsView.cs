@@ -4,16 +4,19 @@ using Localization;
 using Model;
 using TMPro;
 using UnityEngine;
+using YG;
 
 namespace View.UI
 {
     /// <summary>
-    /// Отображает игровую статистику (счет и множитель).
+    /// Отображает игровую статистику (счет, рекорд и множитель).
     /// </summary>
     public class StatisticsView : MonoBehaviour
     {
         [Header("UI Dependencies")]
         [SerializeField] private TextMeshProUGUI scoreText;
+        [Tooltip("Текстовое поле для отображения рекорда")]
+        [SerializeField] private TextMeshProUGUI recordText;
         [SerializeField] private TextMeshProUGUI multiplierText;
 
         [Header("Event Listening")]
@@ -73,6 +76,11 @@ namespace View.UI
             if (scoreText)
             {
                 scoreText.text = string.Format(_localizationManager.Get("score"), data.score);
+            }
+
+            if (recordText)
+            {
+                recordText.text = string.Format(_localizationManager.Get("record"), YG2.saves.record);
             }
 
             if (multiplierText)

@@ -202,6 +202,17 @@ namespace Core
 
             if (loadSuccess)
             {
+                if (!YG2.saves.seenMigrationIds.Contains(GameConstants.ScoreResetMigrationId))
+                {
+                    Debug.Log($"Выполняется миграция данных '{GameConstants.ScoreResetMigrationId}': сброс счета.");
+                    YG2.saves.statistics.score = 0;
+                    YG2.saves.seenMigrationIds.Add(GameConstants.ScoreResetMigrationId);
+                    var statisticsModel = ServiceProvider.GetService<StatisticsModel>();
+                    statisticsModel.SetState(YG2.saves.statistics.score, YG2.saves.statistics.multiplier);
+                    gameEvents.onStatisticsChanged.Raise((statisticsModel.Score, statisticsModel.Multiplier));
+                    saveLoadService.RequestSave();
+                }
+
                 Debug.Log("Данные успешно загружены. Отображение сохраненного состояния.");
                 gridView.FullRedraw();
                 FinalizeGameSetup();
@@ -308,6 +319,7 @@ namespace Core
             var actionCountersModel = ServiceProvider.GetService<ActionCountersModel>();
             actionCountersModel?.ReEnableCounterLimits();
             YG2.saves.seenUpdateVersions.Clear();
+            YG2.saves.seenMigrationIds.Clear();
             StartNewGameAndFinalize();
         }
 
@@ -371,6 +383,9 @@ namespace Core
         /// </summary>
         private void StartNewGameFromButton()
         {
+            var statisticsModel = ServiceProvider.GetService<StatisticsModel>();
+            statisticsModel.SetState(0, statisticsModel.Multiplier);
+            gameEvents.onStatisticsChanged.Raise((statisticsModel.Score, statisticsModel.Multiplier));
             _gameController.StartNewGame(false);
         }
     }

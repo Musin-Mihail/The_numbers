@@ -61,7 +61,6 @@ namespace Localization
 
         /// <summary>
         /// Устанавливает текущий язык и уведомляет подписчиков.
-        /// --- ИЗМЕНЕНИЕ: Добавлена валидация языка ---
         /// </summary>
         private void SetLanguage(string langCode)
         {

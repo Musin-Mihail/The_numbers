@@ -29,7 +29,7 @@ MonoBehaviour:
     enable: 1
     saveScoreAnonymousPlayers: 1
     listLBSim:
-    - technoName: TotalScore
+    - technoName: Records
       entries: 
       isDefault: 0
       isInvertSortOrder: 0

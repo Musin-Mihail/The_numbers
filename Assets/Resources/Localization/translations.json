@@ -8,15 +8,6 @@
     "de": "Spielen",
     "tr": "Oyna"
   },
-  "statistics": {
-    "en": "Statistics",
-    "zh": "统计",
-    "es": "Estadísticas",
-    "ru": "Статистика",
-    "fr": "Statistiques",
-    "de": "Statistiken",
-    "tr": "İstatistikler"
-  },
   "rules": {
     "en": "Rules",
     "zh": "规则",
@@ -61,6 +52,15 @@
     "fr": "Score : {0}",
     "de": "Punktzahl: {0}",
     "tr": "Skor: {0}"
+  },
+  "record": {
+    "en": "Best: {0}",
+    "zh": "记录: {0}",
+    "es": "Récord: {0}",
+    "ru": "Рекорд: {0}",
+    "fr": "Record : {0}",
+    "de": "Beste: {0}",
+    "tr": "Rekor: {0}"
   },
   "playerRating": {
     "en": "Player Rating",
