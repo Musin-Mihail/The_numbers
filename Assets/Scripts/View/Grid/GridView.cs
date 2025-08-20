@@ -80,7 +80,7 @@ namespace View.Grid
         private void SubscribeToEvents()
         {
             if (!_gameEvents) return;
-
+            _gameEvents.onNewGameStarted.AddListener(FullRedraw);
             _gameEvents.onCellAdded.AddListener(HandleGridChanged);
             _gameEvents.onCellUpdated.AddListener(HandleCellUpdated);
             _gameEvents.onCellRemoved.AddListener(HandleGridChanged);
@@ -103,6 +103,7 @@ namespace View.Grid
         {
             if (!_gameEvents) return;
 
+            _gameEvents.onNewGameStarted.RemoveListener(FullRedraw);
             _gameEvents.onCellAdded.RemoveListener(HandleGridChanged);
             _gameEvents.onCellUpdated.RemoveListener(HandleCellUpdated);
             _gameEvents.onCellRemoved.RemoveListener(HandleGridChanged);
