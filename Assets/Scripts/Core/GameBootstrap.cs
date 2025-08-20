@@ -320,6 +320,7 @@ namespace Core
             actionCountersModel?.ReEnableCounterLimits();
             YG2.saves.seenUpdateVersions.Clear();
             YG2.saves.seenMigrationIds.Clear();
+            YG2.saves.record = 0;
             StartNewGameAndFinalize();
         }
 
