@@ -43,42 +43,52 @@ namespace Model
 
         /// <summary>
         /// Восстанавливает состояние сетки из сохраненных данных.
+        /// Создает полную (плотную) сетку, заполняя пробелы неактивными ячейками.
         /// </summary>
-        /// <param name="savedCells">Список сериализованных данных ячеек.</param>
+        /// <param name="savedCells">Список сериализованных данных активных ячеек.</param>
         public void RestoreState(List<CellDataSerializable> savedCells)
         {
             ClearField();
-            var maxLine = -1;
-            if (savedCells == null || savedCells.Count == 0) return;
-
-            var lines = savedCells.GroupBy(c => c.line)
-                .OrderBy(g => g.Key)
-                .ToList();
-
-            foreach (var lineGroup in lines)
+            if (savedCells == null) return;
+            int maxLine;
+            if (savedCells.Count > 0)
             {
-                var lineIndex = lineGroup.Key;
-                while (_cells.Count <= lineIndex)
-                {
-                    _cells.Add(new List<CellData>());
-                }
+                maxLine = savedCells.Max(c => c.line);
+            }
+            else
+            {
+                _isCacheDirty = true;
+                return;
+            }
 
-                var lineData = new List<CellData>();
-                foreach (var savedCell in lineGroup.OrderBy(c => c.column))
+            var savedCellDict = new Dictionary<(int, int), CellDataSerializable>();
+            foreach (var cell in savedCells)
+            {
+                savedCellDict[(cell.line, cell.column)] = cell;
+            }
+
+            for (var i = 0; i <= maxLine; i++)
+            {
+                var newLine = new List<CellData>();
+                for (var j = 0; j < GameConstants.QuantityByWidth; j++)
                 {
-                    var cellData = new CellData(savedCell.number, savedCell.line, savedCell.column);
-                    cellData.SetActive(savedCell.isActive);
-                    lineData.Add(cellData);
+                    CellData cellData;
+                    if (savedCellDict.TryGetValue((i, j), out var savedCell))
+                    {
+                        cellData = new CellData(savedCell.number, i, j);
+                        cellData.SetActive(true);
+                    }
+                    else
+                    {
+                        cellData = new CellData(0, i, j);
+                        cellData.SetActive(false);
+                    }
+
+                    newLine.Add(cellData);
                     _cellDataMap[cellData.Id] = cellData;
                 }
 
-                _cells[lineIndex] = lineData;
-                if (lineIndex > maxLine) maxLine = lineIndex;
-            }
-
-            while (_cells.Count <= maxLine)
-            {
-                _cells.Add(new List<CellData>());
+                _cells.Add(newLine);
             }
 
             _isCacheDirty = true;

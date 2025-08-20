@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Interfaces;
 using Model;
 using UnityEngine;
@@ -34,6 +33,7 @@ namespace DataProviders
 
         /// <summary>
         /// Проверяет, находятся ли две ячейки на одной линии или в одном столбце без активных ячеек между ними.
+        /// Эта версия оптимизирована для работы с плотной (не разреженной) сеткой.
         /// </summary>
         /// <param name="firstCell">Первая ячейка.</param>
         /// <param name="secondCell">Вторая ячейка.</param>
@@ -52,8 +52,7 @@ namespace DataProviders
                 var endCol = Mathf.Max(firstCell.Column, secondCell.Column);
                 for (var column = startCol; column < endCol; column++)
                 {
-                    var cell = grid[line].FirstOrDefault(c => c.Column == column);
-                    if (cell is { IsActive: true })
+                    if (grid[line][column].IsActive)
                     {
                         return false;
                     }
@@ -65,13 +64,10 @@ namespace DataProviders
             var col = firstCell.Column;
             var startLine = Mathf.Min(firstCell.Line, secondCell.Line) + 1;
             var endLine = Mathf.Max(firstCell.Line, secondCell.Line);
-
             for (var line = startLine; line < endLine; line++)
             {
                 if (line < 0 || line >= grid.Count) continue;
-
-                var cell = grid[line].FirstOrDefault(c => c.Column == col);
-                if (cell is { IsActive: true })
+                if (grid[line][col].IsActive)
                 {
                     return false;
                 }
