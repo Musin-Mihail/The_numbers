@@ -9,13 +9,13 @@
         /// Текущая версия игры для системы оповещений об обновлениях.
         /// Увеличивайте это число (например, до 3, 4 и т.д.) при каждом новом обновлении.
         /// </summary>
-        public const int GameVersion = 3;
+        public const int GameVersion = 4;
 
         /// <summary>
         /// Уникальный ID для миграции, связанной со сбросом счета.
         /// Если нужно будет снова сбросить счет в будущем, нужно будет использовать новый ID.
         /// </summary>
-        public const string ScoreResetMigrationId = "ScoreReset_v1";
+        public const string ScoreResetMigrationId = "ScoreReset_v2";
 
         /// <summary>
         /// Идентификатор продукта для отключения счетчиков действий (покупка в игре).

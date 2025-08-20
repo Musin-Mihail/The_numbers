@@ -206,6 +206,7 @@ namespace Core
                 {
                     Debug.Log($"Выполняется миграция данных '{GameConstants.ScoreResetMigrationId}': сброс счета.");
                     YG2.saves.statistics.score = 0;
+                    YG2.saves.record = 0;
                     YG2.saves.seenMigrationIds.Add(GameConstants.ScoreResetMigrationId);
                     var statisticsModel = ServiceProvider.GetService<StatisticsModel>();
                     statisticsModel.SetState(YG2.saves.statistics.score, YG2.saves.statistics.multiplier);
